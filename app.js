@@ -386,6 +386,7 @@ let currentGameMode = null;
 let pvpSocket = null;
 let pvpRoomId = null;
 let pvpSide = null; // 'home' o 'away'
+let pvpMatchFinished = false;
 
 window.showPlayModeSelect = function () {
     // Mostrar la pantalla de selección de modo al pulsar JUGAR
@@ -425,6 +426,8 @@ const PVP_SERVER_URL = window.location.hostname === 'localhost' || window.locati
 function startMultiplayerSearch() {
     document.getElementById('pvp-searching-overlay').classList.remove('hidden');
     document.getElementById('pvp-search-status').textContent = 'Conectando al servidor...';
+
+    pvpMatchFinished = false;
 
     // Conectar al servidor PvP
     pvpSocket = io(PVP_SERVER_URL, { transports: ['websocket', 'polling'] });
@@ -567,11 +570,15 @@ function startMultiplayerSearch() {
         state.stats.goals += rewards.goalsScored;
         state.economy.coins += rewards.coins;
         state.stats.rep = Math.max(0, state.stats.rep + rewards.rep);
+        pvpMatchFinished = true;
         saveState();
     });
 
     // ---- RIVAL DESCONECTADO ----
     pvpSocket.on('opponent_disconnected', (data) => {
+        // Ignorar si el partido ya terminó normalmente
+        if (pvpMatchFinished) return;
+
         document.getElementById('pvp-searching-overlay').classList.add('hidden');
         document.getElementById('pvp-halftime-actions').classList.add('hidden');
         document.getElementById('pvp-post-match').classList.remove('hidden');
@@ -602,6 +609,7 @@ window.exitPvpMatch = function () {
     }
     pvpRoomId = null;
     pvpSide = null;
+    pvpMatchFinished = false;
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
     routeView();
 }
