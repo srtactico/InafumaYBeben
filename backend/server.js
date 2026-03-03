@@ -195,6 +195,7 @@ function finishMatch(roomId) {
     if (!room) return;
 
     const ms = room.matchState;
+    ms.finished = true; // Marcar como terminado para evitar falsos abandonos
     const homeG = ms.homeGoals;
     const awayG = ms.awayGoals;
 
@@ -436,6 +437,13 @@ io.on('connection', (socket) => {
         for (const [roomId, room] of rooms) {
             const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
             if (playerIndex !== -1) {
+                // Si el partido ya terminó, solo limpiar la sala sin notificar abandono
+                if (room.matchState && room.matchState.finished) {
+                    rooms.delete(roomId);
+                    console.log(`   ↳ Sala ${roomId} cerrada (partido ya finalizado).`);
+                    break;
+                }
+
                 // Limpiar intervalo
                 if (room.matchState && room.matchState.interval) {
                     clearInterval(room.matchState.interval);

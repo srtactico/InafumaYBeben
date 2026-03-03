@@ -393,6 +393,12 @@ window.showPlayModeSelect = function () {
     document.getElementById('view-mode-select').classList.remove('hidden');
 }
 
+window.closeModeSelect = function () {
+    // Volver al dashboard desde la selección de modo
+    document.getElementById('view-mode-select').classList.add('hidden');
+    document.getElementById('app-layout').classList.remove('hidden');
+}
+
 window.selectGameMode = function (mode) {
     currentGameMode = mode;
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));

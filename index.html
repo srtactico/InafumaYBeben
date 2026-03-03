@@ -205,7 +205,9 @@
     <!-- ============== SELECCIÓN DE MODO DE JUEGO ============== -->
     <main id="view-mode-select" class="view-section bg-[#0b1628] hidden items-center justify-center">
         <div
-            class="glass-panel p-10 rounded-2xl max-w-2xl w-full border-t-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.15)]">
+            class="glass-panel p-10 rounded-2xl max-w-2xl w-full border-t-4 border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.15)] relative">
+            <button onclick="closeModeSelect()"
+                class="absolute top-4 right-6 text-slate-500 hover:text-white text-3xl font-bold transition cursor-pointer">&times;</button>
             <h2 class="text-3xl font-gaming text-center text-white mb-2 uppercase tracking-widest">Modo de Juego</h2>
             <p class="text-center text-slate-400 text-xs mb-8 uppercase tracking-widest">Elige cómo quieres competir</p>
 
