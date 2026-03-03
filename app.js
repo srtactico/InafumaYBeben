@@ -370,8 +370,12 @@ function routeView() {
     if (!state) document.getElementById('view-landing').classList.remove('hidden');
     else if (!state.team) document.getElementById('view-setup').classList.remove('hidden');
     else {
-        // Mostrar menú de selección de modo
-        document.getElementById('view-mode-select').classList.remove('hidden');
+        // Ir directamente al dashboard (modo local por defecto)
+        currentGameMode = 'local';
+        document.getElementById('app-layout').classList.remove('hidden');
+        updateUI();
+        const savedTab = localStorage.getItem('inafuma_active_tab') || 'dash';
+        switchTab(savedTab);
     }
 }
 
@@ -383,18 +387,24 @@ let pvpSocket = null;
 let pvpRoomId = null;
 let pvpSide = null; // 'home' o 'away'
 
+window.showPlayModeSelect = function () {
+    // Mostrar la pantalla de selección de modo al pulsar JUGAR
+    document.getElementById('app-layout').classList.add('hidden');
+    document.getElementById('view-mode-select').classList.remove('hidden');
+}
+
 window.selectGameMode = function (mode) {
     currentGameMode = mode;
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
 
     if (mode === 'local') {
-        // Modo carrera contra IA — flujo original
+        // Modo carrera contra IA — iniciar partido directamente
         document.getElementById('app-layout').classList.remove('hidden');
         updateUI();
-        const savedTab = localStorage.getItem('inafuma_active_tab') || 'dash';
-        switchTab(savedTab);
+        startMatch();
     } else if (mode === 'multiplayer') {
         // Modo PvP — conectar al servidor y buscar rival
+        document.getElementById('app-layout').classList.remove('hidden');
         startMultiplayerSearch();
     }
 }
