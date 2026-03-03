@@ -404,7 +404,7 @@ window.selectGameMode = function (mode) {
    ========================================================================= */
 const PVP_SERVER_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3001'
-    : 'https://inafumapvp.onrender.com';
+    : 'https://inafumaybeben1.onrender.com';
 
 function startMultiplayerSearch() {
     document.getElementById('pvp-searching-overlay').classList.remove('hidden');
