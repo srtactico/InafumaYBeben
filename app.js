@@ -164,9 +164,11 @@ function cleanState(s) {
     }
 
     if (!s.flags) s.flags = { canTrain: true, canTalk: true };
+    if (!s.settings) s.settings = { volMusic: 0.15, volSfx: 0.5 };
     if (!s.playedTeams || !Array.isArray(s.playedTeams)) s.playedTeams = [];
     if (!s.history) s.history = {};
     if (!s.activeBets) s.activeBets = [];
+    if (!s.betHistory) s.betHistory = [];
     if (!s.nextFixtures) s.nextFixtures = [];
 
     // Plantilla a prueba de errores
@@ -229,6 +231,7 @@ window.acceptCookies = function () {
     localStorage.setItem('inafuma_cookies', 'true');
     const cookiesModal = document.getElementById('modal-cookies');
     if (cookiesModal) cookiesModal.classList.add('hidden');
+    if (typeof initBgMusic === 'function') initBgMusic();
 }
 
 /* =========================================================================
@@ -258,6 +261,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
             state = cleanState({ auth: { user }, team: null, economy: { coins: 50000000, premium: 0 } });
             // Guardar estado inicial en Firestore
             db.collection('users').doc(cred.user.uid).set(JSON.parse(JSON.stringify(state)));
+            initBgMusic();
             routeView();
         })
         .catch((err) => {
@@ -290,6 +294,7 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
                 // Crear estado local si Firestore falla
                 state = cleanState({ auth: { user: u }, team: null, economy: { coins: 50000000, premium: 0 } });
             }
+            initBgMusic();
             routeView();
         })
         .catch((err) => {
@@ -306,6 +311,8 @@ window.updatePreviewBadge = function () {
     const c2El = document.getElementById('set-c2');
     const badgeEl = document.getElementById('preview-badge');
     const nameEl = document.getElementById('set-team');
+    const patternEl = document.getElementById('set-pattern');
+    const iconEl = document.getElementById('set-icon');
 
     if (!badgeEl) return;
 
@@ -313,10 +320,19 @@ window.updatePreviewBadge = function () {
     const c1 = c1El ? c1El.value : '#e11d48';
     const c2 = c2El ? c2El.value : '#1e293b';
     const name = nameEl ? nameEl.value : 'CLUB';
+    const pattern = patternEl ? patternEl.value : 'diagonal';
+    const icon = iconEl ? iconEl.value : '';
 
-    badgeEl.className = `w-16 h-20 club-badge text-xs shadow-lg ${shape}`;
-    badgeEl.style.background = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
-    badgeEl.textContent = name.substring(0, 4).toUpperCase();
+    let bg = '';
+    if (pattern === 'diagonal') bg = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
+    else if (pattern === 'vertical') bg = `linear-gradient(90deg, ${c1} 50%, ${c2} 50%)`;
+    else if (pattern === 'horizontal') bg = `linear-gradient(180deg, ${c1} 50%, ${c2} 50%)`;
+    else if (pattern === 'solid') bg = c1;
+    else if (pattern === 'gradient') bg = `linear-gradient(180deg, ${c1}, ${c2})`;
+
+    badgeEl.className = `w-24 h-28 club-badge text-sm shadow-lg ${shape}`;
+    badgeEl.style.background = bg;
+    badgeEl.innerHTML = (icon ? `<span class="badge-icon">${icon}</span>` : '') + name.substring(0, 4).toUpperCase();
 }
 
 const teamInput = document.getElementById('set-team');
@@ -334,7 +350,9 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
         manager: document.getElementById('set-manager').value,
         shape: shapeEl ? shapeEl.value : 'shape-shield',
         c1: c1El ? c1El.value : '#e11d48',
-        c2: c2El ? c2El.value : '#1e293b'
+        c2: c2El ? c2El.value : '#1e293b',
+        pattern: document.getElementById('set-pattern') ? document.getElementById('set-pattern').value : 'diagonal',
+        icon: document.getElementById('set-icon') ? document.getElementById('set-icon').value : ''
     };
     state.league = initLeague();
 
@@ -346,10 +364,39 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
 
     if (!state.inbox) state.inbox = [];
     addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `Míster ${state.team.manager}, la temporada consta de 38 jornadas (Ida y Vuelta). Le hemos asignado un 11 inicial básico. Llévenos a la gloria.`);
+    initBgMusic();
     saveState(); routeView();
 });
 
 window.logout = function () { auth.signOut().then(() => { state = null; location.reload(); }).catch(err => console.error('Error al cerrar sesión:', err)); }
+
+// Abrir Ajustes
+window.openSettings = function () {
+    const s = state.settings || { volMusic: 0.15, volSfx: 0.5 };
+    const musicSlider = document.getElementById('setting-music');
+    const sfxSlider = document.getElementById('setting-sfx');
+    if (musicSlider) musicSlider.value = s.volMusic;
+    if (sfxSlider) sfxSlider.value = s.volSfx;
+    document.getElementById('modal-settings').classList.remove('hidden');
+}
+
+// Update Volume
+window.updateVolume = function (type, val) {
+    if (!state.settings) state.settings = { volMusic: 0.15, volSfx: 0.5 };
+    const volume = parseFloat(val);
+    if (type === 'music') {
+        state.settings.volMusic = volume;
+        const bgm = document.getElementById('bg-music');
+        if (bgm) bgm.volume = volume;
+    } else if (type === 'sfx') {
+        state.settings.volSfx = volume;
+    }
+    saveState();
+}
+window.closeSettings = function () {
+    document.getElementById('modal-settings').classList.add('hidden');
+}
+
 window.toggleProfileMenu = function () { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
 
 window.showSubpage = function (id) {
@@ -680,16 +727,25 @@ function getStartingXI() { return state.lineup.map(id => state.roster.find(p => 
 function getTeamOvr() {
     const xi = getStartingXI();
     if (xi.length === 0) return 0;
-    const sum = xi.reduce((acc, p) => acc + (p.ovr * (1 + ((p.morale - 50) / 200)) * (p.con / 100)), 0);
+    const sum = xi.reduce((acc, p) => acc + calcPlayerOVR(p), 0);
     return Math.round(sum / xi.length);
 }
 
-function getBadgeHTML(name, shape, c1, c2, extraClass = "w-8 h-10 text-[10px]") {
+function getBadgeHTML(name, shape, c1, c2, extraClass = "w-8 h-10 text-[10px]", pattern, icon) {
     let n = name ? name.substring(0, 3).toUpperCase() : "FM";
     let sh = shape || "shape-shield";
     let col1 = c1 || "#1e293b";
     let col2 = c2 || "#0f172a";
-    return `<div class="club-badge ${sh} ${extraClass}" style="background: linear-gradient(135deg, ${col1} 50%, ${col2} 50%);">${n}</div>`;
+    let pat = pattern || 'diagonal';
+    let ic = icon || '';
+    let bg = '';
+    if (pat === 'vertical') bg = `linear-gradient(90deg, ${col1} 50%, ${col2} 50%)`;
+    else if (pat === 'horizontal') bg = `linear-gradient(180deg, ${col1} 50%, ${col2} 50%)`;
+    else if (pat === 'solid') bg = col1;
+    else if (pat === 'gradient') bg = `linear-gradient(180deg, ${col1}, ${col2})`;
+    else bg = `linear-gradient(135deg, ${col1} 50%, ${col2} 50%)`;
+    let iconHtml = ic ? `<span class="badge-icon">${ic}</span>` : '';
+    return `<div class="club-badge ${sh} ${extraClass}" style="background: ${bg};">${iconHtml}${n}</div>`;
 }
 
 function updateUI() {
@@ -830,17 +886,42 @@ window.renderBetTab = function () {
     }
 
     listBets.innerHTML = '';
+
+    // Show resolved bet history
+    if (state.betHistory && state.betHistory.length > 0) {
+        state.betHistory.slice(-10).reverse().forEach(bet => {
+            let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
+            let resultIcon = bet.result === 'exact' ? '✅ EXACTO' : bet.result === 'winner' ? '✅ GANADOR' : '❌ FALLO';
+            let resultColor = bet.result === 'fail' ? 'red' : 'green';
+            listBets.innerHTML += `
+            <div class="bg-[#111119] border border-slate-600/50 p-3 rounded flex justify-between items-center opacity-80">
+                <div>
+                    <div class="text-[10px] text-${resultColor}-400 font-bold mb-1 uppercase">${resultIcon}</div>
+                    <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
+                    <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span> | Real: <span class="text-white font-bold">${bet.realHG}-${bet.realAG}</span></div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-mono font-bold text-${bet.result === 'fail' ? 'red' : 'green'}-400">${bet.result === 'fail' ? '-' : '+'}${bet.winnings || bet.amount}</div>
+                    <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // Show active bets
     if (!state.activeBets || state.activeBets.length === 0) {
-        listBets.innerHTML = '<div class="text-slate-500 text-xs italic text-center mt-4">No tienes apuestas activas para esta jornada.</div>';
+        if (!state.betHistory || state.betHistory.length === 0) {
+            listBets.innerHTML = '<div class="text-slate-500 text-xs italic text-center mt-4">No tienes apuestas activas para esta jornada.</div>';
+        }
         return;
     }
 
     state.activeBets.forEach(bet => {
         let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
-        listBets.innerHTML += `
+        listBets.innerHTML = `
         <div class="bg-[#111119] border border-yellow-500/50 p-3 rounded flex justify-between items-center">
             <div>
-                <div class="text-[10px] text-yellow-400 font-bold mb-1 uppercase">Boleto Registrado</div>
+                <div class="text-[10px] text-yellow-400 font-bold mb-1 uppercase">⏳ Boleto en Curso</div>
                 <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
                 <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span></div>
             </div>
@@ -849,7 +930,7 @@ window.renderBetTab = function () {
                 <div class="text-lg font-mono font-bold text-${bet.currency === 'coins' ? 'green' : 'yellow'}-400">${bet.amount}</div>
                 <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
             </div>
-        </div>`;
+        </div>` + listBets.innerHTML;
     });
 }
 
@@ -887,7 +968,7 @@ function renderLeague() {
     sorted.forEach((t, i) => {
         const isUserClass = t.isUser ? 'user-row' : '';
         const badgeObj = t.isUser ? state.team : (t.badge || AI_TEAMS[0]);
-        const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto border border-white/10");
+        const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto border border-white/10", badgeObj.pattern, badgeObj.icon);
 
         tbody.innerHTML += `
         <tr class="${isUserClass}">
@@ -942,7 +1023,7 @@ window.executeWeeklyTraining = function () {
         });
     });
 
-    state.flags.canTrain = false; saveState(); renderTrainStatus();
+    state.flags.canTrain = false; saveState(); renderTrainStatus(); updateUI();
     showAlert("Programa completado. Atributos y Condición Física actualizados.");
 }
 
@@ -1004,8 +1085,7 @@ function renderSquad() {
 
         tbody.innerHTML += `
         <tr>
-            <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
-            <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
+            <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
             <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
             <td class="font-bold text-[10px]">${conIcon} ${p.con}%</td>
             <td style="width: 60px;">
@@ -1017,6 +1097,7 @@ function renderSquad() {
             <td><span class="attr-val ${getAttrClass(p.pas)}">${p.pas}</span></td>
             <td><span class="attr-val ${getAttrClass(p.def)}">${p.def}</span></td>
             <td><span class="attr-val ${getAttrClass(p.phy)}">${p.phy}</span></td>
+            <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white cursor-pointer" onclick="showPlayerInfo(${p.id})">ℹ</button></td>
         </tr>`;
     });
     const ovrTag = document.getElementById('squad-ovr');
@@ -1156,6 +1237,12 @@ window.setMarketMode = function (mode) {
     document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
     document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
+    document.getElementById('market-th-prem').style.display = mode === 'buy' ? "table-cell" : "none";
+
+    // Change "Precio" header text to fit the context
+    const thPrecio = document.querySelector('#market-tbody').closest('table').querySelector('th:nth-child(5)');
+    if (thPrecio) thPrecio.textContent = mode === 'buy' ? "Precio" : "Valor Oferta";
+
     filterMarket();
 };
 
@@ -1167,6 +1254,7 @@ window.filterMarket = function (pos) {
 
     const formatM = (num) => (num / 1000000).toFixed(1) + 'M';
     document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
+    document.getElementById('market-prem').textContent = `◈${state.economy.premium.toLocaleString()}`;
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
@@ -1189,25 +1277,23 @@ window.filterMarket = function (pos) {
             const canRep = state.stats.rep >= p.rep;
             tbody.innerHTML += `
             <tr>
-                <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
                 <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
                 <td class="font-mono text-green-400 text-right pr-4">€${formatM(p.priceBasic)}</td>
-                <td class="text-center"><button class="btn-action w-3/4 py-1.5 text-[10px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button></td>
+                <td class="font-mono text-yellow-400 text-right pr-4">◈${p.pricePrem.toLocaleString()}</td>
+                <td class="text-center"><div class="flex gap-1 justify-center"><button class="btn-action px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button><button class="btn-buy premium px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')">PREMIUM</button><button class="text-xs bg-slate-700 px-1.5 py-1 rounded hover:bg-slate-600 text-white cursor-pointer" onclick="showPlayerInfo(${p.id})">ℹ</button></div></td>
             </tr>`;
         } else {
             const sellValue = Math.floor(p.priceBasic * 0.6);
             tbody.innerHTML += `
             <tr>
-                <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
                 <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-                <td style="display:none;"></td> 
-                <td class="font-mono text-slate-400 text-right pr-4">Oferta: €${formatM(sellValue)}</td>
-                <td class="text-center"><button class="btn-sell w-3/4 py-1.5" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button></td>
+                <td class="font-mono text-green-400 text-right pr-4 font-bold">+ €${formatM(sellValue)}</td>
+                <td class="text-center"><div class="flex gap-2 justify-center"><button class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg transition" onclick="sellPlayer(${p.id}, ${sellValue})">CERRAR VENTA</button><button class="text-xs bg-slate-700 px-2 py-1.5 rounded hover:bg-slate-600 text-white cursor-pointer transition" onclick="showPlayerInfo(${p.id})">ℹ INFO</button></div></td>
             </tr>`;
         }
     });
@@ -1215,10 +1301,14 @@ window.filterMarket = function (pos) {
 
 window.buyPlayer = function (id, curr) {
     const p = PLAYERS_DB.find(x => x.id === id);
-    if (state.stats.rep < p.rep) return showAlert(`Reputación Insuficiente (Req: ★ ${p.rep}).`);
+
+    // Only verify reputation for 'basic' purchases. Premium skips reputation block!
+    if (curr === 'basic' && state.stats.rep < p.rep) {
+        return showAlert(`Reputación Insuficiente para Fichaje Estándar (Req: ★ ${p.rep}).`);
+    }
 
     if (curr === 'basic') {
-        if (state.economy.coins < p.priceBasic) return showAlert("Presupuesto insuficiente.");
+        if (state.economy.coins < p.priceBasic) return showAlert("Presupuesto del club insuficiente.");
         state.economy.coins -= p.priceBasic;
     } else {
         if (state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
@@ -1355,12 +1445,21 @@ window.processPayment = function () {
 
     // Validar datos de tarjeta si es visa/mastercard
     if (payMethod.value === 'visa' || payMethod.value === 'mastercard') {
-        const cardNum = document.getElementById('card-number').value.trim();
+        const cardNum = document.getElementById('card-number').value.replace(/\s/g, '').trim();
         const cardExpiry = document.getElementById('card-expiry').value.trim();
         const cardCvv = document.getElementById('card-cvv').value.trim();
         const cardName = document.getElementById('card-name').value.trim();
         if (!cardNum || !cardExpiry || !cardCvv || !cardName) {
             return showAlert("Completa todos los datos de la tarjeta.");
+        }
+        if (cardNum.length !== 16 || !/^\d{16}$/.test(cardNum)) {
+            return showAlert("El número de tarjeta debe tener 16 dígitos.");
+        }
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
+            return showAlert("El formato de caducidad debe ser MM/AA.");
+        }
+        if (!/^\d{3}$/.test(cardCvv)) {
+            return showAlert("El CVV debe tener 3 dígitos.");
         }
     }
 
@@ -1598,26 +1697,34 @@ function finishMatch(mG, oG) {
     state.history[state.stats.matchday.toString()] = results;
 
     // Evaluar Apuestas
+    if (!state.betHistory) state.betHistory = [];
     let betResults = [];
     state.activeBets.forEach(b => {
         const actual = results.find(r => r.home === b.home && r.away === b.away);
         if (actual) {
             let actualWinner = actual.hG > actual.aG ? 'h' : (actual.aG > actual.hG ? 'a' : 'd');
             let predictedWinner = b.hG > b.aG ? 'h' : (b.aG > b.hG ? 'a' : 'd');
+            let betRecord = { ...b, realHG: actual.hG, realAG: actual.aG };
 
             if (actual.hG === b.hG && actual.aG === b.aG) {
                 let winAmt = b.amount * 2;
                 if (b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
                 betResults.push(`Acierto EXACTO (${b.home}): +${winAmt}`);
+                betRecord.result = 'exact'; betRecord.winnings = winAmt;
             } else if (actualWinner === predictedWinner) {
                 let winAmt = Math.floor(b.amount * 1.5);
                 if (b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
                 betResults.push(`Acierto GANADOR (${b.home}): +${winAmt}`);
+                betRecord.result = 'winner'; betRecord.winnings = winAmt;
             } else {
                 betResults.push(`Fallo (${b.home}): -${b.amount}`);
+                betRecord.result = 'fail'; betRecord.winnings = 0;
             }
+            state.betHistory.push(betRecord);
         }
     });
+    // Keep last 20 bet results
+    if (state.betHistory.length > 20) state.betHistory = state.betHistory.slice(-20);
 
     if (betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada', betResults.join(' | '));
     state.activeBets = [];
@@ -1694,3 +1801,195 @@ window.startNewSeason = function () {
     switchTab('dash');
     showAlert("¡Arranca una nueva edición de LaLiga Tussi! Dinero y plantilla se conservan.");
 }
+
+/* =========================================================================
+   FUNCIONES ADICIONALES - Nuevas Features
+   ========================================================================= */
+
+// Mobile sidebar toggle
+window.toggleSidebar = function () {
+    const sidebar = document.getElementById('main-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (!sidebar) return;
+    sidebar.classList.toggle('sidebar-open');
+    if (sidebar.classList.contains('sidebar-open')) {
+        overlay.classList.remove('hidden');
+    } else {
+        overlay.classList.add('hidden');
+    }
+}
+
+// Close sidebar when clicking a nav button on mobile
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar) sidebar.classList.remove('sidebar-open');
+            if (overlay) overlay.classList.add('hidden');
+        }
+    });
+});
+
+// Show player info modal
+window.showPlayerInfo = function (id) {
+    const allPlayers = [...(state.roster || []), ...PLAYERS_DB];
+    const p = allPlayers.find(x => x.id === id);
+    if (!p) return;
+
+    const getStatColor = v => v >= 85 ? '#4ade80' : v >= 70 ? '#38bdf8' : v >= 55 ? '#fbbf24' : '#f87171';
+    const statBar = (label, val) => `
+        <div class="stat-row">
+            <span class="stat-label">${label}</span>
+            <div class="stat-bar-container"><div class="stat-bar-fill" style="width:${val}%; background:${getStatColor(val)};"></div></div>
+            <span class="stat-value" style="color:${getStatColor(val)}">${val}</span>
+        </div>`;
+
+    const pClass = `pos-${p.pos.toLowerCase()}`;
+    const content = document.getElementById('player-info-content');
+    content.innerHTML = `
+        <img src="${p.img}" class="w-20 h-20 rounded-full border-4 border-yellow-400 mx-auto mb-3 shadow-lg">
+        <h3 class="text-xl font-bold text-white mb-1">${p.name}</h3>
+        <span class="pos-badge ${pClass} mb-4 inline-block">${p.pos}</span>
+        <div class="text-4xl font-black text-yellow-400 mb-4 font-gaming">${calcPlayerOVR(p)}</div>
+        <div class="text-left px-4 space-y-1">
+            ${statBar('PAC', p.pac)}
+            ${statBar('SHO', p.sho)}
+            ${statBar('PAS', p.pas)}
+            ${statBar('DEF', p.def)}
+            ${statBar('PHY', p.phy)}
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">Condición</span><br><span class="text-white font-bold">${p.con || 100}%</span></div>
+            <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">Moral</span><br><span class="text-white font-bold">${p.morale || 100}%</span></div>
+        </div>`;
+    document.getElementById('modal-player-info').classList.remove('hidden');
+}
+
+// Bet goal +/- buttons
+window.adjustBetGoal = function (inputId, delta) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    let val = parseInt(input.value) + delta;
+    if (val < 0) val = 0;
+    if (val > 15) val = 15;
+    input.value = val;
+}
+
+// Card number formatting (XXXX XXXX XXXX XXXX)
+window.formatCardNumber = function (el) {
+    let v = el.value.replace(/[^0-9]/g, '').slice(0, 16);
+    el.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+}
+
+// Card expiry formatting (MM/AA)
+window.formatCardExpiry = function (el) {
+    let v = el.value.replace(/[^0-9]/g, '').slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+    el.value = v;
+}
+
+// Payment method change handler
+window.onPaymentMethodChange = function () {
+    const method = document.getElementById('payment-method').value;
+    const cardForm = document.getElementById('payment-card-form');
+    if (method === 'visa' || method === 'mastercard') {
+        cardForm.classList.remove('hidden');
+    } else {
+        cardForm.classList.add('hidden');
+    }
+    updatePaymentButton();
+}
+
+// Legal modal content
+window.showLegalModal = function (type) {
+    const title = document.getElementById('legal-modal-title');
+    const body = document.getElementById('legal-modal-body');
+    if (type === 'cookies') {
+        title.textContent = 'Política de Cookies';
+        body.innerHTML = `
+            <p><strong>¿Qué son las cookies?</strong></p>
+            <p>Las cookies son pequeños archivos de texto que se almacenan en tu navegador cuando visitas un sitio web.</p>
+            <p><strong>Cookies que utilizamos:</strong></p>
+            <ul class="list-disc ml-5 space-y-1">
+                <li><strong>Cookies esenciales:</strong> Necesarias para el funcionamiento de la autenticación y guardado de partida.</li>
+                <li><strong>Cookies de rendimiento:</strong> Nos ayudan a entender cómo interactúas con la aplicación.</li>
+                <li><strong>Cookies de funcionalidad:</strong> Permiten recordar tus preferencias (volumen, idioma, tema).</li>
+            </ul>
+            <p><strong>Control de cookies:</strong> Puedes gestionar las cookies desde la configuración de tu navegador. Si desactivas las cookies esenciales, es posible que algunas funcionalidades no estén disponibles.</p>
+            <p class="text-slate-500 text-[10px] mt-4">Última actualización: Marzo 2026</p>`;
+    } else if (type === 'aviso') {
+        title.textContent = 'Aviso Legal';
+        body.innerHTML = `
+            <p><strong>Titular:</strong> Inafuma & Beben S.L. — Simulador de Gestión Deportiva.</p>
+            <p><strong>Objeto:</strong> Esta aplicación web es un simulador de gestión de club de fútbol con fines de entretenimiento. No involucra dinero real ni apuestas reales.</p>
+            <p><strong>Propiedad Intelectual:</strong> Todos los diseños, código y contenido multimedia de esta aplicación son propiedad del equipo de desarrollo.</p>
+            <p><strong>Limitación de Responsabilidad:</strong> El uso de la aplicación se realiza bajo la exclusiva responsabilidad del usuario. No nos hacemos responsables de interrupciones del servicio o pérdida de datos.</p>
+            <p><strong>Datos Personales:</strong> Solo se recopilan datos estrictamente necesarios (nombre de usuario y contraseña cifrada) para la funcionalidad del juego a través de Firebase.</p>
+            <p class="text-slate-500 text-[10px] mt-4">Última actualización: Marzo 2026</p>`;
+    }
+    document.getElementById('modal-legal').classList.remove('hidden');
+}
+
+// League tab switching (Local / Multiplayer)
+window.switchLeagueTab = function (tab) {
+    document.getElementById('league-tab-local').classList.toggle('active', tab === 'local');
+    document.getElementById('league-tab-multi').classList.toggle('active', tab === 'multi');
+    document.getElementById('league-local-content').classList.toggle('hidden', tab !== 'local');
+    document.getElementById('league-multi-content').classList.toggle('hidden', tab !== 'multi');
+    if (tab === 'multi') loadMultiplayerLeaderboard();
+}
+
+// Load multiplayer leaderboard from Firestore
+window.loadMultiplayerLeaderboard = function () {
+    const tbody = document.getElementById('league-multi-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-slate-500 py-6 text-xs">Cargando clasificación multijugador...</td></tr>';
+
+    db.collection('users').orderBy('stats.rep', 'desc').limit(50).get().then(snap => {
+        tbody.innerHTML = '';
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-slate-500 py-6 text-xs">No hay jugadores registrados aún.</td></tr>';
+            return;
+        }
+        let pos = 0;
+        snap.forEach(doc => {
+            pos++;
+            const d = doc.data();
+            const s = d.stats || {};
+            const isMe = auth.currentUser && doc.id === auth.currentUser.uid;
+            const rowClass = isMe ? 'user-row' : '';
+            tbody.innerHTML += `
+            <tr class="${rowClass}">
+                <td class="text-center font-bold">${pos}</td>
+                <td class="text-white font-bold">${d.team?.manager || doc.id}</td>
+                <td class="text-slate-300">${d.team?.name || 'Sin club'}</td>
+                <td>${s.matches || 0}</td>
+                <td>${s.wins || 0}</td>
+                <td>${s.draws || 0}</td>
+                <td>${s.losses || 0}</td>
+                <td class="text-blue-400 font-bold">★ ${s.rep || 0}</td>
+                <td class="text-yellow-400 font-bold text-center">${s.trophies || 0}</td>
+            </tr>`;
+        });
+    }).catch(() => {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-red-400 py-6 text-xs">Error al cargar. Inténtalo de nuevo.</td></tr>';
+    });
+}
+
+// Audio control - start after cookie acceptance
+window.initBgMusic = function () {
+    const audio = document.getElementById('bg-music');
+    if (audio) {
+        audio.volume = (state.settings && state.settings.volMusic !== undefined) ? state.settings.volMusic : 0.15;
+        audio.play().catch(() => {
+            // Autoplay blocked - will start on next user interaction
+            document.addEventListener('click', function startMusic() {
+                audio.play().catch(() => { });
+                document.removeEventListener('click', startMusic);
+            }, { once: true });
+        });
+    }
+}
+
+
