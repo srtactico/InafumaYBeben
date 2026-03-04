@@ -226,6 +226,11 @@ window.onload = () => {
     const cookiesModal = document.getElementById('modal-cookies');
     if (!localStorage.getItem('inafuma_cookies') && cookiesModal) cookiesModal.classList.remove('hidden');
 
+    // Auto-resume music if cookies already accepted
+    if (localStorage.getItem('inafuma_cookies')) {
+        initBgMusic();
+    }
+
     // Escuchar cambios de autenticación de Firebase
     auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -408,16 +413,21 @@ window.openSettings = function () {
 
 // Update Volume
 window.updateVolume = function (type, val) {
-    if (!state.settings) state.settings = { volMusic: 0.15, volSfx: 0.5 };
+    if (state) {
+        if (!state.settings) state.settings = { volMusic: 0.15, volSfx: 0.5 };
+        const volume = parseFloat(val);
+        if (type === 'music') {
+            state.settings.volMusic = volume;
+        } else if (type === 'sfx') {
+            state.settings.volSfx = volume;
+        }
+        saveState();
+    }
     const volume = parseFloat(val);
     if (type === 'music') {
-        state.settings.volMusic = volume;
         const bgm = document.getElementById('bg-music');
         if (bgm) bgm.volume = volume;
-    } else if (type === 'sfx') {
-        state.settings.volSfx = volume;
     }
-    saveState();
 }
 window.closeSettings = function () {
     document.getElementById('modal-settings').classList.add('hidden');
@@ -1266,7 +1276,11 @@ window.setMarketMode = function (mode) {
 
     // Change "Precio" header text to fit the context
     const thPrecio = document.querySelector('#market-tbody').closest('table').querySelector('th:nth-child(5)');
-    if (thPrecio) thPrecio.textContent = mode === 'buy' ? "Precio" : "Valor Oferta";
+    if (thPrecio) thPrecio.textContent = mode === 'buy' ? "Precio" : "Valor Venta";
+
+    // Clear search when switching modes
+    const searchInput = document.getElementById('market-search');
+    if (searchInput) searchInput.value = '';
 
     filterMarket();
 };
@@ -1282,7 +1296,7 @@ window.filterMarket = function (pos) {
     document.getElementById('market-prem').textContent = `◈${state.economy.premium.toLocaleString()}`;
 
     const searchInput = document.getElementById('market-search');
-    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
     const tbody = document.getElementById('market-tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -1291,8 +1305,9 @@ window.filterMarket = function (pos) {
     if (currentMarketFilter !== 'ALL') items = items.filter(p => p.pos === currentMarketFilter);
     if (searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
 
+    const colSpan = marketMode === 'buy' ? 7 : 5;
     if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-slate-500 py-6 text-xs">Sin resultados de búsqueda.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center text-slate-500 py-6 text-xs">Sin resultados de búsqueda.</td></tr>`;
         return;
     }
 
@@ -1318,7 +1333,7 @@ window.filterMarket = function (pos) {
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="font-mono text-green-400 text-right pr-4 font-bold">+ €${formatM(sellValue)}</td>
-                <td class="text-center"><div class="flex gap-2 justify-center"><button class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg transition" onclick="sellPlayer(${p.id}, ${sellValue})">CERRAR VENTA</button><button class="text-xs bg-slate-700 px-2 py-1.5 rounded hover:bg-slate-600 text-white cursor-pointer transition" onclick="showPlayerInfo(${p.id})">ℹ INFO</button></div></td>
+                <td class="text-center"><div class="flex gap-2 justify-center"><button class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg transition" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button><button class="text-xs bg-slate-700 px-2 py-1.5 rounded hover:bg-slate-600 text-white cursor-pointer transition" onclick="showPlayerInfo(${p.id})">ℹ INFO</button></div></td>
             </tr>`;
         }
     });
@@ -1503,10 +1518,346 @@ window.confirmIAP = function () {
 }
 
 /* =========================================================================
-   MOTOR DE PARTIDO AVANZADO FM
+   MOTOR DE PARTIDO AVANZADO FM — ESTILO FOOTBALL MANAGER
    ========================================================================= */
-let matchState = { mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0, isHome: true, stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 } };
+let matchState = {
+    mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0, isHome: true,
+    stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 },
+    events: [], pitchTokens: [], pitchInterval: null
+};
 let currentOpponent = null;
+
+/* ---------- Formation rendering helpers ---------- */
+function getFormationPositions442() {
+    return [
+        { row: 'POR', slots: [{ x: 50, y: 92 }] },
+        { row: 'DEF', slots: [{ x: 15, y: 72 }, { x: 38, y: 72 }, { x: 62, y: 72 }, { x: 85, y: 72 }] },
+        { row: 'MED', slots: [{ x: 15, y: 45 }, { x: 38, y: 45 }, { x: 62, y: 45 }, { x: 85, y: 45 }] },
+        { row: 'DEL', slots: [{ x: 35, y: 18 }, { x: 65, y: 18 }] }
+    ];
+}
+
+function renderFormationPanel(containerId, players, teamColor) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    const sorted = [];
+    const posOrder = { POR: 0, DEF: 1, MED: 2, DEL: 3 };
+    players.sort((a, b) => (posOrder[a.pos] || 0) - (posOrder[b.pos] || 0));
+
+    players.forEach((p, i) => {
+        const ovr = p.ovr || calcPlayerOVR(p);
+        const ratingClass = ovr >= 80 ? 'fm-rating-good' : ovr >= 65 ? 'fm-rating-avg' : 'fm-rating-bad';
+        const div = document.createElement('div');
+        div.className = 'fm-formation-player';
+        div.innerHTML = `
+            <div class="fm-formation-shirt" style="background-image:url('${p.img || ''}');background-color:${teamColor || '#1e293b'}">
+                <span class="fm-formation-ovr">${ovr}</span>
+            </div>
+            <div class="fm-formation-info">
+                <div class="fm-formation-name">${p.name}</div>
+                <div class="fm-formation-pos">${p.pos}</div>
+            </div>
+            <span class="fm-formation-rating ${ratingClass}">${(6 + Math.random() * 2.5).toFixed(1)}</span>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function generateAIPlayers(teamName, ovr) {
+    const firstNames = ['J.', 'M.', 'A.', 'D.', 'L.', 'R.', 'S.', 'C.', 'P.', 'K.', 'N.'];
+    const lastNames = ['García', 'López', 'Martín', 'Silva', 'Santos', 'Torres', 'Costa', 'Alves', 'Rojas', 'Cruz', 'Pérez', 'Gómez', 'Díaz', 'Ruiz', 'Mora'];
+    const positions = ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL'];
+    const players = [];
+    for (let i = 0; i < 11; i++) {
+        const name = firstNames[Math.floor(Math.random() * firstNames.length)] + ' ' + lastNames[Math.floor(Math.random() * lastNames.length)];
+        const pOvr = Math.max(40, ovr + Math.floor(Math.random() * 15) - 7);
+        players.push({ name, pos: positions[i], ovr: pOvr, img: '' });
+    }
+    return players;
+}
+
+/* ---------- Match Events Tabs ---------- */
+window.fmEvtTab = function (team) {
+    document.getElementById('fm-evt-tab-home').className = 'fm-evt-tab' + (team === 'home' ? ' active' : '');
+    document.getElementById('fm-evt-tab-away').className = 'fm-evt-tab' + (team === 'away' ? ' active' : '');
+    renderMatchEvents(team);
+};
+
+function renderMatchEvents(filter) {
+    const list = document.getElementById('fm-events-list');
+    if (!list) return;
+    const filtered = matchState.events.filter(e => filter === 'home' ? e.side === 'home' : e.side === 'away');
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
+        return;
+    }
+    list.innerHTML = filtered.map(e => `
+        <div class="fm-event-item">
+            <span class="fm-event-icon">${e.icon}</span>
+            <span class="fm-event-text">${e.text}</span>
+            <span class="fm-event-min">${e.min}'</span>
+        </div>
+    `).join('');
+}
+
+/* ---------- Dugout toggle ---------- */
+window.toggleDugout = function () {
+    const content = document.getElementById('fm-dugout-content');
+    if (content) content.classList.toggle('expanded');
+};
+
+/* ---------- Mini Pitch Token Animation ---------- */
+function initPitchTokens() {
+    const tokensDiv = document.getElementById('fm-pitch-tokens');
+    if (!tokensDiv) return;
+    tokensDiv.innerHTML = '';
+    matchState.pitchTokens = [];
+
+    // Home team tokens (left side)
+    const homePositions = [
+        { x: 5, y: 50 }, // GK
+        { x: 15, y: 20 }, { x: 15, y: 40 }, { x: 15, y: 60 }, { x: 15, y: 80 }, // DEF
+        { x: 30, y: 25 }, { x: 30, y: 45 }, { x: 30, y: 55 }, { x: 30, y: 75 }, // MID
+        { x: 42, y: 35 }, { x: 42, y: 65 } // FWD
+    ];
+    // Away team tokens (right side)
+    const awayPositions = [
+        { x: 95, y: 50 },
+        { x: 85, y: 20 }, { x: 85, y: 40 }, { x: 85, y: 60 }, { x: 85, y: 80 },
+        { x: 70, y: 25 }, { x: 70, y: 45 }, { x: 70, y: 55 }, { x: 70, y: 75 },
+        { x: 58, y: 35 }, { x: 58, y: 65 }
+    ];
+
+    homePositions.forEach((pos, i) => {
+        const token = document.createElement('div');
+        token.className = 'fm-pitch-token fm-pitch-token-home';
+        token.innerHTML = `<span class="fm-pitch-token-number">${i + 1}</span>`;
+        token.style.left = pos.x + '%';
+        token.style.top = pos.y + '%';
+        tokensDiv.appendChild(token);
+        matchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'home' });
+    });
+
+    awayPositions.forEach((pos, i) => {
+        const token = document.createElement('div');
+        token.className = 'fm-pitch-token fm-pitch-token-away';
+        token.innerHTML = `<span class="fm-pitch-token-number">${i + 1}</span>`;
+        token.style.left = pos.x + '%';
+        token.style.top = pos.y + '%';
+        tokensDiv.appendChild(token);
+        matchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'away' });
+    });
+}
+
+/* Current tactical situation for pitch animation */
+let pitchPhase = 'neutral'; // 'neutral', 'home-attack', 'away-attack', 'home-goal', 'away-goal', 'home-corner', 'away-corner'
+let pitchPhaseTimer = 0;
+
+function setPitchPhase(phase, duration) {
+    pitchPhase = phase;
+    pitchPhaseTimer = duration || 3;
+}
+
+function animatePitchTokens() {
+    if (matchState.pitchInterval) clearInterval(matchState.pitchInterval);
+    matchState.pitchInterval = setInterval(() => {
+        const ball = document.getElementById('fm-pitch-ball');
+
+        // Decay phase timer
+        if (pitchPhaseTimer > 0) pitchPhaseTimer--;
+        if (pitchPhaseTimer <= 0 && pitchPhase !== 'neutral') pitchPhase = 'neutral';
+
+        // Decide ball zone based on possession and phase
+        let ballX, ballY;
+        const hPoss = matchState.stats.hPoss || 50;
+
+        if (pitchPhase === 'home-goal') {
+            // Ball IN the away goal net (far right)
+            ballX = 96 + Math.random() * 3;
+            ballY = 44 + Math.random() * 12;
+        } else if (pitchPhase === 'away-goal') {
+            // Ball IN the home goal net (far left)
+            ballX = 1 + Math.random() * 3;
+            ballY = 44 + Math.random() * 12;
+        } else if (pitchPhase === 'home-attack') {
+            ballX = 62 + Math.random() * 28;
+            ballY = 20 + Math.random() * 60;
+        } else if (pitchPhase === 'away-attack') {
+            ballX = 10 + Math.random() * 28;
+            ballY = 20 + Math.random() * 60;
+        } else if (pitchPhase === 'home-corner') {
+            ballX = 94 + Math.random() * 4;
+            ballY = Math.random() < 0.5 ? 3 + Math.random() * 6 : 91 + Math.random() * 6;
+        } else if (pitchPhase === 'away-corner') {
+            ballX = 2 + Math.random() * 4;
+            ballY = Math.random() < 0.5 ? 3 + Math.random() * 6 : 91 + Math.random() * 6;
+        } else {
+            // Neutral - possession-weighted drift
+            const possWeight = (hPoss - 50) / 50;
+            ballX = 50 + possWeight * 25 + (Math.random() - 0.5) * 28;
+            ballY = 15 + Math.random() * 70;
+        }
+        ballX = Math.max(1, Math.min(99, ballX));
+        ballY = Math.max(3, Math.min(97, ballY));
+
+        if (ball) {
+            ball.style.left = ballX + '%';
+            ball.style.top = ballY + '%';
+        }
+
+        // Compute team block shifts based on phase and possession
+        let homeBlockX = 0, awayBlockX = 0;
+        const possShift = (hPoss - 50) * 0.18;
+        homeBlockX += possShift;
+        awayBlockX -= possShift;
+
+        const isGoalPhase = pitchPhase === 'home-goal' || pitchPhase === 'away-goal';
+
+        if (pitchPhase === 'home-attack' || pitchPhase === 'home-goal' || pitchPhase === 'home-corner') {
+            homeBlockX += 15;
+            awayBlockX -= 8;
+        } else if (pitchPhase === 'away-attack' || pitchPhase === 'away-goal' || pitchPhase === 'away-corner') {
+            awayBlockX -= 15;
+            homeBlockX += 8;
+        }
+
+        matchState.pitchTokens.forEach((t, idx) => {
+            const isGK = t.baseY === 50 && (t.baseX === 5 || t.baseX === 95);
+            const isAttacker = t.side === 'home' ? (t.baseX >= 42) : (t.baseX <= 58);
+
+            let newX, newY;
+
+            // Goalkeepers stay near their goal
+            if (isGK) {
+                if (t.side === 'home') {
+                    newX = 4 + (Math.random() - 0.5) * 3;
+                    newY = 45 + Math.random() * 10;
+                } else {
+                    newX = 96 + (Math.random() - 0.5) * 3;
+                    newY = 45 + Math.random() * 10;
+                }
+                // GK dives toward ball when goal phase targets their goal
+                if ((pitchPhase === 'away-goal' && t.side === 'home') || (pitchPhase === 'home-goal' && t.side === 'away')) {
+                    newY += (ballY - newY) * 0.5;
+                }
+            }
+            // Attackers rush to goal on goal phases
+            else if (isGoalPhase && isAttacker) {
+                const attackingSide = pitchPhase === 'home-goal' ? 'home' : 'away';
+                if (t.side === attackingSide) {
+                    // Rush toward the goal mouth - cluster near ball
+                    newX = ballX + (Math.random() - 0.5) * 12;
+                    newY = ballY + (Math.random() - 0.5) * 18;
+                } else {
+                    // Defending team retreats to own goal area
+                    const goalX = t.side === 'home' ? 10 : 90;
+                    newX = goalX + (Math.random() - 0.5) * 14;
+                    newY = 30 + Math.random() * 40;
+                }
+            }
+            // Normal positioning with block shift
+            else {
+                const shift = t.side === 'home' ? homeBlockX : awayBlockX;
+                const jitterX = (Math.random() - 0.5) * 6;
+                const jitterY = (Math.random() - 0.5) * 8;
+                newX = t.baseX + shift + jitterX;
+                newY = t.baseY + jitterY;
+
+                // Pull towards ball - stronger when closer or during attacks
+                const distToBall = Math.sqrt(Math.pow(newX - ballX, 2) + Math.pow(newY - ballY, 2));
+                let pullFactor;
+                if (pitchPhase.includes('attack') || pitchPhase.includes('corner')) {
+                    pullFactor = distToBall < 25 ? 0.25 : 0.1;
+                } else {
+                    pullFactor = distToBall < 20 ? 0.15 : 0.05;
+                }
+                newX += (ballX - newX) * pullFactor;
+                newY += (ballY - newY) * pullFactor;
+            }
+
+            // Ensure home tokens stay mostly on left half, away on right (soft constraint)
+            if (!isGoalPhase) {
+                if (t.side === 'home') newX = Math.min(newX, 78);
+                else newX = Math.max(newX, 22);
+            }
+
+            // Clamp to pitch
+            newX = Math.max(1, Math.min(99, newX));
+            newY = Math.max(3, Math.min(97, newY));
+
+            t.el.style.left = newX + '%';
+            t.el.style.top = newY + '%';
+        });
+    }, 900);
+}
+
+function stopPitchAnimation() {
+    if (matchState.pitchInterval) {
+        clearInterval(matchState.pitchInterval);
+        matchState.pitchInterval = null;
+    }
+}
+
+/* ---------- Stats UI Update ---------- */
+function updateMatchStatsUI() {
+    const s = matchState.stats;
+
+    // Possession
+    const hp = document.getElementById('fm-stat-poss-home');
+    const ap = document.getElementById('fm-stat-poss-away');
+    if (hp) hp.textContent = s.hPoss + '%';
+    if (ap) ap.textContent = s.aPoss + '%';
+    const bph = document.getElementById('fm-bar-poss-h');
+    const bpa = document.getElementById('fm-bar-poss-a');
+    if (bph) bph.style.width = s.hPoss + '%';
+    if (bpa) bpa.style.width = s.aPoss + '%';
+
+    // Shots
+    const sh = document.getElementById('fm-stat-shots-home');
+    const sa = document.getElementById('fm-stat-shots-away');
+    if (sh) sh.textContent = s.hShots;
+    if (sa) sa.textContent = s.aShots;
+    const totalS = s.hShots + s.aShots || 1;
+    const bsh = document.getElementById('fm-bar-shots-h');
+    const bsa = document.getElementById('fm-bar-shots-a');
+    if (bsh) bsh.style.width = ((s.hShots / totalS) * 100) + '%';
+    if (bsa) bsa.style.width = ((s.aShots / totalS) * 100) + '%';
+
+    // Shots on Target
+    const soth = document.getElementById('fm-stat-sot-home');
+    const sota = document.getElementById('fm-stat-sot-away');
+    if (soth) soth.textContent = s.hSot;
+    if (sota) sota.textContent = s.aSot;
+    const totalSot = s.hSot + s.aSot || 1;
+    const bsoth = document.getElementById('fm-bar-sot-h');
+    const bsota = document.getElementById('fm-bar-sot-a');
+    if (bsoth) bsoth.style.width = ((s.hSot / totalSot) * 100) + '%';
+    if (bsota) bsota.style.width = ((s.aSot / totalSot) * 100) + '%';
+
+    // xG
+    const xgh = document.getElementById('fm-stat-xg-home');
+    const xga = document.getElementById('fm-stat-xg-away');
+    if (xgh) xgh.textContent = s.hXG.toFixed(2);
+    if (xga) xga.textContent = s.aXG.toFixed(2);
+    const totalXG = s.hXG + s.aXG || 1;
+    const bxgh = document.getElementById('fm-bar-xg-h');
+    const bxga = document.getElementById('fm-bar-xg-a');
+    if (bxgh) bxgh.style.width = ((s.hXG / totalXG) * 100) + '%';
+    if (bxga) bxga.style.width = ((s.aXG / totalXG) * 100) + '%';
+
+    // Corners
+    const ch = document.getElementById('fm-stat-corners-home');
+    const ca = document.getElementById('fm-stat-corners-away');
+    if (ch) ch.textContent = s.hCorners;
+    if (ca) ca.textContent = s.aCorners;
+    const totalC = s.hCorners + s.aCorners || 1;
+    const bch = document.getElementById('fm-bar-corners-h');
+    const bca = document.getElementById('fm-bar-corners-a');
+    if (bch) bch.style.width = ((s.hCorners / totalC) * 100) + '%';
+    if (bca) bca.style.width = ((s.aCorners / totalC) * 100) + '%';
+}
 
 window.startMatch = function () {
     const xi = getStartingXI();
@@ -1527,20 +1878,34 @@ window.startMatch = function () {
     document.getElementById('match-modal').classList.remove('hidden');
     document.getElementById('match-post').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
-    document.getElementById('match-actions').classList.add('hidden');
 
-    document.getElementById('sim-home-name').textContent = isHome ? state.team.name : currentOpponent.name;
-    document.getElementById('sim-away-name').textContent = isHome ? currentOpponent.name : state.team.name;
+    const homeName = isHome ? state.team.name : currentOpponent.name;
+    const awayName = isHome ? currentOpponent.name : state.team.name;
+
+    document.getElementById('sim-home-name').textContent = homeName;
+    document.getElementById('sim-away-name').textContent = awayName;
+
+    // FM panel team labels
+    const statHomeLbl = document.getElementById('fm-stat-home-name');
+    const statAwayLbl = document.getElementById('fm-stat-away-name');
+    if (statHomeLbl) statHomeLbl.textContent = homeName;
+    if (statAwayLbl) statAwayLbl.textContent = awayName;
+    const evtTabHome = document.getElementById('fm-evt-tab-home');
+    const evtTabAway = document.getElementById('fm-evt-tab-away');
+    if (evtTabHome) evtTabHome.textContent = homeName;
+    if (evtTabAway) evtTabAway.textContent = awayName;
+    const pitchLblH = document.getElementById('fm-pitch-label-home');
+    const pitchLblA = document.getElementById('fm-pitch-label-away');
+    if (pitchLblH) pitchLblH.textContent = homeName;
+    if (pitchLblA) pitchLblA.textContent = awayName;
 
     const hTeam = isHome ? state.team : currentOpponent.badge;
     const aTeam = isHome ? currentOpponent.badge : state.team;
 
-    document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(isHome ? state.team.name : currentOpponent.name, hTeam.shape, hTeam.c1, hTeam.c2, "w-12 h-16 text-xs");
-    document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(isHome ? currentOpponent.name : state.team.name, aTeam.shape, aTeam.c1, aTeam.c2, "w-12 h-16 text-xs");
+    document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(homeName, hTeam.shape, hTeam.c1, hTeam.c2, "w-8 h-10 text-[8px]");
+    document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(awayName, aTeam.shape, aTeam.c1, aTeam.c2, "w-8 h-10 text-[8px]");
 
     const myOvr = getTeamOvr();
-    document.getElementById('sim-home-ovr').textContent = isHome ? myOvr : currentOpponent.ovr;
-    document.getElementById('sim-away-ovr').textContent = isHome ? currentOpponent.ovr : myOvr;
 
     // Cansancio Post Partido
     state.roster.forEach(p => { if (state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 10); });
@@ -1549,35 +1914,66 @@ window.startMatch = function () {
         mG: 0, oG: 0, min: 0, talkMod: 0, isHome: isHome,
         myProb: 0.08 + ((myOvr - currentOpponent.ovr) * 0.003),
         oppProb: 0.08 - ((myOvr - currentOpponent.ovr) * 0.003),
-        interval: null, stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 }
+        interval: null,
+        stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 },
+        events: [], pitchTokens: [], pitchInterval: null, talkDone: false
     };
+    pitchPhase = 'neutral';
+    pitchPhaseTimer = 0;
+
+    // Re-enable motivar/bronca buttons for the new match
+    const btnM = document.getElementById('btn-talk-motivar');
+    const btnB = document.getElementById('btn-talk-bronca');
+    [btnM, btnB].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.classList.remove('fm-dugout-btn-disabled');
+    });
+    if (btnM) btnM.onclick = function() { matchTalk('animar'); };
+    if (btnB) btnB.onclick = function() { matchTalk('exigir'); };
 
     document.getElementById('sim-home-score').textContent = "0";
     document.getElementById('sim-away-score').textContent = "0";
     document.getElementById('match-progress').style.width = "0%";
+    document.getElementById('match-time').textContent = "0'";
     document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>¡El árbitro señala el inicio del partido!</div>";
+
+    // Render FM formation panels
+    const myPlayers = xi.map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
+    const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
+    if (isHome) {
+        renderFormationPanel('fm-formation-home', myPlayers, hTeam.c1 || '#2563eb');
+        renderFormationPanel('fm-formation-away', aiPlayers, aTeam.c1 || '#dc2626');
+    } else {
+        renderFormationPanel('fm-formation-home', aiPlayers, hTeam.c1 || '#2563eb');
+        renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 || '#dc2626');
+    }
+
+    // Render events (empty)
+    renderMatchEvents('home');
+
+    // Init and animate pitch tokens
+    initPitchTokens();
+    animatePitchTokens();
+
+    // Dugout narrative reset
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Partido en curso...</div>';
 
     updateMatchStatsUI();
     runMatchLoop(45);
 }
 
-function updateMatchStatsUI() {
-    document.getElementById('stat-poss-home').textContent = matchState.stats.hPoss + "%";
-    document.getElementById('stat-poss-away').textContent = matchState.stats.aPoss + "%";
-    document.getElementById('bar-poss-home').style.width = matchState.stats.hPoss + "%";
-    document.getElementById('bar-poss-away').style.width = matchState.stats.aPoss + "%";
-
-    document.getElementById('stat-shots-home').textContent = matchState.stats.hShots;
-    document.getElementById('stat-shots-away').textContent = matchState.stats.aShots;
-
-    let totalShots = matchState.stats.hShots + matchState.stats.aShots;
-    document.getElementById('bar-shots-home').style.width = totalShots > 0 ? ((matchState.stats.hShots / totalShots) * 100) + "%" : "50%";
-    document.getElementById('bar-shots-away').style.width = totalShots > 0 ? ((matchState.stats.aShots / totalShots) * 100) + "%" : "50%";
-}
-
 function runMatchLoop(targetMinute) {
     const logDiv = document.getElementById('match-narrative');
-    const commentary = ["Controlando el ritmo del partido.", "Pase filtrado peligroso que corta la zaga.", "Falta táctica.", "Disparo lejano que se va alto.", "Gran intervención del portero.", "Despeje de cabeza."];
+    const commentary = [
+        "Controlando el ritmo del partido.", "Pase filtrado peligroso que corta la zaga.",
+        "Falta táctica en la medular.", "Disparo lejano que se va alto.",
+        "Gran intervención del portero.", "Despeje de cabeza en el área.",
+        "Centro desde la banda derecha.", "Posesión tranquila en campo propio.",
+        "Presión alta del equipo rival.", "Recuperación en la medular.",
+        "Lateral largo buscando al extremo.", "Tiro que rechaza la defensa."
+    ];
 
     matchState.interval = setInterval(() => {
         matchState.min += 3;
@@ -1588,40 +1984,101 @@ function runMatchLoop(targetMinute) {
         matchState.stats.hPoss = Math.min(80, Math.max(20, matchState.stats.hPoss + (Math.floor(Math.random() * 11) - 5)));
         matchState.stats.aPoss = 100 - matchState.stats.hPoss;
 
+        // (Corners now handled below alongside pitch phases)
+
         if (matchState.min === 45 && targetMinute === 45) {
             clearInterval(matchState.interval);
+            stopPitchAnimation();
             logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Nos vamos al descanso.</strong></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
-            document.getElementById('match-actions').classList.remove('hidden');
             document.getElementById('match-halftime').classList.remove('hidden');
+            matchState.events.push({ min: 45, icon: '⏱', text: 'Descanso', side: 'home' });
             updateMatchStatsUI();
+            renderMatchEvents('home');
+            // Dugout update
+            const dugNarr = document.getElementById('fm-dugout-narrative');
+            if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Medio tiempo — elige tus acciones en el dugout.</div>';
             return;
         }
 
         if (matchState.min >= 90) {
             clearInterval(matchState.interval);
-            finishMatch(matchState.mG, matchState.oG); return;
+            stopPitchAnimation();
+            finishMatch(matchState.mG, matchState.oG);
+            return;
         }
 
         let eventText = commentary[Math.floor(Math.random() * commentary.length)];
         let rand = Math.random();
         let activeMyProb = matchState.myProb + matchState.talkMod;
+        let isMyGoal = rand < (activeMyProb * 0.4);
+        let isOppGoal = !isMyGoal && rand > 1 - (matchState.oppProb * 0.4);
 
-        if (rand < (activeMyProb * 0.4)) {
+        if (isMyGoal) {
             matchState.mG++;
-            matchState.isHome ? matchState.stats.hShots++ : matchState.stats.aShots++;
+            // Shot + SOT + xG for our team
+            if (matchState.isHome) {
+                matchState.stats.hShots++; matchState.stats.hSot++;
+                matchState.stats.hXG += 0.6 + Math.random() * 0.3;
+            } else {
+                matchState.stats.aShots++; matchState.stats.aSot++;
+                matchState.stats.aXG += 0.6 + Math.random() * 0.3;
+            }
             const xi = getStartingXI();
             const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
             const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)].name : "el delantero";
-            eventText = `<span class="text-green-400 font-bold">¡GOL! Definición perfecta de ${scorer}.</span>`;
-        } else if (rand > 1 - (matchState.oppProb * 0.4)) {
+            eventText = `<span class="text-green-400 font-bold">⚽ ¡GOL! Definición perfecta de ${scorer}.</span>`;
+            const goalSide = matchState.isHome ? 'home' : 'away';
+            matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer}`, side: goalSide });
+            // Animate pitch: our goal = attack towards opponent goal
+            setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
+        } else if (isOppGoal) {
             matchState.oG++;
-            matchState.isHome ? matchState.stats.aShots++ : matchState.stats.hShots++;
-            eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Grave error en defensa.</span>`;
-        } else if (rand < 0.3) {
+            if (matchState.isHome) {
+                matchState.stats.aShots++; matchState.stats.aSot++;
+                matchState.stats.aXG += 0.6 + Math.random() * 0.3;
+            } else {
+                matchState.stats.hShots++; matchState.stats.hSot++;
+                matchState.stats.hXG += 0.6 + Math.random() * 0.3;
+            }
+            eventText = `<span class="text-red-400 font-bold">⚽ ¡Gol del equipo rival! Grave error en defensa.</span>`;
+            const goalSide = matchState.isHome ? 'away' : 'home';
+            matchState.events.push({ min: matchState.min, icon: '⚽', text: 'GOL — Rival', side: goalSide });
+            // Animate pitch: opponent goal = they attack our goal
+            setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
+        } else if (rand < 0.25) {
+            // Shot home (no goal)
             matchState.stats.hShots++;
-        } else if (rand > 0.7) {
+            matchState.stats.hXG += 0.05 + Math.random() * 0.15;
+            if (Math.random() < 0.4) matchState.stats.hSot++;
+            setPitchPhase('home-attack', 2);
+        } else if (rand > 0.75) {
             matchState.stats.aShots++;
+            matchState.stats.aXG += 0.05 + Math.random() * 0.15;
+            if (Math.random() < 0.4) matchState.stats.aSot++;
+            setPitchPhase('away-attack', 2);
+        } else {
+            // Neutral play — occasional possession phase shifts
+            if (Math.random() < 0.3) {
+                setPitchPhase(matchState.stats.hPoss > 55 ? 'home-attack' : matchState.stats.aPoss > 55 ? 'away-attack' : 'neutral', 1);
+            }
+        }
+
+        // Random event icons for cards
+        if (Math.random() < 0.03) {
+            const cardSide = Math.random() < 0.5 ? 'home' : 'away';
+            matchState.events.push({ min: matchState.min, icon: '🟨', text: 'Tarjeta amarilla', side: cardSide });
+        }
+
+        // Corners trigger pitch phase
+        if (Math.random() < 0.08) {
+            if (Math.random() < 0.5) {
+                matchState.stats.hCorners++;
+                setPitchPhase('home-corner', 2);
+            } else {
+                matchState.stats.aCorners++;
+                setPitchPhase('away-corner', 2);
+            }
         }
 
         logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
@@ -1629,15 +2086,21 @@ function runMatchLoop(targetMinute) {
         document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
         document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
         updateMatchStatsUI();
+        renderMatchEvents('home');
 
     }, 350);
 }
 
 window.matchTalk = function (type) {
+    // Prevent selecting more than one talk option per match
+    if (matchState.talkDone) return;
+    matchState.talkDone = true;
+
     const logDiv = document.getElementById('match-narrative');
     if (type === 'animar') {
         matchState.talkMod = 0.01;
         logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">El equipo sale motivado para la 2ª parte.</div>`;
+        matchState.events.push({ min: 45, icon: '📣', text: 'Charla motivacional', side: matchState.isHome ? 'home' : 'away' });
     } else {
         if (Math.random() < 0.6) {
             matchState.talkMod = 0.02;
@@ -1646,9 +2109,37 @@ window.matchTalk = function (type) {
             matchState.talkMod = -0.01;
             logDiv.innerHTML += `<div class="text-red-400 mt-2 text-xs italic">La plantilla se pone nerviosa tras los gritos.</div>`;
         }
+        matchState.events.push({ min: 45, icon: '😤', text: 'Bronca al equipo', side: matchState.isHome ? 'home' : 'away' });
     }
     logDiv.scrollTop = logDiv.scrollHeight;
-    document.getElementById('match-halftime').innerHTML = '<button onclick="resumeMatch()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded text-xs uppercase tracking-widest mt-2 transition">JUGAR SEGUNDA PARTE</button>';
+
+    // AI opponent also does a halftime talk
+    const oppTalkRand = Math.random();
+    const oppSide = matchState.isHome ? 'away' : 'home';
+    if (oppTalkRand < 0.5) {
+        matchState.events.push({ min: 45, icon: '📣', text: 'Charla motivacional (rival)', side: oppSide });
+        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El técnico rival motiva a su equipo.</div>`;
+    } else {
+        matchState.events.push({ min: 45, icon: '😤', text: 'Bronca al equipo (rival)', side: oppSide });
+        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El técnico rival reprende a sus jugadores.</div>`;
+        matchState.oppProb += (Math.random() < 0.6 ? 0.01 : -0.005);
+    }
+    logDiv.scrollTop = logDiv.scrollHeight;
+    renderMatchEvents('home');
+
+    // Disable both talk buttons permanently for this match
+    const btnM = document.getElementById('btn-talk-motivar');
+    const btnB = document.getElementById('btn-talk-bronca');
+    [btnM, btnB].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('fm-dugout-btn-disabled');
+        btn.onclick = null;
+    });
+
+    // Dugout update
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2ª PARTE" para continuar.</div>';
 }
 
 window.goToTacticsFromMatch = function () {
@@ -1673,7 +2164,6 @@ window.returnToMatch = function () {
 }
 
 window.resumeMatch = function () {
-    document.getElementById('match-actions').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
 
     const newOvr = getTeamOvr();
@@ -1682,15 +2172,38 @@ window.resumeMatch = function () {
     const logDiv = document.getElementById('match-narrative');
     logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">45': Arranca la segunda mitad.</strong></div>`;
     logDiv.scrollTop = logDiv.scrollHeight;
+
+    // Dugout update
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Segunda parte en juego...</div>';
+
+    // Re-render formations in case of lineup changes
+    const xi = getStartingXI();
+    const myPlayers = xi.map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
+    const hTeamBadge = matchState.isHome ? state.team : currentOpponent.badge;
+    const aTeamBadge = matchState.isHome ? currentOpponent.badge : state.team;
+    if (matchState.isHome) {
+        renderFormationPanel('fm-formation-home', myPlayers, hTeamBadge.c1 || '#2563eb');
+    } else {
+        renderFormationPanel('fm-formation-away', myPlayers, aTeamBadge.c1 || '#dc2626');
+    }
+
+    // Restart pitch animation
+    animatePitchTokens();
+
     runMatchLoop(90);
 }
 
 function finishMatch(mG, oG) {
-    document.getElementById('match-actions').classList.remove('hidden');
+    stopPitchAnimation();
     document.getElementById('match-post').classList.remove('hidden');
 
     const logDiv = document.getElementById('match-narrative');
     logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
+
+    // Dugout update
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-amber-400 text-[10px] font-bold">Partido finalizado.</div>';
     logDiv.scrollTop = logDiv.scrollHeight;
 
     let ptsEarned = 0; let coins = 0; let rep = 0;
@@ -2002,11 +2515,56 @@ window.loadMultiplayerLeaderboard = function () {
     });
 }
 
-// Audio control - start after cookie acceptance
+// Playlist de canciones
+const MUSIC_PLAYLIST = [
+    'music/We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (Olodum Mix).mp3',
+    'music/John Newman - Love Me Again - JohnNewmanVEVO.mp3',
+    'music/Joy Crookes - Feet Don\'t Fail Me Now (Official Video) - JoyCrookesVEVO.mp3'
+];
+let currentTrackIndex = -1;
+
+function pickRandomTrack(excludeIndex) {
+    if (MUSIC_PLAYLIST.length <= 1) return 0;
+    let idx;
+    do { idx = Math.floor(Math.random() * MUSIC_PLAYLIST.length); } while (idx === excludeIndex);
+    return idx;
+}
+
+// Audio control - start after cookie acceptance, persist across reloads
 window.initBgMusic = function () {
     const audio = document.getElementById('bg-music');
-    if (audio) {
-        audio.volume = (state.settings && state.settings.volMusic !== undefined) ? state.settings.volMusic : 0.15;
+    if (!audio) return;
+
+    // Pick initial random track
+    const savedTrack = parseInt(localStorage.getItem('inafuma_music_track') || '-1');
+    if (savedTrack >= 0 && savedTrack < MUSIC_PLAYLIST.length) {
+        currentTrackIndex = savedTrack;
+    } else {
+        currentTrackIndex = pickRandomTrack(-1);
+    }
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex];
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+
+    // Restore saved playback position
+    const savedTime = parseFloat(localStorage.getItem('inafuma_music_time') || '0');
+    if (savedTime > 0) audio.currentTime = savedTime;
+
+    audio.volume = (state && state.settings && state.settings.volMusic !== undefined) ? state.settings.volMusic : 0.15;
+
+    // When a song ends, pick a different random song and play it
+    audio.removeEventListener('ended', handleTrackEnded);
+    audio.addEventListener('ended', handleTrackEnded);
+
+    // Save position periodically so music resumes after reload
+    setInterval(() => {
+        if (!audio.paused) {
+            localStorage.setItem('inafuma_music_time', String(audio.currentTime));
+            localStorage.setItem('inafuma_music_playing', 'true');
+            localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+        }
+    }, 2000);
+
+    const tryPlay = () => {
         audio.play().catch(() => {
             // Autoplay blocked - will start on next user interaction
             document.addEventListener('click', function startMusic() {
@@ -2014,7 +2572,22 @@ window.initBgMusic = function () {
                 document.removeEventListener('click', startMusic);
             }, { once: true });
         });
+    };
+
+    // Auto-resume if was playing before reload, or if cookies accepted
+    if (localStorage.getItem('inafuma_music_playing') === 'true' || localStorage.getItem('inafuma_cookies')) {
+        tryPlay();
     }
+}
+
+function handleTrackEnded() {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    currentTrackIndex = pickRandomTrack(currentTrackIndex);
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex];
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+    localStorage.setItem('inafuma_music_time', '0');
+    audio.play().catch(() => {});
 }
 
 
