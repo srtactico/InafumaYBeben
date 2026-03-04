@@ -136,6 +136,32 @@ window.closeConfirm = function (result) {
    ========================================================================= */
 let state = null;
 
+/* Genera una plantilla inicial aleatoria: 1 POR, 4 DEF, 3 MED, 3 DEL (de jugadores base, rep=0) */
+function generateRandomInitialRoster() {
+    const basePlayers = PLAYERS_DB.filter(p => p.rep === 0);
+    const byPos = { POR: [], DEF: [], MED: [], DEL: [] };
+    basePlayers.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
+
+    // Mezclar cada pool aleatoriamente (Fisher-Yates)
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    shuffle(byPos.POR); shuffle(byPos.DEF); shuffle(byPos.MED); shuffle(byPos.DEL);
+
+    const picked = [
+        ...byPos.POR.slice(0, 1),
+        ...byPos.DEF.slice(0, 4),
+        ...byPos.MED.slice(0, 3),
+        ...byPos.DEL.slice(0, 3)
+    ];
+
+    return picked.map(p => JSON.parse(JSON.stringify(p)));
+}
+
 function cleanState(s) {
     if (!s) return null;
 
@@ -171,8 +197,8 @@ function cleanState(s) {
 
     // Plantilla a prueba de errores
     if (!s.roster || s.roster.length < 11) {
-        const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
-        s.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id) || PLAYERS_DB[0])));
+        const randomRoster = generateRandomInitialRoster();
+        s.roster = randomRoster;
     }
     s.roster.forEach(p => { if (p.con === undefined) p.con = 100; if (p.morale === undefined) p.morale = 100; });
 
@@ -338,9 +364,9 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     };
     state.league = initLeague();
 
-    const initialIDs = [404, 309, 308, 307, 306, 207, 206, 205, 108, 107, 106];
-    state.roster = initialIDs.map(id => JSON.parse(JSON.stringify(PLAYERS_DB.find(p => p.id === id) || PLAYERS_DB[0])));
-    state.lineup = [...initialIDs];
+    const randomRoster = generateRandomInitialRoster();
+    state.roster = randomRoster;
+    state.lineup = randomRoster.map(p => p.id);
 
     generateFixtures(state);
 
@@ -1004,19 +1030,18 @@ function renderSquad() {
 
         tbody.innerHTML += `
         <tr>
-            <td class="text-center"><button class="text-xs bg-slate-700 px-2 py-1 rounded hover:bg-slate-600 text-white">ℹ</button></td>
-            <td><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
-            <td class="font-bold text-[10px]">${conIcon} ${p.con}%</td>
-            <td style="width: 60px;">
+            <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
+            <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
+            <td class="font-bold text-[10px] text-center">${conIcon} ${p.con}%</td>
+            <td>
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
             </td>
             <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-            <td><span class="attr-val ${getAttrClass(p.pac)}">${p.pac}</span></td>
-            <td><span class="attr-val ${getAttrClass(p.sho)}">${p.sho}</span></td>
-            <td><span class="attr-val ${getAttrClass(p.pas)}">${p.pas}</span></td>
-            <td><span class="attr-val ${getAttrClass(p.def)}">${p.def}</span></td>
-            <td><span class="attr-val ${getAttrClass(p.phy)}">${p.phy}</span></td>
+            <td class="text-center">${p.pac}</td>
+            <td class="text-center">${p.sho}</td>
+            <td class="text-center">${p.pas}</td>
+            <td class="text-center">${p.def}</td>
+            <td class="text-center">${p.phy}</td>
         </tr>`;
     });
     const ovrTag = document.getElementById('squad-ovr');
