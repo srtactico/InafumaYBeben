@@ -1030,18 +1030,18 @@ function renderSquad() {
 
         tbody.innerHTML += `
         <tr>
-            <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
-            <td class="font-bold text-[10px] text-center">${conIcon} ${p.con}%</td>
-            <td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Portero' : p.pos === 'DEF' ? 'Defensa' : p.pos === 'MED' ? 'Mediocampista' : 'Delantero'}"><span class="pos-badge ${pClass}">${p.pos}</span></td>
+            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
+            <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conIcon} ${p.con}%</td>
+            <td title="Moral: ${p.morale}%">
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
             </td>
-            <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-            <td class="text-center">${p.pac}</td>
-            <td class="text-center">${p.sho}</td>
-            <td class="text-center">${p.pas}</td>
-            <td class="text-center">${p.def}</td>
-            <td class="text-center">${p.phy}</td>
+            <td class="font-bold text-white text-sm bg-slate-800/50 text-center" title="Overall: ${p.ovr}">${p.ovr}</td>
+            <td class="text-center" title="Velocidad: ${p.pac}">${p.pac}</td>
+            <td class="text-center" title="Tiro: ${p.sho}">${p.sho}</td>
+            <td class="text-center" title="Pase: ${p.pas}">${p.pas}</td>
+            <td class="text-center" title="Defensa: ${p.def}">${p.def}</td>
+            <td class="text-center" title="Físico: ${p.phy}">${p.phy}</td>
         </tr>`;
     });
     const ovrTag = document.getElementById('squad-ovr');
