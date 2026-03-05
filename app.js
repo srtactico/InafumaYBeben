@@ -293,7 +293,7 @@ let state = null;
 
 /* Genera una plantilla inicial aleatoria: 1 POR, 4 DEF, 3 MED, 3 DEL (de jugadores base, rep=0) */
 function generateRandomInitialRoster() {
-    const basePlayers = PLAYERS_DB.filter(p => p.rep === 0);
+    const basePlayers = PLAYERS_DB.filter(p => p.rep <= 800);
     const byPos = { POR: [], DEF: [], MED: [], DEL: [] };
     basePlayers.forEach(p => { if (byPos[p.pos]) byPos[p.pos].push(p); });
 
@@ -544,16 +544,48 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     };
     state.league = initLeague();
 
-    const randomRoster = generateRandomInitialRoster();
-    state.roster = randomRoster;
-    state.lineup = randomRoster.map(p => p.id);
+    // Initialize empty roster — will be filled by starter pack
+    state.roster = [];
+    state.lineup = [];
 
     generateFixtures(state);
 
     if (!state.inbox) state.inbox = [];
-    addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `Míster ${state.team.manager}, la temporada consta de 38 jornadas (Ida y Vuelta). Le hemos asignado un 11 inicial básico. Llévenos a la gloria.`);
+    addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `Míster ${state.team.manager}, la temporada consta de 38 jornadas (Ida y Vuelta). Abre tu sobre inicial para conocer a tu plantilla.`);
     initBgMusic();
-    saveState(); routeView();
+    saveState();
+
+    // Generate starter pack (14 players) and show reveal animation
+    const starterCards = generateStarterPackCards();
+    // Split into sobres of 4-4-4-2 for dramatic reveal (like 4 sobres: 4+4+4+2)
+    const sobres = [];
+    const bonuses = [];
+    for (let i = 0; i < starterCards.length; i += 4) {
+        sobres.push(starterCards.slice(i, i + 4));
+        bonuses.push([]); // No bonuses for starter pack
+    }
+
+    startPackReveal(sobres, bonuses, true, function () {
+        // After reveal complete, set lineup from roster
+        // Pick the first 11 in position order: 1 POR, 4 DEF, 4 MED, 2 DEL
+        const por = state.roster.filter(p => p.pos === 'POR').slice(0, 1);
+        const def = state.roster.filter(p => p.pos === 'DEF').slice(0, 4);
+        const med = state.roster.filter(p => p.pos === 'MED').slice(0, 4);
+        const del = state.roster.filter(p => p.pos === 'DEL').slice(0, 2);
+        const xi = [...por, ...def, ...med, ...del];
+        state.lineup = xi.map(p => p.id);
+
+        // Ensure we have 11
+        if (state.lineup.length < 11) {
+            const remaining = state.roster.filter(p => !state.lineup.includes(p.id));
+            while (state.lineup.length < 11 && remaining.length > 0) {
+                state.lineup.push(remaining.shift().id);
+            }
+        }
+
+        saveState();
+        routeView();
+    });
 });
 
 window.logout = function () { auth.signOut().then(() => { state = null; location.reload(); }).catch(err => console.error('Error al cerrar sesión:', err)); }
@@ -1270,7 +1302,7 @@ window.switchTab = function (tabId) {
     const targetBtn = document.getElementById('nav-' + tabId);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'bet': 'Apuestas' };
+    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'sobres': 'Sobres de Jugadores', 'bet': 'Apuestas' };
     const pTitle = document.getElementById('page-title');
     if (pTitle) pTitle.textContent = titles[tabId] || 'Panel';
 
@@ -1284,6 +1316,7 @@ window.switchTab = function (tabId) {
     if (tabId === 'talk') renderTalkStatus();
     if (tabId === 'season') renderSeasonTab();
     if (tabId === 'bet') renderBetTab();
+    if (tabId === 'sobres') renderSobresTab();
     if (tabId === 'dash') updateUI();
     if (tabId === 'squad') renderSquad();
 }
@@ -3522,6 +3555,401 @@ function handleTrackEnded() {
     audio.play().catch(() => { });
     // Preload the next one right away
     preloadNextTrack();
+}
+
+/* =========================================================================
+   SISTEMA DE SOBRES / PACKS DE JUGADORES
+   ========================================================================= */
+
+const PACK_CONFIG = {
+    single: { sobres: 1, cardsPerSobre: 4, cost: 5000 },
+    triple: { sobres: 3, cardsPerSobre: 4, cost: 15000 },
+    mega:   { sobres: 5, cardsPerSobre: 4, cost: 25000 }
+};
+
+// Rareza: diamante 5%, oro 20%, plata-normal 55%, plata-malillo 20%
+const RARITY_THRESHOLDS = [
+    { rarity: 'diamante', chance: 0.05, ovrMin: 85, ovrMax: 99, img: 'images/Diamante3.png' },
+    { rarity: 'oro',      chance: 0.20, ovrMin: 75, ovrMax: 89, img: 'images/Oro3.png' },
+    { rarity: 'plata',    chance: 0.55, ovrMin: 65, ovrMax: 79, img: 'images/Plata3.png' },
+    { rarity: 'malillo',  chance: 0.20, ovrMin: 50, ovrMax: 69, img: 'images/Bronce.png' }
+];
+
+// Jugadores retirados / inactivos (iconos)
+const RETIRED_PLAYER_IDS = new Set([506, 507]); // Neymar, Luis Suarez — add more IDs as needed
+
+function getPlayerRarity(p) {
+    const ovr = calcPlayerOVR(p);
+    if (RETIRED_PLAYER_IDS.has(p.id)) return 'icono';
+    if (ovr >= 85) return 'diamante';
+    if (ovr >= 75) return 'oro';
+    if (ovr >= 65) return 'plata';
+    return 'malillo';
+}
+
+function getCardRarity(ovr) {
+    if (ovr < 70) return 'Fuera de rango';
+    if (ovr <= 75) return 'Bronce';
+    if (ovr <= 81) return 'Plata';
+    if (ovr <= 87) return 'Oro';
+    if (ovr <= 93) return 'Diamante';
+    return 'Icono';
+}
+
+function getRarityCardImage(rarity) {
+    if (rarity === 'icono') return 'images/Icono3.png';
+    if (rarity === 'diamante') return 'images/Diamante3.png';
+    if (rarity === 'oro') return 'images/Oro3.png';
+    if (rarity === 'plata') return 'images/Plata3.png';
+    return 'images/Bronce.png';
+}
+
+function getRarityCSSClass(rarity) {
+    if (rarity === 'icono') return 'rarity-icono';
+    if (rarity === 'diamante') return 'rarity-diamante';
+    if (rarity === 'oro') return 'rarity-oro';
+    return 'rarity-plata';
+}
+
+function rollCardRarity() {
+    const roll = Math.random();
+    let cumulative = 0;
+    for (const tier of RARITY_THRESHOLDS) {
+        cumulative += tier.chance;
+        if (roll < cumulative) return tier;
+    }
+    return RARITY_THRESHOLDS[RARITY_THRESHOLDS.length - 1];
+}
+
+function pickPlayerByRarity(tier, excludeIds) {
+    const allWithOvr = PLAYERS_DB.map(p => ({ ...p, ovr: calcPlayerOVR(p) }));
+    let candidates = allWithOvr.filter(p =>
+        p.ovr >= tier.ovrMin && p.ovr <= tier.ovrMax && !excludeIds.has(p.id)
+    );
+    // If no candidates at this tier, widen the search
+    if (candidates.length === 0) {
+        candidates = allWithOvr.filter(p => !excludeIds.has(p.id));
+    }
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function generateSobreCards(count, excludeIds) {
+    const cards = [];
+    for (let i = 0; i < count; i++) {
+        const tier = rollCardRarity();
+        const player = pickPlayerByRarity(tier, excludeIds);
+        if (player) {
+            excludeIds.add(player.id);
+            const actualRarity = getPlayerRarity(player);
+            cards.push({
+                player: JSON.parse(JSON.stringify(player)),
+                rarity: actualRarity,
+                rarityImg: getRarityCardImage(actualRarity)
+            });
+        }
+    }
+    return cards;
+}
+
+function generateSobreBonus() {
+    const bonuses = [];
+    // 10% chance premium coins (10000)
+    if (Math.random() < 0.10) {
+        bonuses.push({ type: 'premium', amount: 10000 });
+    }
+    // 40% chance normal coins
+    if (Math.random() < 0.40) {
+        const amount = (Math.floor(Math.random() * 10) + 1) * 500000; // 500K to 5M
+        bonuses.push({ type: 'coins', amount: amount });
+    }
+    return bonuses;
+}
+
+// Generate starter pack: 14 players with minimum position requirements
+function generateStarterPackCards() {
+    const excludeIds = new Set();
+    const cards = [];
+
+    // Minimum requirements: 1 POR, 4 DEF, 4 MED, 2 DEL = 11, plus 3 random = 14
+    const requirements = [
+        { pos: 'POR', count: 1 },
+        { pos: 'DEF', count: 4 },
+        { pos: 'MED', count: 4 },
+        { pos: 'DEL', count: 2 }
+    ];
+
+    // For starter pack, use lower tier players (rep 0 or low rep)
+    const starterPool = PLAYERS_DB.filter(p => p.rep <= 800).map(p => ({ ...p, ovr: calcPlayerOVR(p) }));
+
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // Pick required positions
+    for (const req of requirements) {
+        const pool = shuffle(starterPool.filter(p => p.pos === req.pos && !excludeIds.has(p.id)));
+        for (let i = 0; i < req.count && i < pool.length; i++) {
+            excludeIds.add(pool[i].id);
+            const rarity = getPlayerRarity(pool[i]);
+            cards.push({
+                player: JSON.parse(JSON.stringify(pool[i])),
+                rarity: rarity,
+                rarityImg: getRarityCardImage(rarity)
+            });
+        }
+    }
+
+    // Fill remaining 3 random slots
+    const remaining = 14 - cards.length;
+    const leftover = shuffle(starterPool.filter(p => !excludeIds.has(p.id)));
+    for (let i = 0; i < remaining && i < leftover.length; i++) {
+        excludeIds.add(leftover[i].id);
+        const rarity = getPlayerRarity(leftover[i]);
+        cards.push({
+            player: JSON.parse(JSON.stringify(leftover[i])),
+            rarity: rarity,
+            rarityImg: getRarityCardImage(rarity)
+        });
+    }
+
+    // Shuffle the final cards so reveal order is random
+    return shuffle(cards);
+}
+
+/* ---- Pack Reveal State ---- */
+let packRevealState = {
+    allSobres: [],       // Array of arrays of card objects
+    currentSobre: 0,
+    revealedCount: 0,
+    allNewPlayers: [],   // Flat list of all players to add to roster
+    allBonuses: [],      // All bonuses across all sobres
+    isStarterPack: false,
+    onComplete: null     // Callback after all sobres revealed
+};
+
+function buildCardHTML(card, index) {
+    const p = card.player;
+    const ovr = calcPlayerOVR(p);
+    const rarityClass = getRarityCSSClass(card.rarity);
+
+    return `
+    <div class="pack-card" data-index="${index}" onclick="revealCard(this)">
+        <div class="pack-card-inner">
+            <div class="pack-card-front"></div>
+            <div class="pack-card-back ${rarityClass}">
+                <img src="${card.rarityImg}" class="pack-card-bg-img">
+                <div class="pack-card-info-left">
+                    <div class="pack-card-ovr">${ovr}</div>
+                    <div class="pack-card-pos">${p.pos}</div>
+                </div>
+                <img src="${p.img}" class="pack-card-photo" onerror="this.src='${getAvatar(p.name)}'">
+                <div class="pack-card-name">${p.name}</div>
+                <div class="pack-card-stats-fifa">
+                    <div class="pack-stat-col">
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.pac}</span><span class="pack-stat-lbl">RIT</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.sho}</span><span class="pack-stat-lbl">TIR</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.pas}</span><span class="pack-stat-lbl">PAS</span></div>
+                    </div>
+                    <div class="pack-stat-col">
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.def}</span><span class="pack-stat-lbl">DEF</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.phy}</span><span class="pack-stat-lbl">FÍS</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+window.revealCard = function (el) {
+    if (el.classList.contains('revealed')) {
+        // Already revealed — zoom in for close-up view
+        zoomCard(el);
+        return;
+    }
+    el.classList.add('revealed');
+    packRevealState.revealedCount++;
+
+    const stage = document.getElementById('pack-reveal-stage');
+    const totalCards = stage.querySelectorAll('.pack-card').length;
+
+    // Check if all cards in this sobre are revealed
+    if (packRevealState.revealedCount >= totalCards) {
+        showSobreCompleteActions();
+    }
+}
+
+function zoomCard(el) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'pack-zoom-overlay';
+    const clone = el.cloneNode(true);
+    clone.classList.add('pack-zoom-card');
+    clone.classList.remove('pack-card');
+    clone.style.animation = 'none';
+    clone.style.opacity = '1';
+    clone.style.transform = 'none';
+    clone.onclick = function (e) { e.stopPropagation(); };
+    overlay.appendChild(clone);
+    overlay.onclick = function () {
+        overlay.classList.add('pack-zoom-closing');
+        setTimeout(() => overlay.remove(), 250);
+    };
+    document.getElementById('modal-pack-reveal').appendChild(overlay);
+}
+
+function showSobreCompleteActions() {
+    const actions = document.getElementById('pack-reveal-actions');
+    actions.classList.remove('hidden');
+
+    const isLastSobre = packRevealState.currentSobre >= packRevealState.allSobres.length - 1;
+    const nextBtn = document.getElementById('pack-reveal-next-btn');
+    const doneBtn = document.getElementById('pack-reveal-done-btn');
+
+    if (isLastSobre) {
+        nextBtn.classList.add('hidden');
+        doneBtn.classList.remove('hidden');
+    } else {
+        nextBtn.classList.remove('hidden');
+        doneBtn.classList.add('hidden');
+    }
+
+    // Show bonuses for this sobre
+    const bonuses = packRevealState.allBonuses[packRevealState.currentSobre];
+    if (bonuses && bonuses.length > 0) {
+        const bonusEl = document.getElementById('pack-reveal-bonus');
+        bonusEl.classList.remove('hidden');
+        let bonusHTML = '';
+        bonuses.forEach(b => {
+            if (b.type === 'premium') {
+                bonusHTML += `<div class="pack-bonus-premium text-xl">¡BONUS! +${b.amount.toLocaleString()} Monedas Premium ◈</div>`;
+            } else {
+                bonusHTML += `<div class="pack-bonus-coins text-xl">¡BONUS! +€${(b.amount / 1000000).toFixed(1)}M</div>`;
+            }
+        });
+        document.getElementById('pack-bonus-text').innerHTML = bonusHTML;
+    }
+}
+
+window.packRevealNext = function () {
+    packRevealState.currentSobre++;
+    packRevealState.revealedCount = 0;
+    document.getElementById('pack-reveal-actions').classList.add('hidden');
+    document.getElementById('pack-reveal-bonus').classList.add('hidden');
+    renderCurrentSobre();
+}
+
+window.packRevealClose = function () {
+    // Add all new players to roster
+    packRevealState.allNewPlayers.forEach(p => {
+        // Check if player already in roster
+        if (!state.roster.find(r => r.id === p.id)) {
+            p.con = 100;
+            p.morale = 100;
+            p.ovr = calcPlayerOVR(p);
+            state.roster.push(p);
+        }
+    });
+
+    // Apply all bonuses
+    packRevealState.allBonuses.flat().forEach(b => {
+        if (b.type === 'premium') {
+            state.economy.premium += b.amount;
+        } else {
+            state.economy.coins += b.amount;
+        }
+    });
+
+    saveState();
+    document.getElementById('modal-pack-reveal').classList.add('hidden');
+
+    if (packRevealState.isStarterPack && packRevealState.onComplete) {
+        packRevealState.onComplete();
+    } else {
+        updateUI();
+        if (document.getElementById('tab-sobres') && document.getElementById('tab-sobres').style.display !== 'none') {
+            renderSobresTab();
+        }
+    }
+}
+
+function renderCurrentSobre() {
+    const sobre = packRevealState.allSobres[packRevealState.currentSobre];
+    const stage = document.getElementById('pack-reveal-stage');
+    const title = document.getElementById('pack-reveal-title');
+    const subtitle = document.getElementById('pack-reveal-subtitle');
+
+    if (packRevealState.allSobres.length > 1) {
+        title.textContent = `Sobre ${packRevealState.currentSobre + 1} de ${packRevealState.allSobres.length}`;
+    } else {
+        title.textContent = packRevealState.isStarterPack ? 'Sobre Inicial del Club' : 'Abriendo Sobre';
+    }
+    subtitle.textContent = `${sobre.length} cartas — Toca cada carta para revelarla`;
+
+    stage.innerHTML = '';
+    sobre.forEach((card, i) => {
+        stage.innerHTML += buildCardHTML(card, i);
+    });
+}
+
+function startPackReveal(sobres, bonusesPerSobre, isStarter, onComplete) {
+    packRevealState = {
+        allSobres: sobres,
+        currentSobre: 0,
+        revealedCount: 0,
+        allNewPlayers: sobres.flat().map(c => c.player),
+        allBonuses: bonusesPerSobre,
+        isStarterPack: isStarter,
+        onComplete: onComplete || null
+    };
+
+    document.getElementById('pack-reveal-actions').classList.add('hidden');
+    document.getElementById('pack-reveal-bonus').classList.add('hidden');
+    document.getElementById('pack-reveal-next-btn').classList.add('hidden');
+    document.getElementById('pack-reveal-done-btn').classList.add('hidden');
+
+    renderCurrentSobre();
+    document.getElementById('modal-pack-reveal').classList.remove('hidden');
+}
+
+/* ---- Buy Pack from Sobres tab ---- */
+window.buyPack = function (packType) {
+    if (!state) return;
+    const config = PACK_CONFIG[packType];
+    if (!config) return;
+
+    if (state.economy.premium < config.cost) {
+        return showAlert(`No tienes suficientes monedas premium. Necesitas ◈${config.cost.toLocaleString()} y tienes ◈${state.economy.premium.toLocaleString()}.`);
+    }
+
+    // Deduct premium
+    state.economy.premium -= config.cost;
+
+    // Generate all sobres
+    const excludeIds = new Set(state.roster.map(p => p.id));
+    const sobres = [];
+    const bonuses = [];
+
+    for (let s = 0; s < config.sobres; s++) {
+        const cards = generateSobreCards(config.cardsPerSobre, excludeIds);
+        sobres.push(cards);
+        bonuses.push(generateSobreBonus());
+    }
+
+    saveState();
+    startPackReveal(sobres, bonuses, false, null);
+}
+
+/* ---- Render Sobres Tab ---- */
+function renderSobresTab() {
+    const premEl = document.getElementById('sobres-premium');
+    const coinsEl = document.getElementById('sobres-coins');
+    if (premEl) premEl.textContent = (state.economy.premium || 0).toLocaleString();
+    if (coinsEl) coinsEl.textContent = `${((state.economy.coins || 0) / 1000000).toFixed(1)}M`;
 }
 
 

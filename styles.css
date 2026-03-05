@@ -2189,8 +2189,7 @@ h4 {
 .now-playing-bar {
     position: fixed;
     bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 18px;
     z-index: 90;
     pointer-events: auto;
     animation: npSlideUp 0.35s ease-out;
@@ -2199,12 +2198,12 @@ h4 {
 @keyframes npSlideUp {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(20px);
+        transform: translateY(20px);
     }
 
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translateY(0);
     }
 }
 
@@ -2513,4 +2512,432 @@ h4 {
     border-color: #facc15;
     transform: rotate(45deg);
     box-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+}
+
+/* =========================================================================
+   PACK / SOBRES — Card Reveal Animation (FIFA-style)
+   ========================================================================= */
+
+.pack-reveal-container {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pack-reveal-stage {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    min-height: 320px;
+    perspective: 1200px;
+}
+
+/* Individual card wrapper */
+.pack-card {
+    width: 160px;
+    height: 240px;
+    position: relative;
+    cursor: pointer;
+    perspective: 800px;
+}
+
+.pack-card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pack-card.revealed {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.pack-card.revealed .pack-card-inner {
+    transform: rotateY(180deg);
+}
+
+.pack-card-front,
+.pack-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Card back (unrevealed) */
+.pack-card-front {
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    border: 2px solid #2d3a6a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+.pack-card-front::before {
+    content: '?';
+    font-size: 48px;
+    font-family: 'Orbitron', sans-serif;
+    color: rgba(250, 204, 21, 0.4);
+    text-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+}
+
+.pack-card-front::after {
+    content: 'TOCA PARA REVELAR';
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 12px;
+}
+
+/* Card front (revealed) — FIFA UT style: .png IS the card */
+.pack-card-back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: none;
+    background: transparent;
+    position: relative;
+}
+
+/* Rarity backgrounds removed — the .png template handles everything */
+.pack-card-back.rarity-plata,
+.pack-card-back.rarity-oro,
+.pack-card-back.rarity-diamante,
+.pack-card-back.rarity-icono {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* The rarity .png IS the card design */
+.pack-card-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 12px;
+}
+
+/* OVR + Position grouped on the left */
+.pack-card-info-left {
+    position: absolute;
+    top: 10%;
+    left: 11%;
+    z-index: 2;
+    text-align: center;
+}
+
+.pack-card-ovr {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    line-height: 1;
+}
+
+.pack-card-pos {
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Player photo — FIFA cutout style (no circle) */
+.pack-card-photo {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 6px;
+    border: none;
+    margin-top: 27%;
+    z-index: 2;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Player name — centered banner */
+.pack-card-name {
+    font-size: 10px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    margin-top: 4px;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+    z-index: 2;
+    padding: 2px 8px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    max-height: 26px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    width: 85%;
+}
+
+/* FIFA-style stats — two columns */
+.pack-card-stats-fifa {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 5px;
+    padding: 3px 12px;
+    width: 100%;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 88%;
+}
+
+.pack-stat-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.pack-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.pack-stat-val {
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    min-width: 18px;
+    text-align: right;
+    font-family: 'Inter', sans-serif;
+}
+
+.pack-stat-lbl {
+    font-size: 8px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Reveal glow animation — uses filter on wrapper to follow card shape */
+.pack-card.revealed:has(.rarity-diamante) {
+    filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.6));
+    animation: packGlowDiamante 2s ease-in-out infinite alternate;
+}
+
+.pack-card.revealed:has(.rarity-oro) {
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.5));
+    animation: packGlowOro 2s ease-in-out infinite alternate;
+}
+
+.pack-card.revealed:has(.rarity-icono) {
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.5));
+    animation: packGlowIcono 2s ease-in-out infinite alternate;
+}
+
+@keyframes packGlowDiamante {
+    from { filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.4)); }
+    to { filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 50px rgba(168, 85, 247, 0.3)); }
+}
+
+@keyframes packGlowOro {
+    from { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3)); }
+    to { filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.2)); }
+}
+
+@keyframes packGlowIcono {
+    from { filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3)); }
+    to { filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 40px rgba(251, 191, 36, 0.2)); }
+}
+
+/* Card entrance animation */
+.pack-card {
+    opacity: 0;
+    transform: scale(0.5) translateY(40px);
+    animation: packCardEntrance 0.5s ease forwards;
+}
+
+.pack-card:nth-child(1) { animation-delay: 0.1s; }
+.pack-card:nth-child(2) { animation-delay: 0.25s; }
+.pack-card:nth-child(3) { animation-delay: 0.4s; }
+.pack-card:nth-child(4) { animation-delay: 0.55s; }
+
+@keyframes packCardEntrance {
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Bonus text animation */
+.pack-bonus-coins {
+    color: #4ade80;
+}
+
+.pack-bonus-premium {
+    color: #facc15;
+}
+
+/* Card zoom overlay */
+.pack-zoom-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    animation: packZoomIn 0.25s ease forwards;
+    backdrop-filter: blur(4px);
+}
+
+.pack-zoom-overlay.pack-zoom-closing {
+    animation: packZoomOut 0.25s ease forwards;
+}
+
+.pack-zoom-card {
+    width: 280px !important;
+    height: 420px !important;
+    cursor: default;
+    perspective: none;
+}
+
+.pack-zoom-card .pack-card-inner {
+    transform: rotateY(180deg);
+    transition: none;
+}
+
+.pack-zoom-card .pack-card-ovr {
+    font-size: 38px;
+}
+
+.pack-zoom-card .pack-card-pos {
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.pack-zoom-card .pack-card-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+}
+
+.pack-zoom-card .pack-card-name {
+    font-size: 16px;
+    max-height: 40px;
+    padding: 4px 12px;
+}
+
+.pack-zoom-card .pack-stat-val {
+    font-size: 18px;
+    min-width: 28px;
+}
+
+.pack-zoom-card .pack-stat-lbl {
+    font-size: 12px;
+}
+
+.pack-zoom-card .pack-card-stats-fifa {
+    gap: 16px;
+    padding: 6px 16px;
+    margin-top: 8px;
+}
+
+.pack-zoom-card .pack-stat-row {
+    gap: 5px;
+}
+
+.pack-zoom-card .pack-stat-col {
+    gap: 2px;
+}
+
+@keyframes packZoomIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes packZoomOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pack-card {
+        width: 130px;
+        height: 200px;
+    }
+    .pack-card-photo {
+        width: 55px;
+        height: 55px;
+    }
+    .pack-card-ovr {
+        font-size: 18px;
+    }
+    .pack-card-name {
+        font-size: 9px;
+    }
+    .pack-stat-val {
+        font-size: 9px;
+    }
+    .pack-stat-lbl {
+        font-size: 7px;
+    }
+    .pack-reveal-stage {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pack-card {
+        width: 110px;
+        height: 170px;
+    }
+    .pack-card-photo {
+        width: 45px;
+        height: 45px;
+    }
+    .pack-card-ovr {
+        font-size: 16px;
+    }
+    .pack-card-name {
+        font-size: 8px;
+        padding: 1px 4px;
+    }
+    .pack-stat-val {
+        font-size: 8px;
+        min-width: 14px;
+    }
+    .pack-stat-lbl {
+        font-size: 6px;
+    }
+    .pack-card-stats-fifa {
+        gap: 6px;
+        padding: 2px 6px;
+    }
 }
