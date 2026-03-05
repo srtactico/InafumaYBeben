@@ -113,8 +113,9 @@ function runMatchLoop(roomId, targetMinute) {
     ms.interval = setInterval(() => {
         ms.min += 3;
 
-        // Posesión dinámica
-        ms.stats.hPoss = Math.min(80, Math.max(20, ms.stats.hPoss + (Math.floor(Math.random() * 11) - 5)));
+        // Posesión dinámica realista
+        const basePoss = 50 + ((ms.homeProb - ms.awayProb) * 200);
+        ms.stats.hPoss = Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))));
         ms.stats.aPoss = 100 - ms.stats.hPoss;
 
         // ---- Descanso (min 45, primera parte) ----
@@ -145,17 +146,25 @@ function runMatchLoop(roomId, targetMinute) {
 
         // ---- Eventos de cada tick ----
         let eventText = COMMENTARY[Math.floor(Math.random() * COMMENTARY.length)];
-        let eventType = 'play';  // play | home_goal | away_goal
+        let eventType = 'play';  // play | home_goal | away_goal | card
         let pitchPhase = 'neutral';
         const rand = Math.random();
 
+        // Modificadores de probabilidad basados en posesión
+        let homePossMod = ms.stats.hPoss / 50;
+        let awayPossMod = ms.stats.aPoss / 50;
+
+        let activeHomeProb = ms.homeProb * homePossMod;
+        let activeAwayProb = ms.awayProb * awayPossMod;
+
         // Gol del equipo local
-        if (rand < (ms.homeProb * 0.4)) {
+        if (rand < (activeHomeProb * 0.4)) {
             ms.homeGoals++;
+            let xG = 0.6 + Math.random() * 0.3;
             ms.stats.hShots++;
             ms.stats.hSot++;
-            ms.stats.hXG += 0.6 + Math.random() * 0.3;
-            const scorers = getScorers(room.players[0].roster, room.players[0].lineup);
+            ms.stats.hXG += xG;
+            const scorers = getScorers(room.players[0].roster, room.players[0].lineup).filter(p => !p.suspension);
             const scorer = scorers.length > 0
                 ? scorers[Math.floor(Math.random() * scorers.length)].name
                 : 'el delantero';
@@ -164,12 +173,13 @@ function runMatchLoop(roomId, targetMinute) {
             pitchPhase = 'home-goal';
         }
         // Gol del equipo visitante
-        else if (rand > 1 - (ms.awayProb * 0.4)) {
+        else if (rand > 1 - (activeAwayProb * 0.4)) {
             ms.awayGoals++;
+            let xG = 0.6 + Math.random() * 0.3;
             ms.stats.aShots++;
             ms.stats.aSot++;
-            ms.stats.aXG += 0.6 + Math.random() * 0.3;
-            const scorers = getScorers(room.players[1].roster, room.players[1].lineup);
+            ms.stats.aXG += xG;
+            const scorers = getScorers(room.players[1].roster, room.players[1].lineup).filter(p => !p.suspension);
             const scorer = scorers.length > 0
                 ? scorers[Math.floor(Math.random() * scorers.length)].name
                 : 'el delantero';
@@ -177,16 +187,29 @@ function runMatchLoop(roomId, targetMinute) {
             eventType = 'away_goal';
             pitchPhase = 'away-goal';
         }
-        // Tiros sin gol
+        // Tiros sin gol local
         else if (rand < 0.25) {
             ms.stats.hShots++;
-            ms.stats.hXG += 0.05 + Math.random() * 0.15;
-            if (Math.random() < 0.4) ms.stats.hSot++;
+            let xG = 0.05 + Math.random() * 0.15;
+            ms.stats.hXG += xG;
+            if (Math.random() < 0.4) {
+                ms.stats.hSot++;
+                eventText = `Mala definición, el portero visitante detiene sin problemas (xG: ${xG.toFixed(2)}).`;
+            } else {
+                eventText = `Disparo desviado del equipo local que se pierde por la banda (xG: ${xG.toFixed(2)}).`;
+            }
             pitchPhase = 'home-attack';
         } else if (rand > 0.75) {
+            // Tiros sin gol visitante
             ms.stats.aShots++;
-            ms.stats.aXG += 0.05 + Math.random() * 0.15;
-            if (Math.random() < 0.4) ms.stats.aSot++;
+            let xG = 0.05 + Math.random() * 0.15;
+            ms.stats.aXG += xG;
+            if (Math.random() < 0.4) {
+                ms.stats.aSot++;
+                eventText = `Atrapada segura de nuestro guardameta ante el tiro visitante (xG: ${xG.toFixed(2)}).`;
+            } else {
+                eventText = `Tiro lejano sin peligro del rival (xG: ${xG.toFixed(2)}).`;
+            }
             pitchPhase = 'away-attack';
         } else {
             // Neutral play
@@ -208,8 +231,43 @@ function runMatchLoop(roomId, targetMinute) {
 
         // Cards
         let card = null;
-        if (Math.random() < 0.03) {
-            card = { side: Math.random() < 0.5 ? 'home' : 'away', type: 'yellow' };
+        if (Math.random() < 0.05) {
+            const cardSide = Math.random() < (ms.stats.aPoss / 100) ? 'home' : 'away'; // El equipo sin balón hace falta
+
+            // Elegir jugador sancionado
+            let sanctionedName = "Jugador";
+            const playerIndex = cardSide === 'home' ? 0 : 1;
+            const xi = room.players[playerIndex].lineup.map(id => room.players[playerIndex].roster.find(p => p.id === id)).filter(p => p && !p.suspension);
+
+            if (xi.length > 0) {
+                const p = xi[Math.floor(Math.random() * xi.length)];
+                sanctionedName = p.name;
+                const playerId = p.id;
+
+                const matchPlayerKey = `${cardSide}_${sanctionedName}`;
+                if (!ms.playersCards) ms.playersCards = {};
+
+                // Si la tarjeta previa es amarilla -> roja
+                if (ms.playersCards[matchPlayerKey] === 'yellow') {
+                    ms.playersCards[matchPlayerKey] = 'red';
+                    card = { side: cardSide, type: 'red', text: `¡SEGUNDA AMARILLA! Expulsión para ${sanctionedName} tras una entrada tardía.`, playerId: playerId };
+                    eventType = 'card';
+                    eventText = card.text;
+
+                    // Añadir sanción en el roster del servidor
+                    const rosterPlayer = room.players[playerIndex].roster.find(rp => rp.id === playerId);
+                    if (rosterPlayer) rosterPlayer.suspension = 2; // Guardaremos esto al final
+
+                } else {
+                    ms.playersCards[matchPlayerKey] = 'yellow';
+                    card = { side: cardSide, type: 'yellow', text: `Falta dura de ${sanctionedName}. El árbitro le muestra amarilla.`, playerId: playerId };
+                    eventType = 'card';
+                    eventText = card.text;
+
+                    const rosterPlayer = room.players[playerIndex].roster.find(rp => rp.id === playerId);
+                    if (rosterPlayer) rosterPlayer.yellowCards = (rosterPlayer.yellowCards || 0) + 1;
+                }
+            }
         }
 
         // Emitir tick a ambos clientes
@@ -270,6 +328,10 @@ function finishMatch(roomId) {
     const homeRewards = calcRewards(homeG, awayG);
     const awayRewards = calcRewards(awayG, homeG);
 
+    // Devolver también el estado de las tarjetas (Roster actualizado) para guardarlo en cliente
+    const homeRosterUpdates = room.players[0].roster.filter(p => p.suspension || p.yellowCards).map(p => ({ id: p.id, suspension: p.suspension, yellowCards: p.yellowCards }));
+    const awayRosterUpdates = room.players[1].roster.filter(p => p.suspension || p.yellowCards).map(p => ({ id: p.id, suspension: p.suspension, yellowCards: p.yellowCards }));
+
     const endData = {
         homeGoals: homeG,
         awayGoals: awayG,
@@ -277,7 +339,9 @@ function finishMatch(roomId) {
         awayName: room.players[1].teamName,
         stats: { ...ms.stats },
         homeRewards: homeRewards,
-        awayRewards: awayRewards
+        awayRewards: awayRewards,
+        homeRosterUpdates: homeRosterUpdates,
+        awayRosterUpdates: awayRosterUpdates
     };
 
     // Emitir a ambos jugadores

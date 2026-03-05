@@ -1302,7 +1302,10 @@ function renderInbox() {
 }
 window.readMail = function (id) { const m = state.inbox.find(x => x.id === id); if (m) { m.read = true; saveState(); renderInbox(); } }
 
-function getStartingXI() { return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p !== undefined); }
+function getStartingXI() {
+    if (!state || !state.lineup) return [];
+    return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p && !p.suspension);
+}
 function getTeamOvr() {
     const xi = getStartingXI();
     if (xi.length === 0) return 0;
@@ -2072,6 +2075,43 @@ window.removeFromCart = function () {
     renderCart();
 }
 
+function showMatchPost(isHome, myMatch, hG, aG, hXG, aXG) {
+    document.getElementById('match-modal').classList.add('hidden');
+    document.getElementById('match-post').classList.remove('hidden');
+
+    const titleEl = document.getElementById('post-title');
+    const msgEl = document.getElementById('post-message');
+    const bgEl = document.getElementById('post-bg');
+
+    let isWin = false, isDraw = false;
+    if (isHome) {
+        if (hG > aG) isWin = true;
+        else if (hG === aG) isDraw = true;
+    } else {
+        if (aG > hG) isWin = true;
+        else if (hG === aG) isDraw = true;
+    }
+
+    if (isWin) {
+        titleEl.textContent = "VICTORIA";
+        titleEl.className = "text-5xl font-gaming text-green-400 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]";
+        msgEl.innerHTML = "Excelente planteamiento táctico.<br>Sumamos 3 puntos clave.";
+        bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-green-500 shadow-[0_0_80px_rgba(74,222,128,0.2)]";
+        playSFX('win');
+    } else if (isDraw) {
+        titleEl.textContent = "EMPATE";
+        titleEl.className = "text-5xl font-gaming text-yellow-500 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(234,179,8,0.8)]";
+        msgEl.innerHTML = "Reparto de puntos.<br>Hay margen de mejora.";
+        bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-yellow-500 shadow-[0_0_80px_rgba(234,179,8,0.2)]";
+    } else {
+        titleEl.textContent = "DERROTA";
+        titleEl.className = "text-5xl font-gaming text-red-500 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]";
+        msgEl.innerHTML = "El equipo no estuvo a la altura.<br>Toca revisar la táctica.";
+        bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-red-500 shadow-[0_0_80px_rgba(239,68,68,0.2)]";
+        playSFX('lose');
+    }
+}
+
 function renderCart() {
     const listEl = document.getElementById('cart-items-list');
     const totalEl = document.getElementById('cart-total');
@@ -2643,6 +2683,17 @@ window.startMatch = function () {
     runMatchLoop(45);
 }
 
+window.updateSimSpeed = function (speed) {
+    simSpeedMs = parseInt(speed);
+    document.getElementById('sim-speed-label').textContent = `Velocidad actual: ${speed}ms`;
+
+    // Si el partido está en juego, reiniciar el intervalo con la nueva velocidad
+    if (matchState && matchState.interval) {
+        clearInterval(matchState.interval);
+        runMatchLoop(matchState._targetMinute);
+    }
+}
+
 function runMatchLoop(targetMinute) {
     matchState._targetMinute = targetMinute;
     const logDiv = document.getElementById('match-narrative');
@@ -2660,8 +2711,9 @@ function runMatchLoop(targetMinute) {
         document.getElementById('match-time').textContent = `${matchState.min}'`;
         document.getElementById('match-progress').style.width = `${(matchState.min / 90) * 100}%`;
 
-        // Posesión dinámica
-        matchState.stats.hPoss = Math.min(80, Math.max(20, matchState.stats.hPoss + (Math.floor(Math.random() * 11) - 5)));
+        // Posesión dinámica realista
+        const basePoss = 50 + ((matchState.myProb - matchState.oppProb) * 200);
+        matchState.stats.hPoss = Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))));
         matchState.stats.aPoss = 100 - matchState.stats.hPoss;
 
         // (Corners now handled below alongside pitch phases)
@@ -2690,52 +2742,77 @@ function runMatchLoop(targetMinute) {
 
         let eventText = commentary[Math.floor(Math.random() * commentary.length)];
         let rand = Math.random();
-        let activeMyProb = matchState.myProb + matchState.talkMod;
+
+        // Modificadores de probabilidad basados en posesión
+        let homePossMod = matchState.stats.hPoss / 50;
+        let awayPossMod = matchState.stats.aPoss / 50;
+
+        let activeMyProb = (matchState.myProb + matchState.talkMod) * (matchState.isHome ? homePossMod : awayPossMod);
+        let activeOppProb = matchState.oppProb * (matchState.isHome ? awayPossMod : homePossMod);
+
         let isMyGoal = rand < (activeMyProb * 0.4);
-        let isOppGoal = !isMyGoal && rand > 1 - (matchState.oppProb * 0.4);
+        let isOppGoal = !isMyGoal && rand > 1 - (activeOppProb * 0.4);
 
         if (isMyGoal) {
             matchState.mG++;
+            let xG = 0.6 + Math.random() * 0.3;
             // Shot + SOT + xG for our team
             if (matchState.isHome) {
                 matchState.stats.hShots++; matchState.stats.hSot++;
-                matchState.stats.hXG += 0.6 + Math.random() * 0.3;
+                matchState.stats.hXG += xG;
             } else {
                 matchState.stats.aShots++; matchState.stats.aSot++;
-                matchState.stats.aXG += 0.6 + Math.random() * 0.3;
+                matchState.stats.aXG += xG;
             }
             const xi = getStartingXI();
-            const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED');
+            const scorers = xi.filter(p => !p.suspension && (p.pos === 'DEL' || p.pos === 'MED'));
             const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)].name : "el delantero";
-            eventText = `<span class="text-green-400 font-bold">⚽ ¡GOL! Definición perfecta de ${scorer}.</span>`;
+            eventText = `<span class="text-green-400 font-bold">¡GOL! Definición perfecta de ${scorer}.</span>`;
             const goalSide = matchState.isHome ? 'home' : 'away';
             matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer}`, side: goalSide });
             // Animate pitch: our goal = attack towards opponent goal
             setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
         } else if (isOppGoal) {
             matchState.oG++;
+            let xG = 0.6 + Math.random() * 0.3;
             if (matchState.isHome) {
                 matchState.stats.aShots++; matchState.stats.aSot++;
-                matchState.stats.aXG += 0.6 + Math.random() * 0.3;
+                matchState.stats.aXG += xG;
             } else {
                 matchState.stats.hShots++; matchState.stats.hSot++;
-                matchState.stats.hXG += 0.6 + Math.random() * 0.3;
+                matchState.stats.hXG += xG;
             }
-            eventText = `<span class="text-red-400 font-bold">⚽ ¡Gol del equipo rival! Grave error en defensa.</span>`;
+            const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
+            const scorers = aiPlayers.filter(p => p.pos === 'DEL' || p.pos === 'MED');
+            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)].name : "el delantero";
+            eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Grave error en defensa que aprovecha ${scorer}.</span>`;
             const goalSide = matchState.isHome ? 'away' : 'home';
-            matchState.events.push({ min: matchState.min, icon: '⚽', text: 'GOL — Rival', side: goalSide });
+            matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer}`, side: goalSide });
             // Animate pitch: opponent goal = they attack our goal
             setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
         } else if (rand < 0.25) {
             // Shot home (no goal)
             matchState.stats.hShots++;
-            matchState.stats.hXG += 0.05 + Math.random() * 0.15;
-            if (Math.random() < 0.4) matchState.stats.hSot++;
+            let xG = 0.05 + Math.random() * 0.15;
+            matchState.stats.hXG += xG;
+            if (Math.random() < 0.4) {
+                matchState.stats.hSot++;
+                eventText = `Mala definición, el portero visitante detiene sin problemas (xG: ${xG.toFixed(2)}).`;
+            } else {
+                eventText = `Disparo desviado del equipo local que se pierde por la banda (xG: ${xG.toFixed(2)}).`;
+            }
             setPitchPhase('home-attack', 2);
         } else if (rand > 0.75) {
+            // Shot away (no goal)
             matchState.stats.aShots++;
-            matchState.stats.aXG += 0.05 + Math.random() * 0.15;
-            if (Math.random() < 0.4) matchState.stats.aSot++;
+            let xG = 0.05 + Math.random() * 0.15;
+            matchState.stats.aXG += xG;
+            if (Math.random() < 0.4) {
+                matchState.stats.aSot++;
+                eventText = `Atrapada segura de nuestro guardameta ante el tiro visitante (xG: ${xG.toFixed(2)}).`;
+            } else {
+                eventText = `Tiro lejano sin peligro del rival (xG: ${xG.toFixed(2)}).`;
+            }
             setPitchPhase('away-attack', 2);
         } else {
             // Neutral play — occasional possession phase shifts
@@ -2745,9 +2822,63 @@ function runMatchLoop(targetMinute) {
         }
 
         // Random event icons for cards
-        if (Math.random() < 0.03) {
-            const cardSide = Math.random() < 0.5 ? 'home' : 'away';
-            matchState.events.push({ min: matchState.min, icon: '🟨', text: 'Tarjeta amarilla', side: cardSide });
+        if (Math.random() < 0.05) {
+            const cardSide = Math.random() < (matchState.stats.aPoss / 100) ? 'home' : 'away'; // El equipo sin el balón hace la falta
+
+            // Elegir jugador sancionado
+            let sanctionedName = "Jugador";
+            let isUserPlayer = false;
+            let playerId = null;
+
+            if ((cardSide === 'home' && matchState.isHome) || (cardSide === 'away' && !matchState.isHome)) {
+                const xi = getStartingXI().filter(p => !p.suspension);
+                if (xi.length > 0) {
+                    const p = xi[Math.floor(Math.random() * xi.length)];
+                    sanctionedName = p.name;
+                    isUserPlayer = true;
+                    playerId = p.id;
+                }
+            } else {
+                const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
+                if (aiPlayers.length > 0) sanctionedName = aiPlayers[Math.floor(Math.random() * aiPlayers.length)].name;
+            }
+
+            // Gestionar estado de tarjeta del partido
+            const matchPlayerKey = `${cardSide}_${sanctionedName}`;
+            if (!matchState.playersCards) matchState.playersCards = {};
+
+            // Si ya tenía amarilla -> Roja
+            if (matchState.playersCards[matchPlayerKey] === 'yellow') {
+                matchState.playersCards[matchPlayerKey] = 'red';
+                eventText = `<span class="text-red-500 font-bold">¡SEGUNDA AMARILLA! Expulsión para ${sanctionedName} tras una entrada tardía.</span>`;
+                matchState.events.push({ min: matchState.min, icon: '🟥', text: `Roja — ${sanctionedName}`, side: cardSide });
+
+                // Aplicar sanción al jugador del usuario directamente
+                if (isUserPlayer && state && state.roster) {
+                    const player = state.roster.find(p => p.id === playerId);
+                    if (player) {
+                        player.suspension = 2;
+                        addEmail('Comité de Competición', 'Sanción por doble amarilla', `Tu jugador ${player.name} ha sido expulsado y se perderá 2 partidos.`);
+                    }
+                }
+            } else {
+                matchState.playersCards[matchPlayerKey] = 'yellow';
+                eventText = `Falta dura de ${sanctionedName}. El árbitro le muestra amarilla.`;
+                matchState.events.push({ min: matchState.min, icon: '🟨', text: `Amarilla — ${sanctionedName}`, side: cardSide });
+
+                // Acumular amarilla al jugador del usuario
+                if (isUserPlayer && state && state.roster) {
+                    const player = state.roster.find(p => p.id === playerId);
+                    if (player) {
+                        player.yellowCards = (player.yellowCards || 0) + 1;
+                        if (player.yellowCards >= 5) {
+                            player.suspension = 1;
+                            player.yellowCards = 0;
+                            addEmail('Comité de Competición', 'Sanción por acumulación', `Tu jugador ${player.name} ha acumulado 5 tarjetas amarillas y se perderá 1 partido.`);
+                        }
+                    }
+                }
+            }
         }
 
         // Corners trigger pitch phase
@@ -2957,6 +3088,13 @@ function finishMatch(mG, oG) {
 
     state.flags.canTrain = true;
     state.flags.canTalk = true;
+
+    // Reducir suspensiones de jugadores
+    if (state.roster) {
+        state.roster.forEach(p => {
+            if (p.suspension > 0) p.suspension--;
+        });
+    }
 
     generateFixtures(state); // Crear siguiente jornada (Para verla en apuestas y demás)
     saveState();

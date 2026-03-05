@@ -604,6 +604,41 @@ h4 {
     background-position: center;
 }
 
+/* --- Mejoras del Scoreboard Broadcast --- */
+.broadcast-scoreboard {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(15, 31, 58, 0.7) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.broadcast-score-value {
+    text-shadow: 0 2px 10px rgba(250, 204, 21, 0.6);
+    background: linear-gradient(to bottom, #fff, #facc15);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Eventos y Narrativa Mejorada */
+.match-narrative-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--fm-border) transparent;
+}
+
+.match-narrative-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.match-narrative-container::-webkit-scrollbar-thumb {
+    background-color: var(--fm-border);
+    border-radius: 3px;
+}
+
+.match-event-item {
+    animation: fadeIn 0.3s ease-out;
+}
+
 /* Control Estricto de Vistas (Tabs) */
 .hidden {
     display: none !important;

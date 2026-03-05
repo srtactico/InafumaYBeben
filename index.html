@@ -329,9 +329,10 @@
     <!-- ============== MODAL PARTIDO PVP ============== -->
     <div id="pvp-match-modal" class="view-section bg-[#0a0a0f] hidden flex-col z-[100]">
 
-        <!-- HEADER: Scoreboard (same FM style as local) -->
-        <header class="fm-match-header shrink-0" style="position:relative;">
-            <button onclick="showSubpage('settings')" class="settings-gear-match" title="Ajustes">
+        <!-- HEADER: Scoreboard (Broadcast Style) -->
+        <header class="broadcast-scoreboard m-4 shrink-0 relative p-4 flex flex-col gap-2">
+            <button onclick="showSubpage('settings')" class="absolute top-4 left-4 text-slate-500 hover:text-white"
+                title="Ajustes">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3" />
@@ -339,25 +340,31 @@
                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
             </button>
-            <div class="fm-match-header-inner">
-                <div class="fm-match-time-box">
-                    <span id="pvp-match-time" class="fm-match-clock">0'</span>
+            <div class="flex items-center justify-between px-8">
+                <div class="flex items-center gap-4 w-1/3 justify-end">
+                    <span id="pvp-home-name"
+                        class="font-gaming text-xl text-white tracking-widest uppercase">LOCAL</span>
+                    <div id="pvp-home-shield" class="w-12 h-16"></div>
                 </div>
-                <div class="fm-match-team fm-match-team-home">
-                    <span id="pvp-home-name" class="fm-match-teamname">LOCAL</span>
-                    <div id="pvp-home-shield" class="fm-match-shield"></div>
+                <div class="flex flex-col items-center w-1/3">
+                    <div class="bg-black/50 border border-slate-700 px-4 py-1 rounded-full mb-2">
+                        <span id="pvp-match-time"
+                            class="font-mono text-sm text-yellow-400 font-bold tracking-widest">0'</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-4xl font-gaming font-bold">
+                        <span id="pvp-home-score" class="broadcast-score-value">0</span>
+                        <span class="text-slate-600">-</span>
+                        <span id="pvp-away-score" class="broadcast-score-value">0</span>
+                    </div>
                 </div>
-                <div class="fm-match-score-box">
-                    <span id="pvp-home-score" class="fm-match-score-num">0</span>
-                    <span id="pvp-away-score" class="fm-match-score-num fm-match-score-away">0</span>
-                </div>
-                <div class="fm-match-team fm-match-team-away">
-                    <div id="pvp-away-shield" class="fm-match-shield"></div>
-                    <span id="pvp-away-name" class="fm-match-teamname">RIVAL</span>
+                <div class="flex items-center gap-4 w-1/3 justify-start">
+                    <div id="pvp-away-shield" class="w-12 h-16"></div>
+                    <span id="pvp-away-name"
+                        class="font-gaming text-xl text-white tracking-widest uppercase">RIVAL</span>
                 </div>
             </div>
-            <div class="match-progress-bg w-full" style="height:4px;border-radius:0;">
-                <div id="pvp-match-progress" class="match-progress-fill" style="border-radius:0;"></div>
+            <div class="match-progress-bg w-full" style="height:4px;border-radius:4px;">
+                <div id="pvp-match-progress" class="match-progress-fill" style="border-radius:4px;"></div>
             </div>
         </header>
 
@@ -1164,9 +1171,10 @@
 
     <div id="match-modal" class="view-section bg-[#0a0a0f] hidden flex-col z-[100]">
 
-        <!-- HEADER: Scoreboard -->
-        <header class="fm-match-header shrink-0" style="position:relative;">
-            <button onclick="showSubpage('settings')" class="settings-gear-match" title="Ajustes">
+        <!-- HEADER: Scoreboard Broadcast Local -->
+        <header class="broadcast-scoreboard m-4 shrink-0 relative p-4 flex flex-col gap-2">
+            <button onclick="showSubpage('settings')" class="absolute top-4 left-4 text-slate-500 hover:text-white"
+                title="Ajustes">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3" />
@@ -1174,25 +1182,31 @@
                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
             </button>
-            <div class="fm-match-header-inner">
-                <div class="fm-match-time-box">
-                    <span id="match-time" class="fm-match-clock">00:00</span>
+            <div class="flex items-center justify-between px-8">
+                <div class="flex items-center gap-4 w-1/3 justify-end">
+                    <span id="sim-home-name"
+                        class="font-gaming text-xl text-white tracking-widest uppercase">LOCAL</span>
+                    <div id="sim-home-shield" class="w-12 h-16"></div>
                 </div>
-                <div class="fm-match-team fm-match-team-home">
-                    <span id="sim-home-name" class="fm-match-teamname">LOCAL</span>
-                    <div id="sim-home-shield" class="fm-match-shield"></div>
+                <div class="flex flex-col items-center w-1/3">
+                    <div class="bg-black/50 border border-slate-700 px-4 py-1 rounded-full mb-2">
+                        <span id="match-time"
+                            class="font-mono text-sm text-yellow-400 font-bold tracking-widest">00:00</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-4xl font-gaming font-bold">
+                        <span id="sim-home-score" class="broadcast-score-value">0</span>
+                        <span class="text-slate-600">-</span>
+                        <span id="sim-away-score" class="broadcast-score-value">0</span>
+                    </div>
                 </div>
-                <div class="fm-match-score-box">
-                    <span id="sim-home-score" class="fm-match-score-num">0</span>
-                    <span id="sim-away-score" class="fm-match-score-num fm-match-score-away">0</span>
-                </div>
-                <div class="fm-match-team fm-match-team-away">
-                    <div id="sim-away-shield" class="fm-match-shield"></div>
-                    <span id="sim-away-name" class="fm-match-teamname">RIVAL</span>
+                <div class="flex items-center gap-4 w-1/3 justify-start">
+                    <div id="sim-away-shield" class="w-12 h-16"></div>
+                    <span id="sim-away-name"
+                        class="font-gaming text-xl text-white tracking-widest uppercase">RIVAL</span>
                 </div>
             </div>
-            <div class="match-progress-bg w-full" style="height:4px;border-radius:0;">
-                <div id="match-progress" class="match-progress-fill" style="border-radius:0;"></div>
+            <div class="match-progress-bg w-full" style="height:4px;border-radius:4px;">
+                <div id="match-progress" class="match-progress-fill" style="border-radius:4px;"></div>
             </div>
         </header>
 
@@ -1398,16 +1412,19 @@
                                 <span class="text-[10px] text-slate-500">🐇</span>
                             </div>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center mt-6 border-t border-[#313145] pt-4">
+                            <span class="text-xs text-blue-400 font-bold uppercase tracking-widest block mb-4">Velocidad
+                                de Simulación (Local)</span>
+                            <div class="flex items-center justify-between pb-2">
+                                <label
+                                    class="text-xs text-slate-300 font-bold uppercase w-1/4 text-left">Velocidad</label>
+                                <input type="range" id="setting-sim-speed" class="w-3/4 cursor-pointer" min="100"
+                                    max="2500" step="100" value="800" oninput="updateSimSpeed(this.value)"
+                                    style="direction: rtl;">
+                            </div>
                             <span id="sim-speed-label"
-                                class="text-xs text-yellow-400 font-bold uppercase tracking-widest">Normal</span>
-                        </div>
-                        <div class="flex justify-between text-[9px] text-slate-600 uppercase px-1">
-                            <span>Muy Lento</span>
-                            <span>Lento</span>
-                            <span>Normal</span>
-                            <span>Rápido</span>
-                            <span>Muy Rápido</span>
+                                class="text-[10px] text-yellow-400 font-bold uppercase tracking-widest mt-2 block">Normal
+                                (800ms)</span>
                         </div>
                     </div>
                 </div>
