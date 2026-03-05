@@ -520,6 +520,20 @@ window.openSettings = function () {
     const sfxSlider = document.getElementById('setting-sfx');
     if (musicSlider) musicSlider.value = s.volMusic;
     if (sfxSlider) sfxSlider.value = s.volSfx;
+
+    // Show speed control only during active match (local or PVP)
+    const speedSection = document.getElementById('settings-sim-speed-section');
+    if (speedSection) {
+        const matchActive = !document.getElementById('match-modal').classList.contains('hidden')
+            || !document.getElementById('pvp-match-modal').classList.contains('hidden');
+        speedSection.classList.toggle('hidden', !matchActive);
+    }
+    // Sync slider value
+    const speedSlider = document.getElementById('setting-sim-speed');
+    if (speedSlider) speedSlider.value = simSpeedLevel;
+    const speedLabel = document.getElementById('sim-speed-label');
+    if (speedLabel) speedLabel.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
+
     document.getElementById('modal-settings').classList.remove('hidden');
 }
 
@@ -543,6 +557,19 @@ window.updateVolume = function (type, val) {
 }
 window.closeSettings = function () {
     document.getElementById('modal-settings').classList.add('hidden');
+}
+
+/* --- Simulation Speed Control --- */
+const SIM_SPEED_MAP = { 1: 700, 2: 500, 3: 350, 4: 200, 5: 100 };
+const SIM_SPEED_LABELS = { 1: 'Muy Lento', 2: 'Lento', 3: 'Normal', 4: 'Rápido', 5: 'Muy Rápido' };
+let simSpeedMs = 350;
+let simSpeedLevel = 3;
+
+window.updateSimSpeed = function (val) {
+    simSpeedLevel = parseInt(val);
+    simSpeedMs = SIM_SPEED_MAP[simSpeedLevel] || 350;
+    const lbl = document.getElementById('sim-speed-label');
+    if (lbl) lbl.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
 }
 
 window.toggleProfileMenu = function () { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
@@ -624,13 +651,200 @@ function startMultiplayerSearch() {
 
     pvpMatchFinished = false;
 
+    // PVP match state (mirrors local matchState structure)
+    let pvpMatchState = {
+        stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 },
+        events: [],
+        pitchTokens: [],
+        pitchInterval: null
+    };
+    let pvpPitchPhase = 'neutral';
+    let pvpPitchPhaseTimer = 0;
+
+    /* --- PVP Pitch Token Functions (mirrored from local) --- */
+    function pvpInitPitchTokens() {
+        const tokensDiv = document.getElementById('pvp-fm-pitch-tokens');
+        if (!tokensDiv) return;
+        tokensDiv.innerHTML = '';
+        pvpMatchState.pitchTokens = [];
+
+        const homePositions = [
+            { x: 5, y: 50 },
+            { x: 15, y: 20 }, { x: 15, y: 40 }, { x: 15, y: 60 }, { x: 15, y: 80 },
+            { x: 30, y: 25 }, { x: 30, y: 45 }, { x: 30, y: 55 }, { x: 30, y: 75 },
+            { x: 42, y: 35 }, { x: 42, y: 65 }
+        ];
+        const awayPositions = [
+            { x: 95, y: 50 },
+            { x: 85, y: 20 }, { x: 85, y: 40 }, { x: 85, y: 60 }, { x: 85, y: 80 },
+            { x: 70, y: 25 }, { x: 70, y: 45 }, { x: 70, y: 55 }, { x: 70, y: 75 },
+            { x: 58, y: 35 }, { x: 58, y: 65 }
+        ];
+
+        homePositions.forEach((pos, i) => {
+            const token = document.createElement('div');
+            token.className = 'fm-pitch-token fm-pitch-token-home';
+            token.innerHTML = `<span class="fm-pitch-token-number">${i + 1}</span>`;
+            token.style.left = pos.x + '%';
+            token.style.top = pos.y + '%';
+            tokensDiv.appendChild(token);
+            pvpMatchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'home' });
+        });
+
+        awayPositions.forEach((pos, i) => {
+            const token = document.createElement('div');
+            token.className = 'fm-pitch-token fm-pitch-token-away';
+            token.innerHTML = `<span class="fm-pitch-token-number">${i + 1}</span>`;
+            token.style.left = pos.x + '%';
+            token.style.top = pos.y + '%';
+            tokensDiv.appendChild(token);
+            pvpMatchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'away' });
+        });
+    }
+
+    function pvpAnimatePitchTokens() {
+        if (pvpMatchState.pitchInterval) clearInterval(pvpMatchState.pitchInterval);
+        pvpMatchState.pitchInterval = setInterval(() => {
+            const ball = document.getElementById('pvp-fm-pitch-ball');
+
+            if (pvpPitchPhaseTimer > 0) pvpPitchPhaseTimer--;
+            if (pvpPitchPhaseTimer <= 0 && pvpPitchPhase !== 'neutral') pvpPitchPhase = 'neutral';
+
+            let ballX, ballY;
+            const hPoss = pvpMatchState.stats.hPoss || 50;
+
+            if (pvpPitchPhase === 'home-goal') {
+                ballX = 96 + Math.random() * 3; ballY = 44 + Math.random() * 12;
+            } else if (pvpPitchPhase === 'away-goal') {
+                ballX = 1 + Math.random() * 3; ballY = 44 + Math.random() * 12;
+            } else if (pvpPitchPhase === 'home-attack') {
+                ballX = 62 + Math.random() * 28; ballY = 20 + Math.random() * 60;
+            } else if (pvpPitchPhase === 'away-attack') {
+                ballX = 10 + Math.random() * 28; ballY = 20 + Math.random() * 60;
+            } else if (pvpPitchPhase === 'home-corner') {
+                ballX = 94 + Math.random() * 4; ballY = Math.random() < 0.5 ? 3 + Math.random() * 6 : 91 + Math.random() * 6;
+            } else if (pvpPitchPhase === 'away-corner') {
+                ballX = 2 + Math.random() * 4; ballY = Math.random() < 0.5 ? 3 + Math.random() * 6 : 91 + Math.random() * 6;
+            } else {
+                const possWeight = (hPoss - 50) / 50;
+                ballX = 50 + possWeight * 25 + (Math.random() - 0.5) * 28;
+                ballY = 15 + Math.random() * 70;
+            }
+            ballX = Math.max(1, Math.min(99, ballX));
+            ballY = Math.max(3, Math.min(97, ballY));
+
+            if (ball) { ball.style.left = ballX + '%'; ball.style.top = ballY + '%'; }
+
+            let homeBlockX = 0, awayBlockX = 0;
+            const possShift = (hPoss - 50) * 0.18;
+            homeBlockX += possShift; awayBlockX -= possShift;
+            const isGoalPhase = pvpPitchPhase === 'home-goal' || pvpPitchPhase === 'away-goal';
+            if (pvpPitchPhase === 'home-attack' || pvpPitchPhase === 'home-goal' || pvpPitchPhase === 'home-corner') {
+                homeBlockX += 15; awayBlockX -= 8;
+            } else if (pvpPitchPhase === 'away-attack' || pvpPitchPhase === 'away-goal' || pvpPitchPhase === 'away-corner') {
+                awayBlockX -= 15; homeBlockX += 8;
+            }
+
+            pvpMatchState.pitchTokens.forEach((t) => {
+                const isGK = t.baseY === 50 && (t.baseX === 5 || t.baseX === 95);
+                const isAttacker = t.side === 'home' ? (t.baseX >= 42) : (t.baseX <= 58);
+                let newX, newY;
+
+                if (isGK) {
+                    if (t.side === 'home') { newX = 4 + (Math.random() - 0.5) * 3; newY = 45 + Math.random() * 10; }
+                    else { newX = 96 + (Math.random() - 0.5) * 3; newY = 45 + Math.random() * 10; }
+                    if ((pvpPitchPhase === 'away-goal' && t.side === 'home') || (pvpPitchPhase === 'home-goal' && t.side === 'away')) {
+                        newY += (ballY - newY) * 0.5;
+                    }
+                } else if (isGoalPhase && isAttacker) {
+                    const attackingSide = pvpPitchPhase === 'home-goal' ? 'home' : 'away';
+                    if (t.side === attackingSide) {
+                        newX = ballX + (Math.random() - 0.5) * 12; newY = ballY + (Math.random() - 0.5) * 18;
+                    } else {
+                        const goalX = t.side === 'home' ? 10 : 90;
+                        newX = goalX + (Math.random() - 0.5) * 14; newY = 30 + Math.random() * 40;
+                    }
+                } else {
+                    const shift = t.side === 'home' ? homeBlockX : awayBlockX;
+                    const jitterX = (Math.random() - 0.5) * 6; const jitterY = (Math.random() - 0.5) * 8;
+                    newX = t.baseX + shift + jitterX; newY = t.baseY + jitterY;
+                    const distToBall = Math.sqrt(Math.pow(newX - ballX, 2) + Math.pow(newY - ballY, 2));
+                    let pullFactor;
+                    if (pvpPitchPhase.includes('attack') || pvpPitchPhase.includes('corner')) {
+                        pullFactor = distToBall < 25 ? 0.25 : 0.1;
+                    } else { pullFactor = distToBall < 20 ? 0.15 : 0.05; }
+                    newX += (ballX - newX) * pullFactor; newY += (ballY - newY) * pullFactor;
+                }
+                if (!isGoalPhase) {
+                    if (t.side === 'home') newX = Math.min(newX, 78);
+                    else newX = Math.max(newX, 22);
+                }
+                newX = Math.max(1, Math.min(99, newX)); newY = Math.max(3, Math.min(97, newY));
+                t.el.style.left = newX + '%'; t.el.style.top = newY + '%';
+            });
+        }, Math.round(simSpeedMs * 2.5));
+    }
+
+    function pvpStopPitchAnimation() {
+        if (pvpMatchState.pitchInterval) { clearInterval(pvpMatchState.pitchInterval); pvpMatchState.pitchInterval = null; }
+    }
+
+    function pvpUpdateMatchStatsUI(s) {
+        const hp = document.getElementById('pvp-fm-stat-poss-home'); if (hp) hp.textContent = s.hPoss + '%';
+        const ap = document.getElementById('pvp-fm-stat-poss-away'); if (ap) ap.textContent = s.aPoss + '%';
+        const bph = document.getElementById('pvp-fm-bar-poss-h'); if (bph) bph.style.width = s.hPoss + '%';
+        const bpa = document.getElementById('pvp-fm-bar-poss-a'); if (bpa) bpa.style.width = s.aPoss + '%';
+
+        const sh_ = document.getElementById('pvp-fm-stat-shots-home'); if (sh_) sh_.textContent = s.hShots;
+        const sa_ = document.getElementById('pvp-fm-stat-shots-away'); if (sa_) sa_.textContent = s.aShots;
+        const totalS = s.hShots + s.aShots || 1;
+        const bsh = document.getElementById('pvp-fm-bar-shots-h'); if (bsh) bsh.style.width = ((s.hShots / totalS) * 100) + '%';
+        const bsa = document.getElementById('pvp-fm-bar-shots-a'); if (bsa) bsa.style.width = ((s.aShots / totalS) * 100) + '%';
+
+        const soth = document.getElementById('pvp-fm-stat-sot-home'); if (soth) soth.textContent = s.hSot || 0;
+        const sota = document.getElementById('pvp-fm-stat-sot-away'); if (sota) sota.textContent = s.aSot || 0;
+        const totalSot = (s.hSot || 0) + (s.aSot || 0) || 1;
+        const bsoth = document.getElementById('pvp-fm-bar-sot-h'); if (bsoth) bsoth.style.width = (((s.hSot || 0) / totalSot) * 100) + '%';
+        const bsota = document.getElementById('pvp-fm-bar-sot-a'); if (bsota) bsota.style.width = (((s.aSot || 0) / totalSot) * 100) + '%';
+
+        const xgh = document.getElementById('pvp-fm-stat-xg-home'); if (xgh) xgh.textContent = (s.hXG || 0).toFixed(2);
+        const xga = document.getElementById('pvp-fm-stat-xg-away'); if (xga) xga.textContent = (s.aXG || 0).toFixed(2);
+        const totalXG = (s.hXG || 0) + (s.aXG || 0) || 1;
+        const bxgh = document.getElementById('pvp-fm-bar-xg-h'); if (bxgh) bxgh.style.width = (((s.hXG || 0) / totalXG) * 100) + '%';
+        const bxga = document.getElementById('pvp-fm-bar-xg-a'); if (bxga) bxga.style.width = (((s.aXG || 0) / totalXG) * 100) + '%';
+
+        const ch = document.getElementById('pvp-fm-stat-corners-home'); if (ch) ch.textContent = s.hCorners || 0;
+        const ca = document.getElementById('pvp-fm-stat-corners-away'); if (ca) ca.textContent = s.aCorners || 0;
+        const totalC = (s.hCorners || 0) + (s.aCorners || 0) || 1;
+        const bch = document.getElementById('pvp-fm-bar-corners-h'); if (bch) bch.style.width = (((s.hCorners || 0) / totalC) * 100) + '%';
+        const bca = document.getElementById('pvp-fm-bar-corners-a'); if (bca) bca.style.width = (((s.aCorners || 0) / totalC) * 100) + '%';
+    }
+
+    function pvpRenderMatchEvents(filter) {
+        const list = document.getElementById('pvp-fm-events-list');
+        if (!list) return;
+        const filtered = pvpMatchState.events.filter(e => filter === 'home' ? e.side === 'home' : e.side === 'away');
+        if (filtered.length === 0) {
+            list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
+            return;
+        }
+        list.innerHTML = filtered.map(e => `
+            <div class="fm-event-item">
+                <span class="fm-event-icon">${e.icon}</span>
+                <span class="fm-event-text">${e.text}</span>
+                <span class="fm-event-min">${e.min}'</span>
+            </div>
+        `).join('');
+        // Store events globally for tab switching 
+        window._pvpEvents = pvpMatchState.events;
+    }
+
     // Conectar al servidor PvP
     pvpSocket = io(PVP_SERVER_URL, { transports: ['websocket', 'polling'] });
 
     pvpSocket.on('connect', () => {
         document.getElementById('pvp-search-status').textContent = 'Buscando rival...';
 
-        // Enviar datos del equipo al lobby
         pvpSocket.emit('join_lobby', {
             teamName: state.team.name,
             managerName: state.team.manager,
@@ -651,44 +865,88 @@ function startMultiplayerSearch() {
     // ---- PARTIDO ENCONTRADO ----
     pvpSocket.on('match_start', (data) => {
         pvpRoomId = data.roomId;
-        pvpSide = data.you; // 'home' o 'away'
+        pvpSide = data.you;
 
-        // Cerrar overlay de búsqueda
         document.getElementById('pvp-searching-overlay').classList.add('hidden');
 
-        // Mostrar modal del partido PvP
         document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
         document.getElementById('pvp-match-modal').classList.remove('hidden');
         document.getElementById('pvp-halftime-actions').classList.add('hidden');
         document.getElementById('pvp-post-match').classList.add('hidden');
 
-        // Rellenar datos
+        // Reset state
+        pvpMatchState.stats = { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 };
+        pvpMatchState.events = [];
+        window._pvpEvents = [];
+        pvpPitchPhase = 'neutral';
+        pvpPitchPhaseTimer = 0;
+
+        // Header data
         document.getElementById('pvp-home-name').textContent = data.homeName;
         document.getElementById('pvp-away-name').textContent = data.awayName;
-        document.getElementById('pvp-home-ovr').textContent = data.homeOvr;
-        document.getElementById('pvp-away-ovr').textContent = data.awayOvr;
         document.getElementById('pvp-home-score').textContent = '0';
         document.getElementById('pvp-away-score').textContent = '0';
         document.getElementById('pvp-match-progress').style.width = '0%';
+        document.getElementById('pvp-match-time').textContent = "0'";
         document.getElementById('pvp-match-narrative').innerHTML = '';
 
-        // Escudos
+        // FM panel team labels
+        const statHomeLbl = document.getElementById('pvp-fm-stat-home-name');
+        const statAwayLbl = document.getElementById('pvp-fm-stat-away-name');
+        if (statHomeLbl) statHomeLbl.textContent = data.homeName;
+        if (statAwayLbl) statAwayLbl.textContent = data.awayName;
+        const evtTabHome = document.getElementById('pvp-fm-evt-tab-home');
+        const evtTabAway = document.getElementById('pvp-fm-evt-tab-away');
+        if (evtTabHome) evtTabHome.textContent = data.homeName;
+        if (evtTabAway) evtTabAway.textContent = data.awayName;
+        const pitchLblH = document.getElementById('pvp-fm-pitch-label-home');
+        const pitchLblA = document.getElementById('pvp-fm-pitch-label-away');
+        if (pitchLblH) pitchLblH.textContent = data.homeName;
+        if (pitchLblA) pitchLblA.textContent = data.awayName;
+
+        // Badges (FM-style)
         const myBadge = { shape: state.team.shape, c1: state.team.c1, c2: state.team.c2 };
         const oppBadge = data.opponentBadge || { shape: 'shape-shield', c1: '#666', c2: '#333' };
 
         if (pvpSide === 'home') {
-            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-12 h-16 text-xs');
-            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-12 h-16 text-xs');
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]');
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]');
         } else {
-            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-12 h-16 text-xs');
-            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-12 h-16 text-xs');
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]');
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]');
         }
+
+        // Render formation panels
+        const myPlayers = getStartingXI().map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
+        const oppPlayers = generateAIPlayers(pvpSide === 'home' ? data.awayName : data.homeName, pvpSide === 'home' ? data.awayOvr : data.homeOvr);
+        const homeColor = pvpSide === 'home' ? (myBadge.c1 || '#2563eb') : (oppBadge.c1 || '#2563eb');
+        const awayColor = pvpSide === 'home' ? (oppBadge.c1 || '#dc2626') : (myBadge.c1 || '#dc2626');
+
+        if (pvpSide === 'home') {
+            renderFormationPanel('pvp-fm-formation-home', myPlayers, homeColor);
+            renderFormationPanel('pvp-fm-formation-away', oppPlayers, awayColor);
+        } else {
+            renderFormationPanel('pvp-fm-formation-home', oppPlayers, homeColor);
+            renderFormationPanel('pvp-fm-formation-away', myPlayers, awayColor);
+        }
+
+        pvpRenderMatchEvents('home');
+        pvpInitPitchTokens();
+        pvpAnimatePitchTokens();
+
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Conectado. Esperando inicio...</div>';
+
+        pvpUpdateMatchStatsUI(pvpMatchState.stats);
     });
 
     // ---- KICKOFF ----
     pvpSocket.on('match_kickoff', (data) => {
         const logDiv = document.getElementById('pvp-match-narrative');
         logDiv.innerHTML += `<div class='text-blue-400 font-bold'>${data.message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Partido en curso...</div>';
     });
 
     // ---- TICK DEL PARTIDO ----
@@ -698,6 +956,26 @@ function startMultiplayerSearch() {
         document.getElementById('pvp-away-score').textContent = data.awayGoals;
         document.getElementById('pvp-match-progress').style.width = data.progress + '%';
 
+        pvpMatchState.stats = data.stats;
+
+        // Set pitch phase from server
+        if (data.pitchPhase && data.pitchPhase !== 'neutral') {
+            pvpPitchPhase = data.pitchPhase;
+            pvpPitchPhaseTimer = data.pitchPhase.includes('goal') ? 4 : 2;
+        }
+
+        // Events
+        if (data.eventType === 'home_goal') {
+            const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
+            pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL — ${scorer}`, side: 'home' });
+        } else if (data.eventType === 'away_goal') {
+            const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
+            pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL — ${scorer}`, side: 'away' });
+        }
+        if (data.card) {
+            pvpMatchState.events.push({ min: data.min, icon: '🟨', text: 'Tarjeta amarilla', side: data.card.side });
+        }
+
         // Narrativa
         const logDiv = document.getElementById('pvp-match-narrative');
         let cssClass = '';
@@ -706,24 +984,21 @@ function startMultiplayerSearch() {
         logDiv.innerHTML += `<div><span class="text-slate-500">${data.min}'</span> - <span class="${cssClass}">${data.narrative.split(' - ').slice(1).join(' - ') || data.narrative}</span></div>`;
         logDiv.scrollTop = logDiv.scrollHeight;
 
-        // Estadísticas
-        document.getElementById('pvp-stat-poss-home').textContent = data.stats.hPoss + '%';
-        document.getElementById('pvp-stat-poss-away').textContent = data.stats.aPoss + '%';
-        document.getElementById('pvp-bar-poss-home').style.width = data.stats.hPoss + '%';
-        document.getElementById('pvp-bar-poss-away').style.width = data.stats.aPoss + '%';
-        document.getElementById('pvp-stat-shots-home').textContent = data.stats.hShots;
-        document.getElementById('pvp-stat-shots-away').textContent = data.stats.aShots;
-        let totalShots = data.stats.hShots + data.stats.aShots;
-        document.getElementById('pvp-bar-shots-home').style.width = totalShots > 0 ? ((data.stats.hShots / totalShots) * 100) + '%' : '50%';
-        document.getElementById('pvp-bar-shots-away').style.width = totalShots > 0 ? ((data.stats.aShots / totalShots) * 100) + '%' : '50%';
+        pvpUpdateMatchStatsUI(data.stats);
+        pvpRenderMatchEvents('home');
     });
 
     // ---- DESCANSO ----
     pvpSocket.on('match_halftime', (data) => {
+        pvpStopPitchAnimation();
         document.getElementById('pvp-halftime-actions').classList.remove('hidden');
         const logDiv = document.getElementById('pvp-match-narrative');
         logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">${data.narrative}</strong></div>`;
         logDiv.scrollTop = logDiv.scrollHeight;
+        pvpMatchState.events.push({ min: 45, icon: '⏱', text: 'Descanso', side: 'home' });
+        pvpRenderMatchEvents('home');
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Medio tiempo — elige tus acciones en el dugout.</div>';
     });
 
     pvpSocket.on('halftime_response', (data) => {
@@ -738,10 +1013,14 @@ function startMultiplayerSearch() {
         const logDiv = document.getElementById('pvp-match-narrative');
         logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">${data.message}</strong></div>`;
         logDiv.scrollTop = logDiv.scrollHeight;
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Segunda parte en juego...</div>';
+        pvpAnimatePitchTokens();
     });
 
     // ---- FIN DEL PARTIDO ----
     pvpSocket.on('match_result', (data) => {
+        pvpStopPitchAnimation();
         document.getElementById('pvp-post-match').classList.remove('hidden');
 
         const logDiv = document.getElementById('pvp-match-narrative');
@@ -757,7 +1036,9 @@ function startMultiplayerSearch() {
         document.getElementById('pvp-result-text').textContent = resultText;
         document.getElementById('pvp-rewards-text').innerHTML = `+€${(rewards.coins / 1000000).toFixed(1)}M | +${rewards.pts} PTS | REP: ${rewards.rep > 0 ? '+' : ''}${rewards.rep}`;
 
-        // Aplicar recompensas al estado local
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-amber-400 text-[10px] font-bold">Partido finalizado.</div>';
+
         if (rewards.result === 'win') state.stats.wins++;
         else if (rewards.result === 'draw') state.stats.draws++;
         else state.stats.losses++;
@@ -771,9 +1052,9 @@ function startMultiplayerSearch() {
 
     // ---- RIVAL DESCONECTADO ----
     pvpSocket.on('opponent_disconnected', (data) => {
-        // Ignorar si el partido ya terminó normalmente
         if (pvpMatchFinished) return;
 
+        pvpStopPitchAnimation();
         document.getElementById('pvp-searching-overlay').classList.add('hidden');
         document.getElementById('pvp-halftime-actions').classList.add('hidden');
         document.getElementById('pvp-post-match').classList.remove('hidden');
@@ -781,6 +1062,32 @@ function startMultiplayerSearch() {
         document.getElementById('pvp-rewards-text').textContent = data.message;
     });
 }
+
+/* --- PVP Event Tabs --- */
+window.pvpFmEvtTab = function (team) {
+    document.getElementById('pvp-fm-evt-tab-home').className = 'fm-evt-tab' + (team === 'home' ? ' active' : '');
+    document.getElementById('pvp-fm-evt-tab-away').className = 'fm-evt-tab' + (team === 'away' ? ' active' : '');
+    const list = document.getElementById('pvp-fm-events-list');
+    if (!list) return;
+    const filtered = (window._pvpEvents || []).filter(e => team === 'home' ? e.side === 'home' : e.side === 'away');
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
+        return;
+    }
+    list.innerHTML = filtered.map(e => `
+        <div class="fm-event-item">
+            <span class="fm-event-icon">${e.icon}</span>
+            <span class="fm-event-text">${e.text}</span>
+            <span class="fm-event-min">${e.min}'</span>
+        </div>
+    `).join('');
+};
+
+/* --- PVP Dugout toggle --- */
+window.togglePvpDugout = function () {
+    const content = document.getElementById('pvp-fm-dugout-content');
+    if (content) content.classList.toggle('expanded');
+};
 
 window.pvpHalftimeAction = function (action) {
     if (pvpSocket && pvpRoomId) {
@@ -1902,7 +2209,7 @@ function animatePitchTokens() {
             t.el.style.left = newX + '%';
             t.el.style.top = newY + '%';
         });
-    }, 900);
+    }, Math.round(simSpeedMs * 2.5));
 }
 
 function stopPitchAnimation() {
@@ -2200,7 +2507,7 @@ function runMatchLoop(targetMinute) {
         updateMatchStatsUI();
         renderMatchEvents('home');
 
-    }, 350);
+    }, simSpeedMs);
 }
 
 window.matchTalk = function (type) {

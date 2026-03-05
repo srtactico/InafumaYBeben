@@ -128,35 +128,70 @@ function runMatchLoop(roomId, targetMinute) {
         // ---- Eventos de cada tick ----
         let eventText = COMMENTARY[Math.floor(Math.random() * COMMENTARY.length)];
         let eventType = 'play';  // play | home_goal | away_goal
+        let pitchPhase = 'neutral';
         const rand = Math.random();
 
         // Gol del equipo local
         if (rand < (ms.homeProb * 0.4)) {
             ms.homeGoals++;
             ms.stats.hShots++;
+            ms.stats.hSot++;
+            ms.stats.hXG += 0.6 + Math.random() * 0.3;
             const scorers = getScorers(room.players[0].roster, room.players[0].lineup);
             const scorer = scorers.length > 0
                 ? scorers[Math.floor(Math.random() * scorers.length)].name
                 : 'el delantero';
             eventText = `¡GOL DEL LOCAL! Definición perfecta de ${scorer}.`;
             eventType = 'home_goal';
+            pitchPhase = 'home-goal';
         }
         // Gol del equipo visitante
         else if (rand > 1 - (ms.awayProb * 0.4)) {
             ms.awayGoals++;
             ms.stats.aShots++;
+            ms.stats.aSot++;
+            ms.stats.aXG += 0.6 + Math.random() * 0.3;
             const scorers = getScorers(room.players[1].roster, room.players[1].lineup);
             const scorer = scorers.length > 0
                 ? scorers[Math.floor(Math.random() * scorers.length)].name
                 : 'el delantero';
             eventText = `¡GOL DEL VISITANTE! Gran jugada de ${scorer}.`;
             eventType = 'away_goal';
+            pitchPhase = 'away-goal';
         }
         // Tiros sin gol
-        else if (rand < 0.3) {
+        else if (rand < 0.25) {
             ms.stats.hShots++;
-        } else if (rand > 0.7) {
+            ms.stats.hXG += 0.05 + Math.random() * 0.15;
+            if (Math.random() < 0.4) ms.stats.hSot++;
+            pitchPhase = 'home-attack';
+        } else if (rand > 0.75) {
             ms.stats.aShots++;
+            ms.stats.aXG += 0.05 + Math.random() * 0.15;
+            if (Math.random() < 0.4) ms.stats.aSot++;
+            pitchPhase = 'away-attack';
+        } else {
+            // Neutral play
+            if (Math.random() < 0.3) {
+                pitchPhase = ms.stats.hPoss > 55 ? 'home-attack' : ms.stats.aPoss > 55 ? 'away-attack' : 'neutral';
+            }
+        }
+
+        // Corners
+        if (Math.random() < 0.08) {
+            if (Math.random() < 0.5) {
+                ms.stats.hCorners++;
+                pitchPhase = 'home-corner';
+            } else {
+                ms.stats.aCorners++;
+                pitchPhase = 'away-corner';
+            }
+        }
+
+        // Cards
+        let card = null;
+        if (Math.random() < 0.03) {
+            card = { side: Math.random() < 0.5 ? 'home' : 'away', type: 'yellow' };
         }
 
         // Emitir tick a ambos clientes
@@ -166,6 +201,8 @@ function runMatchLoop(roomId, targetMinute) {
             awayGoals: ms.awayGoals,
             narrative: `${ms.min}' - ${eventText}`,
             eventType: eventType,
+            pitchPhase: pitchPhase,
+            card: card,
             stats: { ...ms.stats },
             progress: (ms.min / 90) * 100
         };
@@ -321,7 +358,7 @@ io.on('connection', (socket) => {
                 awayProb: 0.08 - ((homeOvr - awayOvr) * 0.003),
                 interval: null,
                 talkMod: 0,
-                stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0 }
+                stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 }
             };
 
             rooms.set(roomId, room);

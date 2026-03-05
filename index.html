@@ -308,117 +308,170 @@
 
     <!-- ============== MODAL PARTIDO PVP ============== -->
     <div id="pvp-match-modal" class="view-section bg-[#0a0a0f] hidden flex-col z-[100]">
-        <header
-            class="bg-[#1c1c28] border-b border-[#313145] p-5 flex items-center justify-between shadow-2xl shrink-0" style="position:relative;">
+
+        <!-- HEADER: Scoreboard (same FM style as local) -->
+        <header class="fm-match-header shrink-0" style="position:relative;">
             <button onclick="showSubpage('settings')" class="settings-gear-match" title="Ajustes">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
-            <div class="flex items-center gap-6 w-1/3">
-                <div id="pvp-home-shield" class="w-16 h-20 text-xs"></div>
-                <div>
-                    <h2 id="pvp-home-name" class="font-bold text-white text-2xl uppercase tracking-wider truncate">
-                        LOCAL</h2>
-                    <div class="text-[10px] text-slate-400 font-bold mt-1 bg-slate-800 inline-block px-2 rounded">OVR:
-                        <span id="pvp-home-ovr" class="text-yellow-400">0</span>
-                    </div>
+            <div class="fm-match-header-inner">
+                <div class="fm-match-time-box">
+                    <span id="pvp-match-time" class="fm-match-clock">0'</span>
+                </div>
+                <div class="fm-match-team fm-match-team-home">
+                    <span id="pvp-home-name" class="fm-match-teamname">LOCAL</span>
+                    <div id="pvp-home-shield" class="fm-match-shield"></div>
+                </div>
+                <div class="fm-match-score-box">
+                    <span id="pvp-home-score" class="fm-match-score-num">0</span>
+                    <span id="pvp-away-score" class="fm-match-score-num fm-match-score-away">0</span>
+                </div>
+                <div class="fm-match-team fm-match-team-away">
+                    <div id="pvp-away-shield" class="fm-match-shield"></div>
+                    <span id="pvp-away-name" class="fm-match-teamname">RIVAL</span>
                 </div>
             </div>
-
-            <div class="w-1/3 text-center flex flex-col items-center">
-                <div
-                    class="text-[10px] font-bold text-slate-300 bg-slate-700 px-4 py-1 rounded-full uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    PvP en Vivo <span id="pvp-match-time" class="text-white ml-2">00'</span>
-                </div>
-                <div
-                    class="text-6xl font-black text-white font-gaming bg-black/60 px-8 py-3 rounded-xl border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center gap-6">
-                    <span id="pvp-home-score" class="text-blue-400">0</span>
-                    <span class="text-2xl text-slate-600">-</span>
-                    <span id="pvp-away-score" class="text-red-400">0</span>
-                </div>
-                <div class="match-progress-bg w-3/4 max-w-xs mt-4">
-                    <div id="pvp-match-progress" class="match-progress-fill"></div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-6 w-1/3 text-right">
-                <div>
-                    <h2 id="pvp-away-name" class="font-bold text-white text-2xl uppercase tracking-wider truncate">
-                        RIVAL</h2>
-                    <div class="text-[10px] text-slate-400 font-bold mt-1 bg-slate-800 inline-block px-2 rounded">OVR:
-                        <span id="pvp-away-ovr" class="text-yellow-400">0</span>
-                    </div>
-                </div>
-                <div id="pvp-away-shield" class="w-16 h-20 text-xs"></div>
+            <div class="match-progress-bg w-full" style="height:4px;border-radius:0;">
+                <div id="pvp-match-progress" class="match-progress-fill" style="border-radius:0;"></div>
             </div>
         </header>
 
-        <div class="flex-1 flex gap-6 p-8 overflow-hidden max-w-[1400px] mx-auto w-full">
-            <div class="flex-1 glass-panel flex flex-col h-full overflow-hidden shadow-2xl">
-                <div
-                    class="bg-[#272738] p-4 text-xs font-bold uppercase border-b border-[#313145] text-white tracking-widest">
-                    Narración en Directo</div>
-                <div id="pvp-match-narrative" class="flex-1 overflow-y-auto p-4 text-xs space-y-1 bg-[#0f0f17]"></div>
+        <!-- MAIN CONTENT: FM-style grid (identical to local) -->
+        <div class="fm-match-grid flex-1 overflow-hidden">
+
+            <!-- LEFT: Home Formation -->
+            <div class="fm-panel-card fm-formation-panel">
+                <div class="fm-panel-header">
+                    <span>Formación (Local)</span>
+                    <span class="fm-panel-dots">&#9679;&#9679;</span>
+                </div>
+                <div id="pvp-fm-formation-home" class="fm-formation-area"></div>
             </div>
 
-            <div class="w-72 flex flex-col gap-6 shrink-0">
-                <div class="glass-panel p-6">
-                    <h3
-                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 text-center border-b border-[#313145] pb-2">
-                        Estadísticas</h3>
-                    <div class="space-y-4 text-[10px]">
-                        <div>
-                            <div class="flex justify-between font-bold text-slate-300 mb-1">
-                                <span id="pvp-stat-poss-home">50%</span>
-                                <span class="text-slate-500 uppercase">Posesión</span>
-                                <span id="pvp-stat-poss-away">50%</span>
-                            </div>
-                            <div class="flex h-1.5 rounded overflow-hidden bg-slate-800">
-                                <div id="pvp-bar-poss-home" class="bg-blue-500 transition-all" style="width:50%"></div>
-                                <div id="pvp-bar-poss-away" class="bg-red-500 transition-all" style="width:50%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between font-bold text-slate-300 mb-1">
-                                <span id="pvp-stat-shots-home">0</span>
-                                <span class="text-slate-500 uppercase">Tiros</span>
-                                <span id="pvp-stat-shots-away">0</span>
-                            </div>
-                            <div class="flex h-1.5 rounded overflow-hidden bg-slate-800">
-                                <div id="pvp-bar-shots-home" class="bg-blue-500 transition-all" style="width:50%">
-                                </div>
-                                <div id="pvp-bar-shots-away" class="bg-red-500 transition-all" style="width:50%">
-                                </div>
+            <!-- CENTER TOP: Match Stats -->
+            <div class="fm-panel-card fm-stats-panel">
+                <div class="fm-panel-header">
+                    <span>Match Stats</span>
+                    <span class="fm-panel-dots">&#9679;&#9679;&#9679;</span>
+                </div>
+                <div class="fm-stats-content">
+                    <div class="fm-stats-teams-row">
+                        <span id="pvp-fm-stat-home-name" class="fm-stat-team-label">LOCAL</span>
+                        <span id="pvp-fm-stat-away-name" class="fm-stat-team-label" style="text-align:right">RIVAL</span>
+                    </div>
+                    <div class="fm-stat-row">
+                        <span id="pvp-fm-stat-shots-home" class="fm-stat-val">0</span>
+                        <div class="fm-stat-bar-wrap"><div class="fm-stat-bar"><div id="pvp-fm-bar-shots-h" class="fm-stat-bar-fill-home" style="width:50%"></div><div id="pvp-fm-bar-shots-a" class="fm-stat-bar-fill-away" style="width:50%"></div></div></div>
+                        <span id="pvp-fm-stat-shots-away" class="fm-stat-val">0</span>
+                    </div>
+                    <div class="fm-stat-label-center">Shots</div>
+                    <div class="fm-stat-row">
+                        <span id="pvp-fm-stat-sot-home" class="fm-stat-val">0</span>
+                        <div class="fm-stat-bar-wrap"><div class="fm-stat-bar"><div id="pvp-fm-bar-sot-h" class="fm-stat-bar-fill-home" style="width:50%"></div><div id="pvp-fm-bar-sot-a" class="fm-stat-bar-fill-away" style="width:50%"></div></div></div>
+                        <span id="pvp-fm-stat-sot-away" class="fm-stat-val">0</span>
+                    </div>
+                    <div class="fm-stat-label-center">Shots On Target</div>
+                    <div class="fm-stat-row">
+                        <span id="pvp-fm-stat-xg-home" class="fm-stat-val">0.00</span>
+                        <div class="fm-stat-bar-wrap"><div class="fm-stat-bar"><div id="pvp-fm-bar-xg-h" class="fm-stat-bar-fill-home" style="width:50%"></div><div id="pvp-fm-bar-xg-a" class="fm-stat-bar-fill-away" style="width:50%"></div></div></div>
+                        <span id="pvp-fm-stat-xg-away" class="fm-stat-val">0.00</span>
+                    </div>
+                    <div class="fm-stat-label-center">xG</div>
+                    <div class="fm-stat-row">
+                        <span id="pvp-fm-stat-corners-home" class="fm-stat-val">0</span>
+                        <div class="fm-stat-bar-wrap"><div class="fm-stat-bar"><div id="pvp-fm-bar-corners-h" class="fm-stat-bar-fill-home" style="width:50%"></div><div id="pvp-fm-bar-corners-a" class="fm-stat-bar-fill-away" style="width:50%"></div></div></div>
+                        <span id="pvp-fm-stat-corners-away" class="fm-stat-val">0</span>
+                    </div>
+                    <div class="fm-stat-label-center">Corners</div>
+                    <div class="fm-stat-row">
+                        <span id="pvp-fm-stat-poss-home" class="fm-stat-val">50%</span>
+                        <div class="fm-stat-bar-wrap"><div class="fm-stat-bar"><div id="pvp-fm-bar-poss-h" class="fm-stat-bar-fill-home" style="width:50%"></div><div id="pvp-fm-bar-poss-a" class="fm-stat-bar-fill-away" style="width:50%"></div></div></div>
+                        <span id="pvp-fm-stat-poss-away" class="fm-stat-val">50%</span>
+                    </div>
+                    <div class="fm-stat-label-center">Possession</div>
+                </div>
+            </div>
+
+            <!-- RIGHT Top: Match Events -->
+            <div class="fm-panel-card fm-events-panel">
+                <div class="fm-panel-header">
+                    <span>Match Events</span>
+                    <span class="fm-panel-dots">&#9679;&#9679;</span>
+                </div>
+                <div class="fm-events-tabs">
+                    <span id="pvp-fm-evt-tab-home" class="fm-evt-tab active" onclick="pvpFmEvtTab('home')">LOCAL</span>
+                    <span id="pvp-fm-evt-tab-away" class="fm-evt-tab" onclick="pvpFmEvtTab('away')">RIVAL</span>
+                </div>
+                <div id="pvp-fm-events-list" class="fm-events-list"></div>
+            </div>
+
+            <!-- RIGHT: Away Formation -->
+            <div class="fm-panel-card fm-formation-panel">
+                <div class="fm-panel-header">
+                    <span>Formación (Visitante)</span>
+                    <span class="fm-panel-dots">&#9679;&#9679;</span>
+                </div>
+                <div id="pvp-fm-formation-away" class="fm-formation-area"></div>
+            </div>
+
+            <!-- BOTTOM LEFT: Dugout -->
+            <div class="fm-panel-card fm-dugout-panel">
+                <div class="fm-panel-header">
+                    <span>Dugout</span>
+                    <span class="fm-panel-expand" id="pvp-fm-dugout-expand" onclick="togglePvpDugout()">Expand &#8599;</span>
+                </div>
+                <div id="pvp-fm-dugout-content" class="fm-dugout-content">
+                    <div id="pvp-halftime-actions" class="hidden">
+                        <div class="fm-dugout-section">
+                            <div class="fm-dugout-label">&#9200; Medio Tiempo — Acciones</div>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="pvpHalftimeAction('animar')" class="fm-dugout-btn fm-dugout-btn-blue">Motivar</button>
+                                <button onclick="pvpHalftimeAction('bronca')" class="fm-dugout-btn fm-dugout-btn-red">Bronca</button>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Acciones PvP de descanso -->
-                <div id="pvp-halftime-actions" class="glass-panel p-6 hidden">
-                    <h3
-                        class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-4 text-center border-b border-[#313145] pb-2">
-                        Descanso</h3>
-                    <div class="space-y-2">
-                        <button onclick="pvpHalftimeAction('animar')"
-                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-xs uppercase tracking-widest transition">Animar</button>
-                        <button onclick="pvpHalftimeAction('bronca')"
-                            class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 rounded text-xs uppercase tracking-widest transition">Bronca</button>
+                    <div id="pvp-post-match" class="hidden">
+                        <div class="fm-dugout-section">
+                            <div class="fm-dugout-label">Análisis Final</div>
+                            <div class="text-center mt-2">
+                                <div id="pvp-result-text" class="text-yellow-400 font-bold text-xl font-mono mb-1"></div>
+                                <div id="pvp-rewards-text" class="text-slate-400 text-xs mb-2"></div>
+                            </div>
+                            <button onclick="exitPvpMatch()" class="fm-dugout-btn fm-dugout-btn-gold mt-3 w-full">VOLVER AL MENÚ</button>
+                        </div>
+                    </div>
+                    <div id="pvp-fm-dugout-narrative" class="fm-dugout-narrative">
+                        <div class="text-blue-400 text-[10px]">Esperando inicio del partido...</div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Post partido PvP -->
-                <div id="pvp-post-match" class="glass-panel p-6 hidden text-center">
-                    <h3
-                        class="text-lg font-gaming text-yellow-400 uppercase tracking-widest mb-4 border-b border-[#313145] pb-2">
-                        Resultado</h3>
-                    <div id="pvp-result-text" class="text-white text-sm font-bold mb-2"></div>
-                    <div id="pvp-rewards-text" class="text-slate-400 text-xs mb-4"></div>
-                    <button onclick="exitPvpMatch()"
-                        class="w-full btn-action py-3 text-xs uppercase tracking-widest">Volver al
-                        Menú</button>
+            <!-- BOTTOM CENTER: Mini Pitch with live tokens -->
+            <div class="fm-panel-card fm-pitch-panel">
+                <div class="fm-mini-pitch" id="pvp-fm-mini-pitch">
+                    <div class="fm-pitch-center-circle"></div>
+                    <div class="fm-pitch-center-line"></div>
+                    <div class="fm-pitch-box-top"></div>
+                    <div class="fm-pitch-box-bottom"></div>
+                    <div class="fm-pitch-team-label fm-pitch-label-left" id="pvp-fm-pitch-label-home">HOME</div>
+                    <div class="fm-pitch-team-label fm-pitch-label-right" id="pvp-fm-pitch-label-away">AWAY</div>
+                    <div class="fm-pitch-ball" id="pvp-fm-pitch-ball"></div>
+                    <div id="pvp-fm-pitch-tokens"></div>
                 </div>
             </div>
+
+            <!-- BOTTOM RIGHT: Latest info + logo -->
+            <div class="fm-panel-card fm-latest-panel">
+                <div class="fm-panel-header">
+                    <span>Narración</span>
+                    <span class="fm-panel-dots">&#9679;&#9679;</span>
+                </div>
+                <div id="pvp-match-narrative" class="fm-narrative-list"></div>
+                <div class="fm-logo-watermark">
+                    <img src="images/logo1.png" alt="Inafuma & Beben" class="fm-logo-bottom">
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -1211,6 +1264,32 @@
                 Ajustes del Sistema</h1>
 
             <div class="space-y-8">
+                <!-- Simulation Speed (only visible during match) -->
+                <div id="settings-sim-speed-section" class="hidden">
+                    <h3 class="text-xs text-yellow-400 font-bold uppercase mb-4 tracking-widest">Velocidad de Simulación</h3>
+                    <div class="space-y-4 bg-[#111119] p-6 rounded border border-[#313145]">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs text-slate-300 font-bold uppercase">Velocidad del Partido</label>
+                            <div class="flex items-center gap-3 w-1/2">
+                                <span class="text-[10px] text-slate-500">🐢</span>
+                                <input type="range" id="setting-sim-speed" class="flex-1 cursor-pointer accent-yellow-400" min="1" max="5"
+                                    step="1" value="3" oninput="updateSimSpeed(this.value)">
+                                <span class="text-[10px] text-slate-500">🐇</span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <span id="sim-speed-label" class="text-xs text-yellow-400 font-bold uppercase tracking-widest">Normal</span>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-slate-600 uppercase px-1">
+                            <span>Muy Lento</span>
+                            <span>Lento</span>
+                            <span>Normal</span>
+                            <span>Rápido</span>
+                            <span>Muy Rápido</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <h3 class="text-xs text-blue-400 font-bold uppercase mb-4 tracking-widest">Audio y Preferencias</h3>
                     <div class="space-y-6 bg-[#111119] p-6 rounded border border-[#313145]">
