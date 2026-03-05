@@ -24,7 +24,7 @@ const PLAYERS_DB = [
     { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: "https://i.redd.it/ekbnqb2za2y51.jpg" },
     { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGWdbul4YolKhJhyNFg6s3G57zUScIbryrtw&s" },
     { id: 401, name: "Thibaut Courtois", pos: "POR", pac: 85, sho: 89, pas: 76, def: 20, phy: 90, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: "https://www.clarin.com/2022/05/28/-h5dvaCni_360x240__1.jpg" },
-    { id: 104, name: "Vini Jr.", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt8XM1bPlLnxJiwtXA-dRI0m2_JFiF06AOCw&s" },
+    { id: 104, name: "Vini", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt8XM1bPlLnxJiwtXA-dRI0m2_JFiF06AOCw&s" },
     { id: 202, name: "Jude Bellingham", pos: "MED", pac: 82, sho: 85, pas: 88, def: 78, phy: 85, rep: 4500, priceBasic: 105000000, pricePrem: 8500, img: "https://img.asmedia.epimg.net/resizer/v2/A43ZCIYQ45GOPD6RSU4BMQDJKA.jpg?auth=28955647f8c2746ddacbcaef794724da6461afeb5818292923b1c8266be15a5e&width=360" },
     { id: 302, name: "Antonio Rüdiger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: "https://images7.memedroid.com/images/UPLOADED575/652d60841d73b.jpeg" },
     { id: 402, name: "Alisson Becker", pos: "POR", pac: 86, sho: 85, pas: 85, def: 20, phy: 89, rep: 3000, priceBasic: 65000000, pricePrem: 5000, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUODxT9kUGcLFOAQG-xYCweQphUsebWt7whg&s" },
@@ -32,135 +32,133 @@ const PLAYERS_DB = [
     { id: 203, name: "Pedri González", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: "https://esportbase.valenciaplaza.com/wp-content/uploads/2021/08/E8MPi_LWUAY2YvY.jpg" },
     { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://pbs.twimg.com/media/GSeKCF4XMAAILjg.jpg" },
     { id: 403, name: "Unai Simón", pos: "POR", pac: 82, sho: 80, pas: 74, def: 18, phy: 82, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://assets.goal.com/images/v3/blt58f6b3a15aac644b/0b605ad106ff7459d79745dd71267d9de5783cb3.png?auto=webp&format=pjpg&width=3840&quality=60" },
-    { id: 506, name: "Neymar Jr.", pos: "DEL", pac: 88, sho: 90, pas: 90, def: 40, phy: 80, rep: 5000, priceBasic: 135000000, pricePrem: 10500, img: "https://peopleenespanol.com/thmb/mupW5fAgLVCwjZHm_CyhZ4kXaNE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/memes-de-neymar23-00f89d757f3c46279829547ff5eaf52b.png" },
+    { id: 506, name: "Neymar", pos: "DEL", pac: 88, sho: 90, pas: 90, def: 40, phy: 80, rep: 5000, priceBasic: 135000000, pricePrem: 10500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTaVXm4MJpY-0VUq-dOIU0Bhqa8kXb_0489Q&s" },
     { id: 507, name: "Luis Suarez", pos: "DEL", pac: 85, sho: 88, pas: 85, def: 50, phy: 85, rep: 5000, priceBasic: 130000000, pricePrem: 10000, img: "https://i.pinimg.com/736x/37/04/b0/3704b045926c5754515afcb51bc5cb37.jpg" },
-    { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://estaticos-cdn.prensaiberica.es/clip/916e8357-aa8e-450f-95d7-0fd46b11ccf1_source-aspect-ratio_default_0.jpg" },
-    { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://static.eldiario.es/clip/dc7c24bc-4e9b-46fa-b0d7-bd9080e2986a_16-9-discover-aspect-ratio_default_1134172.jpg" },
-    { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://image.ondacero.es/clipping/cmsimages02/2024/01/23/BA3CE66A-7976-4522-95D4-3B094E6A5BCB/hugo-duro_103.jpg?crop=600,450,x137,y0&width=1200&height=900&optimize=low&format=webply" },
-    { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 0, priceBasic: 4000000, pricePrem: 300, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEyOd-ScVKgWFmy4Uwuf5Q20jDrEOFvmHi4w&s" },
-    { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 0, priceBasic: 5000000, pricePrem: 400, img: "https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/01/20/60e70648d9fe5.jpeg" },
-    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 0, priceBasic: 2500000, pricePrem: 150, img: "https://www.valenciacf.com/public/Image/2023/12/nr30b5l0gsuquemyeyxbqsuc2g74drmjrmwvgont4jasseos8edirodhdhuwssn8.jpg" },
-    { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: "https://killerasturias.com/sites/default/files/2021-12/trejo.jpeg" },
-    { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 0, priceBasic: 8000000, pricePrem: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJk1Gw8cjNu4w5mlv3kCZFNJi3wZhCeMj8g&s" },
-    { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 0, priceBasic: 4500000, pricePrem: 350, img: "https://img.a.transfermarkt.technology/portrait/big/298589-1740664950.jpg?lm=1" },
-    { id: 307, name: "Pablo Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 0, priceBasic: 2500000, pricePrem: 200, img: "https://i.pinimg.com/474x/16/3c/ff/163cffab021629302f8314665c2c1582.jpg" },
-    { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 0, priceBasic: 1500000, pricePrem: 100, img: "https://pbs.twimg.com/media/Fwgt6PSXwAEvYWv.jpg" },
-    { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-13/fd5957a5268b45d4b5b0640c78980701.webp" },
-    { id: 404, name: "David Soria", pos: "POR", pac: 80, sho: 78, pas: 70, def: 15, phy: 78, rep: 0, priceBasic: 3000000, pricePrem: 200, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRE2H0vymmNHD9tmRyLPodRo7GwSRBne7pUg&s" },
-    { id: 405, name: "P. Gazzaniga", pos: "POR", pac: 81, sho: 77, pas: 72, def: 15, phy: 79, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/97/b5/a397b5f830894abb925a36ae74652e35.jpg" },
-
-
-    { id: 601, name: "Ximo Navarro", pos: "DEF", pac: 74, sho: 55, pas: 62, def: 70, phy: 72, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/G61mZWUXMAAC_RV.jpg" },
-    { id: 602, name: "Arnau Comas", pos: "DEF", pac: 68, sho: 34, pas: 55, def: 68, phy: 72, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTSykN3Bo3xa42HvnRRxbZTyCiUGkYYDBTGQ&s" },
-    { id: 603, name: "Julian Alvarez", pos: "DEL", pac: 86, sho: 88, pas: 82, def: 58, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://fotos.perfil.com//2024/08/12/900/0/meme-julian-1852788.jpg" },
-    { id: 604, name: "G. Donnarumma", pos: "POR", pac: 88, sho: 83, pas: 79, def: 20, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhXZqkSPTOqr5S0Vk7--yubJNZCF-SQU7vmg&s" },
-    { id: 605, name: "David Raya", pos: "POR", pac: 83, sho: 86, pas: 82, def: 18, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/GxRQV1cXIAMBRVr.jpg" },
-    { id: 606, name: "Dibu Martinez", pos: "POR", pac: 85, sho: 85, pas: 80, def: 20, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://fastly.restofworld.org/uploads/2023/04/Meme-2-scaled.jpg?width=800&dpr=2&crop=16:9" },
-    { id: 607, name: "Diogo Costa", pos: "POR", pac: 84, sho: 82, pas: 78, def: 16, phy: 81, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.iol.pt/image/id/66846a39d34ebf9bbb3f59cc/" },
-    { id: 608, name: "Iker Casillas", pos: "POR", pac: 92, sho: 88, pas: 74, def: 25, phy: 90, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/6d/b3/50/6db3509b016a26789e3825a9da183acf.jpg" },
-    { id: 609, name: "Buffon", pos: "POR", pac: 89, sho: 88, pas: 74, def: 20, phy: 93, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCawnsEmsDOD-7UAN_XKWACheyi7RCdPT8yg&s" },
-    { id: 610, name: "D. Maradona", pos: "MED", pac: 92, sho: 96, pas: 97, def: 42, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://images3.memedroid.com/images/UPLOADED166/5fbe899a8ba4c.jpeg" },
-    { id: 611, name: "Pele", pos: "DEL", pac: 96, sho: 96, pas: 94, def: 60, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://imgcdn.stablediffusionweb.com/2024/11/15/1c9b5037-d3ff-4163-8105-b6db827f44a8.jpg" },
-    { id: 612, name: "Samuel Eto'o", pos: "DEL", pac: 94, sho: 92, pas: 82, def: 45, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAB-RUzgcKTmaQGj0GSU2Pfoo4TcLgLpBqLQ&s" },
-    { id: 613, name: "A. Hakimi", pos: "DEF", pac: 91, sho: 76, pas: 80, def: 78, phy: 79, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FH3edrtWYAYX_zZ.jpg" },
-    { id: 614, name: "M. Cucurella", pos: "DEF", pac: 82, sho: 64, pas: 75, def: 78, phy: 76, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXD9oA8nNKRBVPEXqWMJFM1bB_Seuplqw7xA&s" },
-    { id: 615, name: "Nuno Mendes", pos: "DEF", pac: 88, sho: 70, pas: 77, def: 79, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.francebleu.fr/pikapi/images/cb910f4d-158e-474c-939c-18dc563d5e15/1200x680?webp=false" },
-    { id: 616, name: "Pedro Porro", pos: "DEF", pac: 85, sho: 72, pas: 78, def: 75, phy: 74, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJmvlEqLdo_RCce7P8HotGGl_WC5wvjVtq5A&s" },
-    { id: 617, name: "Willian Pacho", pos: "DEF", pac: 76, sho: 40, pas: 62, def: 82, phy: 83, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/661171-1696508666.jpg?lm=1" },
-    { id: 618, name: "Vitinha", pos: "MED", pac: 82, sho: 74, pas: 86, def: 74, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCT13H1TMBGYJ1rMl_35jZqUxr3o_PmmDn0g&s" },
-    { id: 619, name: "M. Merino", pos: "MED", pac: 71, sho: 78, pas: 82, def: 82, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5_1m1nTPpKD11pwCMHAqWn6zesv7iup5YAg&s" },
-    { id: 620, name: "B. Fernandes", pos: "MED", pac: 75, sho: 86, pas: 89, def: 66, phy: 74, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1pNq4eEDxBqaqFjtuBRtdzaWT-NHWWsau2Q&s" },
-    { id: 621, name: "E. Fernandez", pos: "MED", pac: 74, sho: 74, pas: 85, def: 80, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThu830lfg-Hvon71p40_8eLFLN5X4QhCkD9w&s" },
-    { id: 622, name: "D. Rice", pos: "MED", pac: 72, sho: 72, pas: 82, def: 87, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShw-iupY_AGXerLPmfcy1bJcrOk-SDYGXRbw&s" },
+    { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 800, priceBasic: 5000000, pricePrem: 400, img: "https://estaticos-cdn.prensaiberica.es/clip/916e8357-aa8e-450f-95d7-0fd46b11ccf1_source-aspect-ratio_default_0.jpg" },
+    { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 500, priceBasic: 4000000, pricePrem: 300, img: "https://static.eldiario.es/clip/dc7c24bc-4e9b-46fa-b0d7-bd9080e2986a_16-9-discover-aspect-ratio_default_1134172.jpg" },
+    { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 500, priceBasic: 3000000, pricePrem: 200, img: "https://image.ondacero.es/clipping/cmsimages02/2024/01/23/BA3CE66A-7976-4522-95D4-3B094E6A5BCB/hugo-duro_103.jpg?crop=600,450,x137,y0&width=1200&height=900&optimize=low&format=webply" },
+    { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 600, priceBasic: 4000000, pricePrem: 300, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEyOd-ScVKgWFmy4Uwuf5Q20jDrEOFvmHi4w&s" },
+    { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 700, priceBasic: 5000000, pricePrem: 400, img: "https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/01/20/60e70648d9fe5.jpeg" },
+    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 600, priceBasic: 2500000, pricePrem: 150, img: "https://www.valenciacf.com/public/Image/2023/12/nr30b5l0gsuquemyeyxbqsuc2g74drmjrmwvgont4jasseos8edirodhdhuwssn8.jpg" },
+    { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 500, priceBasic: 1500000, pricePrem: 100, img: "https://killerasturias.com/sites/default/files/2021-12/trejo.jpeg" },
+    { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 800, priceBasic: 8000000, pricePrem: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJk1Gw8cjNu4w5mlv3kCZFNJi3wZhCeMj8g&s" },
+    { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 400, priceBasic: 4500000, pricePrem: 350, img: "https://img.a.transfermarkt.technology/portrait/big/298589-1740664950.jpg?lm=1" },
+    { id: 307, name: "Pablo Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 550, priceBasic: 2500000, pricePrem: 200, img: "https://i.pinimg.com/474x/16/3c/ff/163cffab021629302f8314665c2c1582.jpg" },
+    { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 600, priceBasic: 1500000, pricePrem: 100, img: "https://pbs.twimg.com/media/Fwgt6PSXwAEvYWv.jpg" },
+    { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-13/fd5957a5268b45d4b5b0640c78980701.webp" },
+    { id: 404, name: "David Soria", pos: "POR", pac: 80, sho: 78, pas: 70, def: 15, phy: 78, rep: 650, priceBasic: 3000000, pricePrem: 200, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRE2H0vymmNHD9tmRyLPodRo7GwSRBne7pUg&s" },
+    { id: 405, name: "P. Gazzaniga", pos: "POR", pac: 81, sho: 77, pas: 72, def: 15, phy: 79, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/97/b5/a397b5f830894abb925a36ae74652e35.jpg" },
+    { id: 601, name: "Ximo Navarro", pos: "DEF", pac: 74, sho: 55, pas: 62, def: 70, phy: 72, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/G61mZWUXMAAC_RV.jpg" },
+    { id: 602, name: "Arnau Comas", pos: "DEF", pac: 68, sho: 34, pas: 55, def: 68, phy: 72, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTSykN3Bo3xa42HvnRRxbZTyCiUGkYYDBTGQ&s" },
+    { id: 603, name: "Julian Alvarez", pos: "DEL", pac: 86, sho: 88, pas: 82, def: 58, phy: 80, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://fotos.perfil.com//2024/08/12/900/0/meme-julian-1852788.jpg" },
+    { id: 604, name: "G. Donnarumma", pos: "POR", pac: 88, sho: 83, pas: 79, def: 20, phy: 85, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhXZqkSPTOqr5S0Vk7--yubJNZCF-SQU7vmg&s" },
+    { id: 605, name: "David Raya", pos: "POR", pac: 83, sho: 86, pas: 82, def: 18, phy: 84, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/GxRQV1cXIAMBRVr.jpg" },
+    { id: 606, name: "Dibu Martinez", pos: "POR", pac: 85, sho: 85, pas: 80, def: 20, phy: 86, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://fastly.restofworld.org/uploads/2023/04/Meme-2-scaled.jpg?width=800&dpr=2&crop=16:9" },
+    { id: 607, name: "Diogo Costa", pos: "POR", pac: 84, sho: 82, pas: 78, def: 16, phy: 81, rep: 1700, priceBasic: 2000000, pricePrem: 150, img: "https://img.iol.pt/image/id/66846a39d34ebf9bbb3f59cc/" },
+    { id: 608, name: "Iker Casillas", pos: "POR", pac: 92, sho: 88, pas: 74, def: 25, phy: 90, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/6d/b3/50/6db3509b016a26789e3825a9da183acf.jpg" },
+    { id: 609, name: "Buffon", pos: "POR", pac: 89, sho: 88, pas: 74, def: 20, phy: 93, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCawnsEmsDOD-7UAN_XKWACheyi7RCdPT8yg&s" },
+    { id: 610, name: "D. Maradona", pos: "MED", pac: 92, sho: 96, pas: 97, def: 42, phy: 75, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://images3.memedroid.com/images/UPLOADED166/5fbe899a8ba4c.jpeg" },
+    { id: 611, name: "Pele", pos: "DEL", pac: 96, sho: 96, pas: 94, def: 60, phy: 78, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://imgcdn.stablediffusionweb.com/2024/11/15/1c9b5037-d3ff-4163-8105-b6db827f44a8.jpg" },
+    { id: 612, name: "Samuel Eto'o", pos: "DEL", pac: 94, sho: 92, pas: 82, def: 45, phy: 80, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAB-RUzgcKTmaQGj0GSU2Pfoo4TcLgLpBqLQ&s" },
+    { id: 613, name: "A. Hakimi", pos: "DEF", pac: 91, sho: 76, pas: 80, def: 78, phy: 79, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FH3edrtWYAYX_zZ.jpg" },
+    { id: 614, name: "M. Cucurella", pos: "DEF", pac: 82, sho: 64, pas: 75, def: 78, phy: 76, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXD9oA8nNKRBVPEXqWMJFM1bB_Seuplqw7xA&s" },
+    { id: 615, name: "Nuno Mendes", pos: "DEF", pac: 88, sho: 70, pas: 77, def: 79, phy: 78, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://www.francebleu.fr/pikapi/images/cb910f4d-158e-474c-939c-18dc563d5e15/1200x680?webp=false" },
+    { id: 616, name: "Pedro Porro", pos: "DEF", pac: 85, sho: 72, pas: 78, def: 75, phy: 74, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJmvlEqLdo_RCce7P8HotGGl_WC5wvjVtq5A&s" },
+    { id: 617, name: "Willian Pancho", pos: "DEF", pac: 76, sho: 40, pas: 62, def: 82, phy: 83, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/661171-1696508666.jpg?lm=1" },
+    { id: 618, name: "Vitinha", pos: "MED", pac: 82, sho: 74, pas: 86, def: 74, phy: 70, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCT13H1TMBGYJ1rMl_35jZqUxr3o_PmmDn0g&s" },
+    { id: 619, name: "M. Merino", pos: "MED", pac: 71, sho: 78, pas: 82, def: 82, phy: 84, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5_1m1nTPpKD11pwCMHAqWn6zesv7iup5YAg&s" },
+    { id: 620, name: "B. Fernandes", pos: "MED", pac: 75, sho: 86, pas: 89, def: 66, phy: 74, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1pNq4eEDxBqaqFjtuBRtdzaWT-NHWWsau2Q&s" },
+    { id: 621, name: "E. Fernandez", pos: "MED", pac: 74, sho: 74, pas: 85, def: 80, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThu830lfg-Hvon71p40_8eLFLN5X4QhCkD9w&s" },
+    { id: 622, name: "D. Rice", pos: "MED", pac: 72, sho: 72, pas: 82, def: 87, phy: 86, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShw-iupY_AGXerLPmfcy1bJcrOk-SDYGXRbw&s" },
     { id: 623, name: "Lamine Yamal", pos: "DEL", pac: 90, sho: 80, pas: 82, def: 40, phy: 60, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.ole.us/2025/10/26/3hcMxXdOM_720x0__1.jpg" },
-    { id: 624, name: "Raphinha", pos: "DEL", pac: 88, sho: 82, pas: 80, def: 48, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxwmPw0vkp_b51TfFMkfTn3mCC82APOp42iw&s" },
-    { id: 625, name: "M. Salah", pos: "DEL", pac: 89, sho: 88, pas: 86, def: 45, phy: 76, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgFt3Vsmv0QAT3X_BOT1_zNjHetnPPF7p1dA&s" },
-    { id: 626, name: "H. Kane", pos: "DEL", pac: 65, sho: 93, pas: 84, def: 49, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQ5uQoutLKwD97-lw0wm-p_2ZmSSsAYudeHA&s" },
-    { id: 627, name: "E. Haaland", pos: "DEL", pac: 88, sho: 92, pas: 70, def: 45, phy: 88, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/36/0f/24/360f24adf34c1bedcf2a29e8e85788e7.jpg" },
-    { id: 628, name: "Lautaro", pos: "DEL", pac: 83, sho: 89, pas: 78, def: 50, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-PXpk7GSC6rXrdXJDrPpMqQhhu4o1GtQGCQ&s" },
-    { id: 629, name: "K. Kvaratskhelia", pos: "DEL", pac: 89, sho: 84, pas: 82, def: 45, phy: 72, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://witty-images.s3.amazonaws.com/Z/G/K/703ef693-1f62-4f29-b6da-4da53fb29981-board.jpg" },
-    { id: 630, name: "Désiré Doué", pos: "DEL", pac: 88, sho: 80, pas: 78, def: 50, phy: 74, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/tSFkSorTlbUAAAAe/dou%C3%A9-d%C3%A9sir%C3%A9.png" },
-    { id: 631, name: "Falcao", pos: "DEL", pac: 82, sho: 94, pas: 72, def: 40, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F57dq38WMAAEmcj.jpg" },
-    { id: 632, name: "Benzema", pos: "DEL", pac: 82, sho: 92, pas: 87, def: 45, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.tycsports.com/files/2022/03/09/400134/benzema-meme-residente-_862x485.jpg?v=1" },
-    { id: 633, name: "G. Bale", pos: "DEL", pac: 95, sho: 91, pas: 85, def: 62, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/e9/ff/49/e9ff49d248ac43b973451802b01093c0.jpg" },
-    { id: 634, name: "Lewandowski", pos: "DEL", pac: 75, sho: 88, pas: 79, def: 44, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/3f/74/d0/3f74d078c7086bddeba9780da7ed550a.jpg" },
-    { id: 635, name: "Szczęsny", pos: "POR", pac: 86, sho: 84, pas: 76, def: 18, phy: 87, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.diez.hn/binrepository/465x444/0c0/0d0/none/3014757/VVNE/screenshot-20250305-152209_10084737_20250305165700.jpg" },
-    { id: 636, name: "Rodri", pos: "MED", pac: 66, sho: 80, pas: 86, def: 87, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://s1.abcstatics.com/abc/www/multimedia/gente/2024/06/15/rodri-espana-kYNG-U603206132602BCB-1024x512@diario_abc.jpg" },
-    { id: 637, name: "O. Dembélé", pos: "DEL", pac: 92, sho: 84, pas: 80, def: 45, phy: 65, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.ytimg.com/vi/JFp4iIMjnXk/oardefault.jpg?sqp=-oaymwEiCJwEENAFSFqQAgHyq4qpAxEIARUAAAAAJQAAyEI9AICiQw==&rs=AOn4CLCCQbFaofMRWdfxkdBUpu4KCDzNRA&usqp=CCk" },
-    { id: 638, name: "Kepa", pos: "POR", pac: 82, sho: 79, pas: 74, def: 20, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/09/6a/b1/096ab18fd2ee6cd6b22dadb3a067d9ae.jpg" },
-    { id: 639, name: "J. Musiala", pos: "MED", pac: 88, sho: 83, pas: 86, def: 62, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-19/999ca101a2a64d088ca1cbef7e92a44b.webp" },
-    { id: 640, name: "A. Mac Allister", pos: "MED", pac: 74, sho: 80, pas: 86, def: 72, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/yWz8WZejSBD6u6YZwEB4srTKIXB.jpg" },
-    { id: 641, name: "F. Valverde", pos: "MED", pac: 88, sho: 82, pas: 84, def: 80, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/0tyxnnjccfq81.png" },
-    { id: 642, name: "J. Kimmich", pos: "MED", pac: 70, sho: 76, pas: 88, def: 87, phy: 79, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0717.jpg/960px-20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0717.jpg" },
-    { id: 643, name: "N. Barella", pos: "MED", pac: 81, sho: 78, pas: 84, def: 83, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://sempreinter.com/wp-content/uploads/2021/10/Nicolo-Barella-3-1-scaled-e1633615982244.jpg" },
-    { id: 644, name: "Marquinhos", pos: "DEF", pac: 79, sho: 56, pas: 74, def: 88, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCshNm3OJ3zVFJV6peJeERZjQAH2h_tfJa-Q&s" },
-    { id: 645, name: "P. Foden", pos: "MED", pac: 86, sho: 86, pas: 85, def: 57, phy: 63, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/originals/30/8b/84/308b846c2e56ef02f9b18696256cc99e.jpg" },
-    { id: 646, name: "C. Palmer", pos: "MED", pac: 79, sho: 84, pas: 85, def: 55, phy: 65, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.kym-cdn.com/photos/images/newsfeed/002/838/629/39b.jpg" },
-    { id: 647, name: "G. Rodrygo", pos: "DEL", pac: 91, sho: 83, pas: 81, def: 40, phy: 68, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/d907b94d69c2ab52af28b044525c2111.jpg" },
-    { id: 648, name: "N. Williams", pos: "DEL", pac: 94, sho: 79, pas: 77, def: 40, phy: 65, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5YAsrMJ6pG4jOObFRxvCkqMXDKVpNmH5hSA&s" },
-    { id: 649, name: "I. Williams", pos: "DEL", pac: 93, sho: 82, pas: 72, def: 45, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FFjNDgrXwAUaFsi.jpg" },
-    { id: 650, name: "R. Leão", pos: "DEL", pac: 94, sho: 85, pas: 78, def: 35, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F3LB8dmXIAAfxwg.jpg" },
-    { id: 651, name: "Mamardashvili", pos: "POR", pac: 88, sho: 83, pas: 72, def: 15, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzZ_d0xvOOYRimgMMepoOivPoYEmSCQ7dFDg&s" },
-    { id: 652, name: "F. de Jong", pos: "MED", pac: 82, sho: 72, pas: 88, def: 80, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2022/09/23/16639478284639.jpg" },
-    { id: 653, name: "Sergio Ramos", pos: "DEF", pac: 78, sho: 70, pas: 75, def: 90, phy: 88, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2n297NFs8qOJeCSars9pa81ZkOrHc-pniKg&s" },
-    { id: 654, name: "Varane", pos: "DEF", pac: 84, sho: 49, pas: 68, def: 89, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/profile_images/1426617019928129537/Hq5_AcCB_400x400.jpg" },
-    { id: 655, name: "Puyol", pos: "DEF", pac: 72, sho: 50, pas: 65, def: 92, phy: 88, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.rodneypikeart.com/wp-content/uploads/2017/06/Carles-Puyol-1024x768.jpg" },
-    { id: 656, name: "Marcelo", pos: "DEF", pac: 83, sho: 75, pas: 84, def: 82, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://static.wikia.nocookie.net/memes-pedia/images/6/6a/Marselo.png/revision/latest?cb=20200108165346&path-prefix=es" },
-    { id: 657, name: "Xavi Alonso", pos: "MED", pac: 65, sho: 78, pas: 92, def: 86, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://estaticos-cdn.prensaiberica.es/clip/bc2feed5-654c-41c7-b3fe-c272f4b34e89_alta-libre-aspect-ratio_default_0.jpg" },
-    { id: 658, name: "Xavi Hernandez", pos: "MED", pac: 70, sho: 75, pas: 96, def: 83, phy: 73, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://phantom-marca.unidadeditorial.es/2bdef96b9027219076a397ae474ba34b/resize/640/assets/multimedia/imagenes/2023/04/27/16825702042066.jpg" },
-    { id: 659, name: "Iniesta", pos: "MED", pac: 82, sho: 81, pas: 94, def: 72, phy: 68, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI9TnfBVTllJGY4zv9P6sezGHd0PHv2HQSsg&s" },
-    { id: 660, name: "Ronaldo", pos: "DEL", pac: 96, sho: 96, pas: 90, def: 45, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/a4ef20509403920815bbf03d9eb0aa37.jpg" },
-    { id: 661, name: "R. Carlos", pos: "DEF", pac: 92, sho: 82, pas: 86, def: 85, phy: 83, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Ne75q2lCt7jwRD5qduInCr1-y7as-9LllA&s" },
-    { id: 662, name: "Casemiro", pos: "MED", pac: 60, sho: 75, pas: 80, def: 91, phy: 90, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTG-RxJKaO-o1-0QYIshQ_6eHZC8j7oK-l90w&s" },
-    { id: 663, name: "L. Modric", pos: "MED", pac: 76, sho: 80, pas: 92, def: 82, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/tiny-lukita-modric-10-v0-1pmpht7peql81.jpg?width=1080&format=pjpg&auto=webp&s=d066323331a19f7c6d45835386f58fc6c576ce52" },
-    { id: 664, name: "T. Kroos", pos: "MED", pac: 65, sho: 86, pas: 94, def: 78, phy: 74, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRGgkk2_6qgedwmN_EBqV9qI3MyfPf5PiJ_Q&s" },
-    { id: 665, name: "S. Busquets", pos: "MED", pac: 58, sho: 70, pas: 88, def: 90, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQe8BkkQGlAtcr2FFmWrFZYdsdksAFbAunnVA&s" },
-    { id: 666, name: "Pique", pos: "DEF", pac: 67, sho: 61, pas: 74, def: 90, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4GCkYabKHAotXda3YmdbNY_rtkBQvcnWKfQ&s" },
-    { id: 667, name: "Mascherano", pos: "DEF", pac: 72, sho: 64, pas: 78, def: 89, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg/330px-Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg" },
-    { id: 668, name: "Dybala", pos: "DEL", pac: 82, sho: 84, pas: 85, def: 45, phy: 65, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn0mgIG9lOBdjb2v_MNS3Wsl1HtUI_YXZrYQ&s" },
-    { id: 669, name: "Jordi Alba", pos: "DEF", pac: 90, sho: 69, pas: 82, def: 84, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUzYS01Drh0XErHlv_yaYphbhO22aW2th2nw&s-" },
-    { id: 670, name: "Kun Agüero", pos: "DEL", pac: 88, sho: 92, pas: 85, def: 40, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb9WAhXRvqZsH3Z9OXXS4kZxu5Jg09MB13qw&s" },
-    { id: 671, name: "Ter Stegen", pos: "POR", pac: 85, sho: 86, pas: 88, def: 18, phy: 85, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://barcauniversal.com/wp-content/uploads/2025/08/fc-barcelona-v-ssc-napoli-round-of-16-second-leg-uefa-champions-league-2023-24-scaled.jpg" },
-    { id: 672, name: "Joan Garcia", pos: "POR", pac: 80, sho: 78, pas: 70, def: 15, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfzQMiGiz4Wo3cnv-1PB4oIHgSOg_GNwDIzw&s" },
-    { id: 673, name: "Godin", pos: "DEF", pac: 64, sho: 52, pas: 65, def: 90, phy: 87, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/gE5FVq48t1SIwOIwPtXwPWBCbBU.jpg" },
-    { id: 674, name: "Filipe Luis", pos: "DEF", pac: 78, sho: 65, pas: 76, def: 84, phy: 79, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/21725-1447152742.jpg?lm=1" },
-    { id: 675, name: "Koke", pos: "MED", pac: 70, sho: 75, pas: 85, def: 75, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://album.mediaset.es/eimg/2025/11/11/koke-okkkkjpg-jpg-16-9-aspect-ratio-default-0_da39.jpg" },
-    { id: 676, name: "A. Correa", pos: "DEL", pac: 86, sho: 82, pas: 78, def: 45, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/N__bujihGRsAAAAe/angel-correa.png" },
-    { id: 677, name: "Joao Felix", pos: "DEL", pac: 83, sho: 82, pas: 82, def: 40, phy: 68, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://phantom.estaticos-marca.com/dc91d80f711c73e0b796c35691b638b2/resize/828/f/jpg/assets/multimedia/imagenes/2023/09/19/16951604567922.jpg" },
-    { id: 678, name: "De Paul", pos: "MED", pac: 75, sho: 78, pas: 84, def: 70, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.rosario3.com/__export/1684933220601/sites/rosario3/img/2023/05/24/rodrigo_de_paul_crop1684933129163.jpg_682626441.jpg" },
-    { id: 679, name: "Carrasco", pos: "MED", pac: 88, sho: 80, pas: 78, def: 50, phy: 72, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2023/08/04/16911571971081.jpg" },
-    { id: 680, name: "Llorente", pos: "MED", pac: 88, sho: 82, pas: 80, def: 78, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/SOB3XOY3WRAERMRK3MJH7U7YFU.jpg?auth=ef732fc6e1d37995e68a1a1befdcdccd698270be953d1df424d96604f800e362&width=1200&height=1200&smart=true" },
-    { id: 681, name: "Oblak", pos: "POR", pac: 87, sho: 85, pas: 76, def: 15, phy: 89, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://ctxt.es/images/cache/800x540/nocrop/images%7Ccms-image-000023026.jpg" },
-    { id: 682, name: "Savic", pos: "DEF", pac: 62, sho: 40, pas: 60, def: 85, phy: 84, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.sportyou.es/blog/wp-content/uploads/2018/05/savic.jpg" },
-    { id: 683, name: "P. Maldini", pos: "DEF", pac: 84, sho: 66, pas: 77, def: 95, phy: 88, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/0a/3b/f5/0a3bf59885969a05c60c999faddd67d0.jpg" },
-    { id: 684, name: "Yashin", pos: "POR", pac: 95, sho: 89, pas: 75, def: 20, phy: 95, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.panenka.org/wp-content/uploads/2021/08/Captura-de-pantalla-2021-08-30-a-las-10.31.42-768x432.png" },
-    { id: 685, name: "Cafu", pos: "DEF", pac: 91, sho: 67, pas: 82, def: 90, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://objetos-xlk.estaticos-marca.com/uploads/2025/04/20/680536007f5c8.jpeg" },
-    { id: 686, name: "J. Cruyff", pos: "DEL", pac: 91, sho: 92, pas: 94, def: 50, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/d1/39/a3d1398a01087c93146fd4676c0ef5fe.jpg" },
-    { id: 687, name: "Victor Valdes", pos: "POR", pac: 87, sho: 85, pas: 80, def: 20, phy: 88, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.aupaathletic.com/comun/jugadores_fotos/foto_jugador-111.jpg" },
-    { id: 688, name: "Di Stefano", pos: "DEL", pac: 90, sho: 93, pas: 90, def: 65, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.tiempoar.com.ar/wp-content/uploads/2024/07/Di-Stefano-como-jugador-en-el-Madrid-500x333.jpg" },
-    { id: 689, name: "F. Hierro", pos: "DEF", pac: 70, sho: 76, pas: 78, def: 91, phy: 86, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.footballdatabase.eu/images/photos/players/1998-1999/a_0/380.jpg" },
-    { id: 690, name: "Eusebio", pos: "DEL", pac: 94, sho: 96, pas: 90, def: 42, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://revistalibero.com/cdn/shop/articles/Eusebio.jpg?v=1638445765" },
-    { id: 691, name: "Rooney", pos: "DEL", pac: 82, sho: 91, pas: 88, def: 55, phy: 88, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/CwC0-8cWAAYL-vH.jpg" },
-    { id: 692, name: "A. di Maria", pos: "MED", pac: 91, sho: 86, pas: 89, def: 48, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNvI-TU1G0ikjlwyECWPURX8tdhE35JRp6Rg&s" },
-    { id: 693, name: "Robben", pos: "DEL", pac: 93, sho: 92, pas: 88, def: 40, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/4360-1719545379.jpg?lm=1" },
-    { id: 694, name: "Neuer", pos: "POR", pac: 88, sho: 87, pas: 91, def: 20, phy: 89, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/Gt7lBlbWYAAtHkU.jpg" },
-    { id: 695, name: "R. Gonzalez", pos: "DEL", pac: 85, sho: 92, pas: 84, def: 45, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://fotografias.lasexta.com/clipping/cmsimages01/2020/08/11/6F67F8B9-58F1-469A-9D5B-ACC709494524/104.jpg?crop=500,500,x85,y0&width=1200&height=1200&optimize=low&format=webply" },
-    { id: 696, name: "Roberto Baggio", pos: "DEL", pac: 88, sho: 92, pas: 94, def: 45, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfeFsDWdblOqe9jFlohT500ciFlAmwACd6oA&s" },
-    { id: 697, name: "Thierry Henry", pos: "DEL", pac: 94, sho: 93, pas: 86, def: 50, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/a9/e8/44a9e8e9984c0938dc703c9aa06b8967.jpg" },
-    { id: 698, name: "Ronaldinho", pos: "MED", pac: 91, sho: 93, pas: 95, def: 50, phy: 80, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCWZ8pH70yhFCCrH20IQhdx-522HpgLVxW5w&s" },
-    { id: 699, name: "F. Puskas", pos: "DEL", pac: 90, sho: 96, pas: 88, def: 40, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/ad/48/44ad4874969ef11e7ecd1024f30a7699.jpg" },
-    { id: 700, name: "Kaká", pos: "MED", pac: 89, sho: 90, pas: 91, def: 60, phy: 75, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.printler.com/media/photo/145625-1.jpg?rmode=crop&width=638&height=900" },
-    { id: 701, name: "Ibrahimovic", pos: "DEL", pac: 78, sho: 94, pas: 86, def: 40, phy: 90, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/236x/d1/84/83/d18483dbf5325f469aa715d7d5242afb.jpg" },
-    { id: 702, name: "F. Totti", pos: "DEL", pac: 75, sho: 91, pas: 92, def: 45, phy: 78, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/YXZXGY25YFLJXGLIPSQZMJYZAI.jpg?auth=b6a1ee2164a31bbaf7a7f31029bee76a62f93d1b735978cac1f0c657f9e947f9&width=1472&height=1104&smart=true" },
-    { id: 703, name: "Gundogan", pos: "MED", pac: 69, sho: 80, pas: 88, def: 73, phy: 71, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/i2ury833z4me1.jpeg" },
-    { id: 704, name: "Camavinga", pos: "MED", pac: 78, sho: 70, pas: 80, def: 82, phy: 82, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/79/7f/60/797f60c83743e3fa97e68665309eb540.jpg" },
-    { id: 705, name: "Grealish", pos: "MED", pac: 76, sho: 78, pas: 85, def: 50, phy: 70, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://media.bolavip.com/wp-content/uploads/sites/18/2024/06/07085826/GettyImages-2155984484-scaled-e1719767995850-714x535.webp" },
-    { id: 706, name: "Endrick", pos: "DEL", pac: 88, sho: 83, pas: 70, def: 30, phy: 72, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB9gFTaAXauJ8L4rpJtwbpSg5UC4y4-8S-Nw&s" },
-    { id: 707, name: "Guti", pos: "MED", pac: 70, sho: 84, pas: 91, def: 60, phy: 69, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.shutterstock.com/editorial/image-editorial/N1zeQe41NaTfgez9NzI3MA==/jose-maria-guti--real-madrid-captain-440nw-7436431bh.jpg" },
-    { id: 708, name: "M. Soriano", pos: "MED", pac: 75, sho: 70, pas: 76, def: 55, phy: 60, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/NZW5M7PSTNGHFDX3XVAOJ3VJZM.jpg?auth=46b53182d8d8c4f71e873ec2e7514488c43b1fc4072f0b11eaea7d705885fbd5&width=1200&height=1200&smart=true" },
-    { id: 709, name: "José Ángel", pos: "MED", pac: 72, sho: 60, pas: 68, def: 74, phy: 72, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.bdfutbol.com/i/j/401089h.jpg?v=1717578381" },
-    { id: 710, name: "Mella", pos: "DEL", pac: 85, sho: 65, pas: 65, def: 40, phy: 60, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://assets.laliga.com/squad/2025/t180/p554651/2048x2225/p554651_t180_2025_1_001_000.png" },
-    { id: 711, name: "Luismi Cruz", pos: "DEL", pac: 82, sho: 68, pas: 66, def: 38, phy: 62, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/610461-1647594517.jpg?lm=1" },
+    { id: 624, name: "Raphinha", pos: "DEL", pac: 88, sho: 82, pas: 80, def: 48, phy: 70, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxwmPw0vkp_b51TfFMkfTn3mCC82APOp42iw&s" },
+    { id: 625, name: "M. Salah", pos: "DEL", pac: 89, sho: 88, pas: 86, def: 45, phy: 76, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgFt3Vsmv0QAT3X_BOT1_zNjHetnPPF7p1dA&s" },
+    { id: 626, name: "H. Kane", pos: "DEL", pac: 65, sho: 93, pas: 84, def: 49, phy: 82, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQ5uQoutLKwD97-lw0wm-p_2ZmSSsAYudeHA&s" },
+    { id: 627, name: "E. Haaland", pos: "DEL", pac: 88, sho: 92, pas: 70, def: 45, phy: 88, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/36/0f/24/360f24adf34c1bedcf2a29e8e85788e7.jpg" },
+    { id: 628, name: "Lautaro", pos: "DEL", pac: 83, sho: 89, pas: 78, def: 50, phy: 85, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-PXpk7GSC6rXrdXJDrPpMqQhhu4o1GtQGCQ&s" },
+    { id: 629, name: "K. Kvaratskhelia", pos: "DEL", pac: 89, sho: 84, pas: 82, def: 45, phy: 72, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://witty-images.s3.amazonaws.com/Z/G/K/703ef693-1f62-4f29-b6da-4da53fb29981-board.jpg" },
+    { id: 630, name: "Désiré Doué", pos: "DEL", pac: 88, sho: 80, pas: 78, def: 50, phy: 74, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/tSFkSorTlbUAAAAe/dou%C3%A9-d%C3%A9sir%C3%A9.png" },
+    { id: 631, name: "Falcao", pos: "DEL", pac: 82, sho: 94, pas: 72, def: 40, phy: 86, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F57dq38WMAAEmcj.jpg" },
+    { id: 632, name: "Benzema", pos: "DEL", pac: 82, sho: 92, pas: 87, def: 45, phy: 82, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tycsports.com/files/2022/03/09/400134/benzema-meme-residente-_862x485.jpg?v=1" },
+    { id: 633, name: "G. Bale", pos: "DEL", pac: 95, sho: 91, pas: 85, def: 62, phy: 86, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/e9/ff/49/e9ff49d248ac43b973451802b01093c0.jpg" },
+    { id: 634, name: "Lewandowski", pos: "DEL", pac: 75, sho: 88, pas: 79, def: 44, phy: 84, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/3f/74/d0/3f74d078c7086bddeba9780da7ed550a.jpg" },
+    { id: 635, name: "Szczęsny", pos: "POR", pac: 86, sho: 84, pas: 76, def: 18, phy: 87, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.diez.hn/binrepository/465x444/0c0/0d0/none/3014757/VVNE/screenshot-20250305-152209_10084737_20250305165700.jpg" },
+    { id: 636, name: "Rodri", pos: "MED", pac: 66, sho: 80, pas: 86, def: 87, phy: 85, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://s1.abcstatics.com/abc/www/multimedia/gente/2024/06/15/rodri-espana-kYNG-U603206132602BCB-1024x512@diario_abc.jpg" },
+    { id: 637, name: "O. Dembélé", pos: "DEL", pac: 92, sho: 84, pas: 80, def: 45, phy: 65, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://i.ytimg.com/vi/JFp4iIMjnXk/oardefault.jpg?sqp=-oaymwEiCJwEENAFSFqQAgHyq4qpAxEIARUAAAAAJQAAyEI9AICiQw==&rs=AOn4CLCCQbFaofMRWdfxkdBUpu4KCDzNRA&usqp=CCk" },
+    { id: 638, name: "Kepa", pos: "POR", pac: 82, sho: 79, pas: 74, def: 20, phy: 80, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/09/6a/b1/096ab18fd2ee6cd6b22dadb3a067d9ae.jpg" },
+    { id: 639, name: "J. Musiala", pos: "MED", pac: 88, sho: 83, pas: 86, def: 62, phy: 70, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-19/999ca101a2a64d088ca1cbef7e92a44b.webp" },
+    { id: 640, name: "A. Mac Allister", pos: "MED", pac: 74, sho: 80, pas: 86, def: 72, phy: 78, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/yWz8WZejSBD6u6YZwEB4srTKIXB.jpg" },
+    { id: 641, name: "F. Valverde", pos: "MED", pac: 88, sho: 82, pas: 84, def: 80, phy: 82, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/0tyxnnjccfq81.png" },
+    { id: 642, name: "J. Kimmich", pos: "MED", pac: 70, sho: 76, pas: 88, def: 87, phy: 79, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0717.jpg/960px-20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0717.jpg" },
+    { id: 643, name: "N. Barella", pos: "MED", pac: 81, sho: 78, pas: 84, def: 83, phy: 80, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://sempreinter.com/wp-content/uploads/2021/10/Nicolo-Barella-3-1-scaled-e1633615982244.jpg" },
+    { id: 644, name: "Marquinhos", pos: "DEF", pac: 79, sho: 56, pas: 74, def: 88, phy: 82, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCshNm3OJ3zVFJV6peJeERZjQAH2h_tfJa-Q&s" },
+    { id: 645, name: "P. Foden", pos: "MED", pac: 86, sho: 86, pas: 85, def: 57, phy: 63, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/originals/30/8b/84/308b846c2e56ef02f9b18696256cc99e.jpg" },
+    { id: 646, name: "C. Palmer", pos: "MED", pac: 79, sho: 84, pas: 85, def: 55, phy: 65, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://i.kym-cdn.com/photos/images/newsfeed/002/838/629/39b.jpg" },
+    { id: 647, name: "G. Rodrygo", pos: "DEL", pac: 91, sho: 83, pas: 81, def: 40, phy: 68, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/d907b94d69c2ab52af28b044525c2111.jpg" },
+    { id: 648, name: "N. Williams", pos: "DEL", pac: 94, sho: 79, pas: 77, def: 40, phy: 65, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5YAsrMJ6pG4jOObFRxvCkqMXDKVpNmH5hSA&s" },
+    { id: 649, name: "I. Williams", pos: "DEL", pac: 93, sho: 82, pas: 72, def: 45, phy: 80, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FFjNDgrXwAUaFsi.jpg" },
+    { id: 650, name: "R. Leão", pos: "DEL", pac: 94, sho: 85, pas: 78, def: 35, phy: 78, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F3LB8dmXIAAfxwg.jpg" },
+    { id: 651, name: "Mamardashvili", pos: "POR", pac: 88, sho: 83, pas: 72, def: 15, phy: 85, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzZ_d0xvOOYRimgMMepoOivPoYEmSCQ7dFDg&s" },
+    { id: 652, name: "F. de Jong", pos: "MED", pac: 82, sho: 72, pas: 88, def: 80, phy: 78, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2022/09/23/16639478284639.jpg" },
+    { id: 653, name: "Sergio Ramos", pos: "DEF", pac: 78, sho: 70, pas: 75, def: 90, phy: 88, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2n297NFs8qOJeCSars9pa81ZkOrHc-pniKg&s" },
+    { id: 654, name: "Varane", pos: "DEF", pac: 84, sho: 49, pas: 68, def: 89, phy: 84, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/profile_images/1426617019928129537/Hq5_AcCB_400x400.jpg" },
+    { id: 655, name: "Puyol", pos: "DEF", pac: 72, sho: 50, pas: 65, def: 92, phy: 88, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.rodneypikeart.com/wp-content/uploads/2017/06/Carles-Puyol-1024x768.jpg" },
+    { id: 656, name: "Marcelo", pos: "DEF", pac: 83, sho: 75, pas: 84, def: 82, phy: 78, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://static.wikia.nocookie.net/memes-pedia/images/6/6a/Marselo.png/revision/latest?cb=20200108165346&path-prefix=es" },
+    { id: 657, name: "Xavi Alonso", pos: "MED", pac: 65, sho: 78, pas: 92, def: 86, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://estaticos-cdn.prensaiberica.es/clip/bc2feed5-654c-41c7-b3fe-c272f4b34e89_alta-libre-aspect-ratio_default_0.jpg" },
+    { id: 658, name: "Xavi Hernandez", pos: "MED", pac: 70, sho: 75, pas: 96, def: 83, phy: 73, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://phantom-marca.unidadeditorial.es/2bdef96b9027219076a397ae474ba34b/resize/640/assets/multimedia/imagenes/2023/04/27/16825702042066.jpg" },
+    { id: 659, name: "Iniesta", pos: "MED", pac: 82, sho: 81, pas: 94, def: 72, phy: 68, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI9TnfBVTllJGY4zv9P6sezGHd0PHv2HQSsg&s" },
+    { id: 660, name: "Ronaldo", pos: "DEL", pac: 96, sho: 96, pas: 90, def: 45, phy: 85, rep: 6000, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/a4ef20509403920815bbf03d9eb0aa37.jpg" },
+    { id: 661, name: "R. Carlos", pos: "DEF", pac: 92, sho: 82, pas: 86, def: 85, phy: 83, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Ne75q2lCt7jwRD5qduInCr1-y7as-9LllA&s" },
+    { id: 662, name: "Casemiro", pos: "MED", pac: 60, sho: 75, pas: 80, def: 91, phy: 90, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTG-RxJKaO-o1-0QYIshQ_6eHZC8j7oK-l90w&s" },
+    { id: 663, name: "L. Modric", pos: "MED", pac: 76, sho: 80, pas: 92, def: 82, phy: 70, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/tiny-lukita-modric-10-v0-1pmpht7peql81.jpg?width=1080&format=pjpg&auto=webp&s=d066323331a19f7c6d45835386f58fc6c576ce52" },
+    { id: 664, name: "T. Kroos", pos: "MED", pac: 65, sho: 86, pas: 94, def: 78, phy: 74, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRGgkk2_6qgedwmN_EBqV9qI3MyfPf5PiJ_Q&s" },
+    { id: 665, name: "S. Busquets", pos: "MED", pac: 58, sho: 70, pas: 88, def: 90, phy: 82, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQe8BkkQGlAtcr2FFmWrFZYdsdksAFbAunnVA&s" },
+    { id: 666, name: "Pique", pos: "DEF", pac: 67, sho: 61, pas: 74, def: 90, phy: 84, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4GCkYabKHAotXda3YmdbNY_rtkBQvcnWKfQ&s" },
+    { id: 667, name: "Mascherano", pos: "DEF", pac: 72, sho: 64, pas: 78, def: 89, phy: 86, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg/330px-Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg" },
+    { id: 668, name: "Dybala", pos: "DEL", pac: 82, sho: 84, pas: 85, def: 45, phy: 65, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn0mgIG9lOBdjb2v_MNS3Wsl1HtUI_YXZrYQ&s" },
+    { id: 669, name: "Jordi Alba", pos: "DEF", pac: 90, sho: 69, pas: 82, def: 84, phy: 75, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUzYS01Drh0XErHlv_yaYphbhO22aW2th2nw&s-" },
+    { id: 670, name: "Kun Agüero", pos: "DEL", pac: 88, sho: 92, pas: 85, def: 40, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb9WAhXRvqZsH3Z9OXXS4kZxu5Jg09MB13qw&s" },
+    { id: 671, name: "Ter Stegen", pos: "POR", pac: 85, sho: 86, pas: 88, def: 18, phy: 85, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://barcauniversal.com/wp-content/uploads/2025/08/fc-barcelona-v-ssc-napoli-round-of-16-second-leg-uefa-champions-league-2023-24-scaled.jpg" },
+    { id: 672, name: "Joan Garcia", pos: "POR", pac: 80, sho: 78, pas: 70, def: 15, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfzQMiGiz4Wo3cnv-1PB4oIHgSOg_GNwDIzw&s" },
+    { id: 673, name: "Godin", pos: "DEF", pac: 64, sho: 52, pas: 65, def: 90, phy: 87, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/gE5FVq48t1SIwOIwPtXwPWBCbBU.jpg" },
+    { id: 674, name: "Filipe Luis", pos: "DEF", pac: 78, sho: 65, pas: 76, def: 84, phy: 79, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/21725-1447152742.jpg?lm=1" },
+    { id: 675, name: "Koke", pos: "MED", pac: 70, sho: 75, pas: 85, def: 75, phy: 75, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://album.mediaset.es/eimg/2025/11/11/koke-okkkkjpg-jpg-16-9-aspect-ratio-default-0_da39.jpg" },
+    { id: 676, name: "A. Correa", pos: "DEL", pac: 86, sho: 82, pas: 78, def: 45, phy: 70, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/N__bujihGRsAAAAe/angel-correa.png" },
+    { id: 677, name: "Joao Felix", pos: "DEL", pac: 83, sho: 82, pas: 82, def: 40, phy: 68, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://phantom.estaticos-marca.com/dc91d80f711c73e0b796c35691b638b2/resize/828/f/jpg/assets/multimedia/imagenes/2023/09/19/16951604567922.jpg" },
+    { id: 678, name: "De Paul", pos: "MED", pac: 75, sho: 78, pas: 84, def: 70, phy: 80, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://www.rosario3.com/__export/1684933220601/sites/rosario3/img/2023/05/24/rodrigo_de_paul_crop1684933129163.jpg_682626441.jpg" },
+    { id: 679, name: "Carrasco", pos: "MED", pac: 88, sho: 80, pas: 78, def: 50, phy: 72, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2023/08/04/16911571971081.jpg" },
+    { id: 680, name: "Llorente", pos: "MED", pac: 88, sho: 82, pas: 80, def: 78, phy: 84, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/SOB3XOY3WRAERMRK3MJH7U7YFU.jpg?auth=ef732fc6e1d37995e68a1a1befdcdccd698270be953d1df424d96604f800e362&width=1200&height=1200&smart=true" },
+    { id: 681, name: "Oblak", pos: "POR", pac: 87, sho: 85, pas: 76, def: 15, phy: 89, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://ctxt.es/images/cache/800x540/nocrop/images%7Ccms-image-000023026.jpg" },
+    { id: 682, name: "Savic", pos: "DEF", pac: 62, sho: 40, pas: 60, def: 85, phy: 84, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://www.sportyou.es/blog/wp-content/uploads/2018/05/savic.jpg" },
+    { id: 683, name: "P. Maldini", pos: "DEF", pac: 84, sho: 66, pas: 77, def: 95, phy: 88, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/0a/3b/f5/0a3bf59885969a05c60c999faddd67d0.jpg" },
+    { id: 684, name: "Yashin", pos: "POR", pac: 95, sho: 89, pas: 75, def: 20, phy: 95, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://www.panenka.org/wp-content/uploads/2021/08/Captura-de-pantalla-2021-08-30-a-las-10.31.42-768x432.png" },
+    { id: 685, name: "Cafu", pos: "DEF", pac: 91, sho: 67, pas: 82, def: 90, phy: 86, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://objetos-xlk.estaticos-marca.com/uploads/2025/04/20/680536007f5c8.jpeg" },
+    { id: 686, name: "J. Cruyff", pos: "DEL", pac: 91, sho: 92, pas: 94, def: 50, phy: 75, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/d1/39/a3d1398a01087c93146fd4676c0ef5fe.jpg" },
+    { id: 687, name: "Victor Valdes", pos: "POR", pac: 87, sho: 85, pas: 80, def: 20, phy: 88, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://www.aupaathletic.com/comun/jugadores_fotos/foto_jugador-111.jpg" },
+    { id: 688, name: "Di Stefano", pos: "DEL", pac: 90, sho: 93, pas: 90, def: 65, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://www.tiempoar.com.ar/wp-content/uploads/2024/07/Di-Stefano-como-jugador-en-el-Madrid-500x333.jpg" },
+    { id: 689, name: "F. Hierro", pos: "DEF", pac: 70, sho: 76, pas: 78, def: 91, phy: 86, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://www.footballdatabase.eu/images/photos/players/1998-1999/a_0/380.jpg" },
+    { id: 690, name: "Eusebio", pos: "DEL", pac: 94, sho: 96, pas: 90, def: 42, phy: 80, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://revistalibero.com/cdn/shop/articles/Eusebio.jpg?v=1638445765" },
+    { id: 691, name: "Rooney", pos: "DEL", pac: 82, sho: 91, pas: 88, def: 55, phy: 88, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/CwC0-8cWAAYL-vH.jpg" },
+    { id: 692, name: "A. di Maria", pos: "MED", pac: 91, sho: 86, pas: 89, def: 48, phy: 70, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNvI-TU1G0ikjlwyECWPURX8tdhE35JRp6Rg&s" },
+    { id: 693, name: "Robben", pos: "DEL", pac: 93, sho: 92, pas: 88, def: 40, phy: 75, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/4360-1719545379.jpg?lm=1" },
+    { id: 694, name: "Neuer", pos: "POR", pac: 88, sho: 87, pas: 91, def: 20, phy: 89, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/Gt7lBlbWYAAtHkU.jpg" },
+    { id: 695, name: "R. Gonzalez", pos: "DEL", pac: 85, sho: 92, pas: 84, def: 45, phy: 78, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://fotografias.lasexta.com/clipping/cmsimages01/2020/08/11/6F67F8B9-58F1-469A-9D5B-ACC709494524/104.jpg?crop=500,500,x85,y0&width=1200&height=1200&optimize=low&format=webply" },
+    { id: 696, name: "Roberto Baggio", pos: "DEL", pac: 88, sho: 92, pas: 94, def: 45, phy: 70, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfeFsDWdblOqe9jFlohT500ciFlAmwACd6oA&s" },
+    { id: 697, name: "Thierry Henry", pos: "DEL", pac: 94, sho: 93, pas: 86, def: 50, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/a9/e8/44a9e8e9984c0938dc703c9aa06b8967.jpg" },
+    { id: 698, name: "Ronaldinho", pos: "MED", pac: 91, sho: 93, pas: 95, def: 50, phy: 80, rep: 6000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCWZ8pH70yhFCCrH20IQhdx-522HpgLVxW5w&s" },
+    { id: 699, name: "F. Puskas", pos: "DEL", pac: 90, sho: 96, pas: 88, def: 40, phy: 78, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/ad/48/44ad4874969ef11e7ecd1024f30a7699.jpg" },
+    { id: 700, name: "Kaká", pos: "MED", pac: 89, sho: 90, pas: 91, def: 60, phy: 75, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.printler.com/media/photo/145625-1.jpg?rmode=crop&width=638&height=900" },
+    { id: 701, name: "Ibrahimovic", pos: "DEL", pac: 78, sho: 94, pas: 86, def: 40, phy: 90, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/236x/d1/84/83/d18483dbf5325f469aa715d7d5242afb.jpg" },
+    { id: 702, name: "F. Totti", pos: "DEL", pac: 75, sho: 91, pas: 92, def: 45, phy: 78, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/YXZXGY25YFLJXGLIPSQZMJYZAI.jpg?auth=b6a1ee2164a31bbaf7a7f31029bee76a62f93d1b735978cac1f0c657f9e947f9&width=1472&height=1104&smart=true" },
+    { id: 703, name: "Gundogan", pos: "MED", pac: 69, sho: 80, pas: 88, def: 73, phy: 71, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/i2ury833z4me1.jpeg" },
+    { id: 704, name: "Camavinga", pos: "MED", pac: 78, sho: 70, pas: 80, def: 82, phy: 82, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/79/7f/60/797f60c83743e3fa97e68665309eb540.jpg" },
+    { id: 705, name: "Grealish", pos: "MED", pac: 76, sho: 78, pas: 85, def: 50, phy: 70, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://media.bolavip.com/wp-content/uploads/sites/18/2024/06/07085826/GettyImages-2155984484-scaled-e1719767995850-714x535.webp" },
+    { id: 706, name: "Endrick", pos: "DEL", pac: 88, sho: 83, pas: 70, def: 30, phy: 72, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB9gFTaAXauJ8L4rpJtwbpSg5UC4y4-8S-Nw&s" },
+    { id: 707, name: "Guti", pos: "MED", pac: 70, sho: 84, pas: 91, def: 60, phy: 69, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.shutterstock.com/editorial/image-editorial/N1zeQe41NaTfgez9NzI3MA==/jose-maria-guti--real-madrid-captain-440nw-7436431bh.jpg" },
+    { id: 708, name: "M. Soriano", pos: "MED", pac: 75, sho: 70, pas: 76, def: 55, phy: 60, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/NZW5M7PSTNGHFDX3XVAOJ3VJZM.jpg?auth=46b53182d8d8c4f71e873ec2e7514488c43b1fc4072f0b11eaea7d705885fbd5&width=1200&height=1200&smart=true" },
+    { id: 709, name: "José Ángel", pos: "MED", pac: 72, sho: 60, pas: 68, def: 74, phy: 72, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://www.bdfutbol.com/i/j/401089h.jpg?v=1717578381" },
+    { id: 710, name: "Mella", pos: "DEL", pac: 85, sho: 65, pas: 65, def: 40, phy: 60, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://assets.laliga.com/squad/2025/t180/p554651/2048x2225/p554651_t180_2025_1_001_000.png" },
+    { id: 711, name: "Luismi Cruz", pos: "DEL", pac: 82, sho: 68, pas: 66, def: 38, phy: 62, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/610461-1647594517.jpg?lm=1" },
 ];
 
 function calcPlayerOVR(p) {
@@ -189,12 +187,12 @@ function calcPlayerOVR(p) {
     return Math.max(50, Math.min(99, ovr)); // Limitar entre 50 y 99
 }
 
-// Calcular precios dinámicamente en base a su OVR (calidad)
+// Calcular precios dinámicamente en base a su OVR (calidad) y reputación
 PLAYERS_DB.forEach(p => {
     const ovr = calcPlayerOVR(p);
     let basePrice, premPrice;
 
-    // Curva de precios exponencial
+    // Curva de precios exponencial por OVR
     if (ovr >= 93) { basePrice = 200000000; premPrice = 15000; }
     else if (ovr >= 90) { basePrice = 100000000 + (ovr - 90) * 30000000; premPrice = 9000 + (ovr - 90) * 2000; }
     else if (ovr >= 85) { basePrice = 40000000 + (ovr - 85) * 12000000; premPrice = 4000 + (ovr - 85) * 1000; }
@@ -203,8 +201,17 @@ PLAYERS_DB.forEach(p => {
     else if (ovr >= 70) { basePrice = 1500000 + (ovr - 70) * 500000; premPrice = 150 + (ovr - 70) * 70; }
     else { basePrice = 500000 + Math.max(0, ovr - 60) * 100000; premPrice = 50 + Math.max(0, ovr - 60) * 10; }
 
-    p.priceBasic = basePrice;
-    p.pricePrem = premPrice;
+    // Multiplicador de reputación
+    let repMultiplier = 1.0;
+    if (p.rep >= 5000) repMultiplier = 2.5;
+    else if (p.rep >= 4000) repMultiplier = 2.0;
+    else if (p.rep >= 3000) repMultiplier = 1.6;
+    else if (p.rep >= 2000) repMultiplier = 1.3;
+    else if (p.rep >= 800) repMultiplier = 1.15;
+    else if (p.rep >= 400) repMultiplier = 1.05;
+
+    p.priceBasic = Math.round(basePrice * repMultiplier);
+    p.pricePrem = Math.round(premPrice * repMultiplier);
 });
 
 // Inicializar DB 
@@ -361,6 +368,9 @@ function cleanState(s) {
         s.team.shape = "shape-shield";
         s.team.c1 = s.team.color || "#e11d48";
         s.team.c2 = "#1e293b";
+    }
+    if (s.team && !s.team.pattern) {
+        s.team.pattern = "diagonal";
     }
 
     // Forzar creación de calendario si no lo hay
@@ -605,6 +615,13 @@ window.updateSimSpeed = function (val) {
     simSpeedMs = SIM_SPEED_MAP[simSpeedLevel] || 350;
     const lbl = document.getElementById('sim-speed-label');
     if (lbl) lbl.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
+    // Sync inline match speed bar
+    const matchLbl = document.getElementById('match-speed-label');
+    if (matchLbl) matchLbl.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
+    const matchSlider = document.getElementById('match-speed-slider');
+    if (matchSlider) matchSlider.value = simSpeedLevel;
+    const settingsSlider = document.getElementById('setting-sim-speed');
+    if (settingsSlider) settingsSlider.value = simSpeedLevel;
     // If a local match is running, restart the intervals with new speed
     if (matchState && matchState.interval) {
         clearInterval(matchState.interval);
@@ -967,15 +984,15 @@ function startMultiplayerSearch() {
         if (pitchLblA) pitchLblA.textContent = data.awayName;
 
         // Badges (FM-style)
-        const myBadge = { shape: state.team.shape, c1: state.team.c1, c2: state.team.c2 };
+        const myBadge = { shape: state.team.shape, c1: state.team.c1, c2: state.team.c2, pattern: state.team.pattern };
         const oppBadge = data.opponentBadge || { shape: 'shape-shield', c1: '#666', c2: '#333' };
 
         if (pvpSide === 'home') {
-            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]');
-            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]');
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]', myBadge.pattern);
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]', oppBadge.pattern);
         } else {
-            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]');
-            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]');
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]', oppBadge.pattern);
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]', myBadge.pattern);
         }
 
         // Render formation panels — use real opponent roster if available from server
@@ -1346,7 +1363,7 @@ function updateUI() {
     const teamNameEls = document.querySelectorAll('#top-teamname, #sidebar-teamname, #dash-greeting-team');
     teamNameEls.forEach(el => el.textContent = state.team.name);
 
-    const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow");
+    const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow", state.team.pattern);
     document.getElementById('top-shield').innerHTML = badgeHTML;
     document.getElementById('sidebar-shield').innerHTML = badgeHTML;
 
@@ -1361,8 +1378,8 @@ function updateUI() {
         document.getElementById('dash-next-home').textContent = myNextFix.home;
         document.getElementById('dash-next-away').textContent = myNextFix.away;
 
-        let homeBadge = isHome ? getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20") : getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20");
-        let awayBadge = isHome ? getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20") : getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20");
+        let homeBadge = isHome ? getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20", state.team.pattern) : getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20");
+        let awayBadge = isHome ? getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20") : getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20", state.team.pattern);
 
         document.getElementById('dash-next-home-shield').innerHTML = homeBadge;
         document.getElementById('dash-next-away-shield').innerHTML = awayBadge;
@@ -2621,8 +2638,8 @@ window.startMatch = function () {
     const hTeam = isHome ? state.team : currentOpponent.badge;
     const aTeam = isHome ? currentOpponent.badge : state.team;
 
-    document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(homeName, hTeam.shape, hTeam.c1, hTeam.c2, "w-8 h-10 text-[8px]");
-    document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(awayName, aTeam.shape, aTeam.c1, aTeam.c2, "w-8 h-10 text-[8px]");
+    document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(homeName, hTeam.shape, hTeam.c1, hTeam.c2, "w-8 h-10 text-[8px]", hTeam.pattern);
+    document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(awayName, aTeam.shape, aTeam.c1, aTeam.c2, "w-8 h-10 text-[8px]", aTeam.pattern);
 
     const myOvr = getTeamOvr();
 
@@ -3365,15 +3382,26 @@ const MUSIC_PLAYLIST = [
     { src: 'music/Imagine Dragons - On Top Of The World (Official Music Video) - ImagineDragonsVEVO.mp3', title: 'Imagine Dragons — On Top Of The World' },
     { src: 'music/My Type - Saint Motel (Lyrics)  Pop Song - Astro.mp3', title: 'Saint Motel — My Type' },
     { src: 'music/Travis Scott - goosebumps (Official Video) ft. Kendrick Lamar - TravisScottVEVO.mp3', title: 'Travis Scott — Goosebumps ft. Kendrick Lamar' },
-    { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons — Warriors' }
+    { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons — Warriors' },
+    { src: 'music/Somos Carlos Kirk.mp3', title: 'Carlos Kirk — Somos' },
+    { src: 'music/Willyrex Canta Paradise-Coldplay (mp3cut.net).mp3', title: 'Willyrex — Paradise (Coldplay)' }
 ];
 let currentTrackIndex = -1;
+let shuffledQueue = [];
 
 function pickRandomTrack(excludeIndex) {
     if (MUSIC_PLAYLIST.length <= 1) return 0;
-    let idx;
-    do { idx = Math.floor(Math.random() * MUSIC_PLAYLIST.length); } while (idx === excludeIndex);
-    return idx;
+    // Bag-shuffle: no se repite ninguna canción hasta que se hayan escuchado todas
+    if (shuffledQueue.length === 0) {
+        shuffledQueue = Array.from({ length: MUSIC_PLAYLIST.length }, (_, i) => i)
+            .filter(i => i !== excludeIndex);
+        // Fisher-Yates shuffle
+        for (let i = shuffledQueue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledQueue[i], shuffledQueue[j]] = [shuffledQueue[j], shuffledQueue[i]];
+        }
+    }
+    return shuffledQueue.shift();
 }
 
 // Audio control - start after cookie acceptance, persist across reloads
