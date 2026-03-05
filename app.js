@@ -637,23 +637,13 @@ window.closeSettings = function () {
 }
 
 /* --- Simulation Speed Control --- */
-const SIM_SPEED_MAP = { 1: 700, 2: 500, 3: 350, 4: 200, 5: 100 };
-const SIM_SPEED_LABELS = { 1: 'Muy Lento', 2: 'Lento', 3: 'Normal', 4: 'Rápido', 5: 'Muy Rápido' };
+const SIM_SPEED_MAP = { slow: 700, medium: 350, fast: 100 };
 let simSpeedMs = 350;
 let simSpeedLevel = 3;
 
 window.updateSimSpeed = function (val) {
     simSpeedLevel = parseInt(val);
-    simSpeedMs = SIM_SPEED_MAP[simSpeedLevel] || 350;
-    const lbl = document.getElementById('sim-speed-label');
-    if (lbl) lbl.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
-    // Sync inline match speed bar
-    const matchLbl = document.getElementById('match-speed-label');
-    if (matchLbl) matchLbl.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
-    const matchSlider = document.getElementById('match-speed-slider');
-    if (matchSlider) matchSlider.value = simSpeedLevel;
-    const settingsSlider = document.getElementById('setting-sim-speed');
-    if (settingsSlider) settingsSlider.value = simSpeedLevel;
+    simSpeedMs = { 1: 700, 2: 500, 3: 350, 4: 200, 5: 100 }[simSpeedLevel] || 350;
     // If a local match is running, restart the intervals with new speed
     if (matchState && matchState.interval) {
         clearInterval(matchState.interval);
@@ -2558,7 +2548,7 @@ function animatePitchTokens() {
             t.el.style.left = newX + '%';
             t.el.style.top = newY + '%';
         });
-    }, Math.round(simSpeedMs * 2.5));
+    }, 700);
 }
 
 function stopPitchAnimation() {
@@ -2638,6 +2628,21 @@ window.startMatch = function () {
         endSeason();
         return;
     }
+
+    // Show speed selection modal
+    document.getElementById('modal-match-speed').classList.remove('hidden');
+}
+
+window.selectMatchSpeed = function (speed) {
+    simSpeedMs = SIM_SPEED_MAP[speed] || 350;
+    document.getElementById('modal-match-speed').classList.add('hidden');
+    launchMatch();
+}
+
+function launchMatch() {
+    const xi = getStartingXI();
+
+    let myMatch = state.nextFixtures.find(f => f.isUserMatch);
 
     let isHome = myMatch.home === state.team.name;
     currentOpponent = state.league.find(t => t.name === (isHome ? myMatch.away : myMatch.home));
@@ -2731,17 +2736,6 @@ window.startMatch = function () {
 
     updateMatchStatsUI();
     runMatchLoop(45);
-}
-
-window.updateSimSpeed = function (speed) {
-    simSpeedMs = parseInt(speed);
-    document.getElementById('sim-speed-label').textContent = `Velocidad actual: ${speed}ms`;
-
-    // Si el partido está en juego, reiniciar el intervalo con la nueva velocidad
-    if (matchState && matchState.interval) {
-        clearInterval(matchState.interval);
-        runMatchLoop(matchState._targetMinute);
-    }
 }
 
 function runMatchLoop(targetMinute) {
@@ -3417,7 +3411,14 @@ const MUSIC_PLAYLIST = [
     { src: 'music/Travis Scott - goosebumps (Official Video) ft. Kendrick Lamar - TravisScottVEVO.mp3', title: 'Travis Scott — Goosebumps ft. Kendrick Lamar' },
     { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons — Warriors' },
     { src: 'music/Somos Carlos Kirk.mp3', title: 'Carlos Kirk — Somos' },
-    { src: 'music/Willyrex Canta Paradise-Coldplay (mp3cut.net).mp3', title: 'Willyrex — Paradise (Coldplay)' }
+    { src: 'music/Willyrex Canta Paradise-Coldplay (mp3cut.net).mp3', title: 'Willyrex — Paradise (Coldplay)' },
+    { src: 'music/Capital Cities - Safe And Sound - Hunter Seth.mp3', title: 'Capital Cities — Safe And Sound' },
+    { src: 'music/CHVRCHES - WE SINK - coconut🤍.mp3', title: 'CHVRCHES — We Sink' },
+    { src: 'music/FIFA 14 - Amplify Dot - Get Down  Soundtrack - Silvo & Shani.mp3', title: 'Amplify Dot — Get Down' },
+    { src: 'music/Skrillex & Damian Jr. Gong Marley - Make It Bun Dem [OFFICIAL VIDEO] - Skrillex.mp3', title: 'Skrillex & Damian Marley — Make It Bun Dem' },
+    { src: 'music/Worship You - Vampire Weekend.mp3', title: 'Vampire Weekend — Worship You' },
+    { src: 'music/Wretch 32 - 24 Hours (Official Audio) - Wretch 32.mp3', title: 'Wretch 32 — 24 Hours' },
+    { src: 'music/Axwell __ Ingrosso, Axwell, Sebastian Ingrosso - More Than You Know - AxwellIngrossoVEVO.mp3', title: 'Axwell Λ Ingrosso — More Than You Know' }
 ];
 let currentTrackIndex = -1;
 let shuffledQueue = [];
@@ -3567,12 +3568,13 @@ const PACK_CONFIG = {
     mega:   { sobres: 5, cardsPerSobre: 4, cost: 25000 }
 };
 
-// Rareza: diamante 5%, oro 20%, plata-normal 55%, plata-malillo 20%
+// Rareza: icono 2%, diamante 8%, oro 20%, plata 35%, bronce 35%
 const RARITY_THRESHOLDS = [
-    { rarity: 'diamante', chance: 0.05, ovrMin: 85, ovrMax: 99, img: 'images/Diamante3.png' },
-    { rarity: 'oro',      chance: 0.20, ovrMin: 75, ovrMax: 89, img: 'images/Oro3.png' },
-    { rarity: 'plata',    chance: 0.55, ovrMin: 65, ovrMax: 79, img: 'images/Plata3.png' },
-    { rarity: 'malillo',  chance: 0.20, ovrMin: 50, ovrMax: 69, img: 'images/Bronce.png' }
+    { rarity: 'icono',    chance: 0.02, ovrMin: 94, ovrMax: 99, img: 'images/Icono3.png' },
+    { rarity: 'diamante', chance: 0.08, ovrMin: 88, ovrMax: 93, img: 'images/Diamante3.png' },
+    { rarity: 'oro',      chance: 0.20, ovrMin: 82, ovrMax: 87, img: 'images/Oro3.png' },
+    { rarity: 'plata',    chance: 0.35, ovrMin: 76, ovrMax: 81, img: 'images/Plata3.png' },
+    { rarity: 'bronce',   chance: 0.35, ovrMin: 70, ovrMax: 75, img: 'images/Bronce.png' }
 ];
 
 // Jugadores retirados / inactivos (iconos)
@@ -3581,19 +3583,20 @@ const RETIRED_PLAYER_IDS = new Set([506, 507]); // Neymar, Luis Suarez — add m
 function getPlayerRarity(p) {
     const ovr = calcPlayerOVR(p);
     if (RETIRED_PLAYER_IDS.has(p.id)) return 'icono';
-    if (ovr >= 85) return 'diamante';
-    if (ovr >= 75) return 'oro';
-    if (ovr >= 65) return 'plata';
-    return 'malillo';
+    if (ovr >= 94) return 'icono';
+    if (ovr >= 88) return 'diamante';
+    if (ovr >= 82) return 'oro';
+    if (ovr >= 76) return 'plata';
+    return 'bronce';
 }
 
 function getCardRarity(ovr) {
     if (ovr < 70) return 'Fuera de rango';
-    if (ovr <= 75) return 'Bronce';
-    if (ovr <= 81) return 'Plata';
-    if (ovr <= 87) return 'Oro';
-    if (ovr <= 93) return 'Diamante';
-    return 'Icono';
+    if (ovr >= 94) return 'Icono';
+    if (ovr >= 88) return 'Diamante';
+    if (ovr >= 82) return 'Oro';
+    if (ovr >= 76) return 'Plata';
+    return 'Bronce';
 }
 
 function getRarityCardImage(rarity) {
@@ -3601,6 +3604,7 @@ function getRarityCardImage(rarity) {
     if (rarity === 'diamante') return 'images/Diamante3.png';
     if (rarity === 'oro') return 'images/Oro3.png';
     if (rarity === 'plata') return 'images/Plata3.png';
+    if (rarity === 'bronce') return 'images/Bronce.png';
     return 'images/Bronce.png';
 }
 
@@ -3608,7 +3612,9 @@ function getRarityCSSClass(rarity) {
     if (rarity === 'icono') return 'rarity-icono';
     if (rarity === 'diamante') return 'rarity-diamante';
     if (rarity === 'oro') return 'rarity-oro';
-    return 'rarity-plata';
+    if (rarity === 'plata') return 'rarity-plata';
+    if (rarity === 'bronce') return 'rarity-bronce';
+    return 'rarity-bronce';
 }
 
 function rollCardRarity() {
@@ -3840,6 +3846,7 @@ window.packRevealNext = function () {
     packRevealState.revealedCount = 0;
     document.getElementById('pack-reveal-actions').classList.add('hidden');
     document.getElementById('pack-reveal-bonus').classList.add('hidden');
+    document.getElementById('pack-reveal-stage').classList.add('hidden');
     renderCurrentSobre();
 }
 
@@ -3882,18 +3889,103 @@ function renderCurrentSobre() {
     const stage = document.getElementById('pack-reveal-stage');
     const title = document.getElementById('pack-reveal-title');
     const subtitle = document.getElementById('pack-reveal-subtitle');
+    const envelope = document.getElementById('pack-envelope');
 
     if (packRevealState.allSobres.length > 1) {
         title.textContent = `Sobre ${packRevealState.currentSobre + 1} de ${packRevealState.allSobres.length}`;
     } else {
         title.textContent = packRevealState.isStarterPack ? 'Sobre Inicial del Club' : 'Abriendo Sobre';
     }
-    subtitle.textContent = `${sobre.length} cartas — Toca cada carta para revelarla`;
+    subtitle.textContent = `${sobre.length} cartas — Desliza hacia abajo para abrir`;
 
+    // Pre-build card HTML but keep stage hidden
     stage.innerHTML = '';
     sobre.forEach((card, i) => {
         stage.innerHTML += buildCardHTML(card, i);
     });
+
+    // Show envelope, hide cards
+    stage.classList.add('hidden');
+    stage.classList.remove('cards-entering');
+    envelope.classList.remove('hidden', 'opening', 'tearing');
+    const inner = envelope.querySelector('.pack-envelope-inner');
+    if (inner) { inner.style.transform = ''; inner.style.transition = ''; }
+}
+
+/* ---- Pack swipe-to-tear logic ---- */
+(function () {
+    let startY = 0;
+    let isDragging = false;
+    const SWIPE_THRESHOLD = 80;
+
+    function getEnvelope() { return document.getElementById('pack-envelope'); }
+
+    function onPointerDown(e) {
+        const env = getEnvelope();
+        if (!env || env.classList.contains('opening') || env.classList.contains('tearing') || env.classList.contains('hidden')) return;
+        isDragging = true;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        env.style.transition = 'none';
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        const env = getEnvelope();
+        if (!env) return;
+        const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+        const delta = currentY - startY;
+        if (delta > 0) {
+            const progress = Math.min(delta / SWIPE_THRESHOLD, 1);
+            const inner = env.querySelector('.pack-envelope-inner');
+            if (inner) inner.style.transform = `translateY(${delta * 0.15}px) scale(${1 + progress * 0.04})`;
+            const tearLine = env.querySelector('.pack-tear-line');
+            if (tearLine) tearLine.style.borderColor = `rgba(250, 204, 21, ${0.4 + progress * 0.6})`;
+        }
+    }
+
+    function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        const env = getEnvelope();
+        if (!env) return;
+        const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+        const delta = endY - startY;
+
+        const inner = env.querySelector('.pack-envelope-inner');
+        if (inner) { inner.style.transform = ''; inner.style.transition = ''; }
+        env.style.transition = '';
+
+        if (delta >= SWIPE_THRESHOLD) {
+            openEnvelopeNow();
+        }
+    }
+
+    document.addEventListener('mousedown', (e) => { if (e.target.closest('#pack-envelope')) onPointerDown(e); });
+    document.addEventListener('mousemove', onPointerMove);
+    document.addEventListener('mouseup', onPointerUp);
+    document.addEventListener('touchstart', (e) => { if (e.target.closest('#pack-envelope')) onPointerDown(e); }, { passive: true });
+    document.addEventListener('touchmove', (e) => { onPointerMove(e); }, { passive: true });
+    document.addEventListener('touchend', (e) => { onPointerUp(e); });
+})();
+
+function openEnvelopeNow() {
+    const envelope = document.getElementById('pack-envelope');
+    const stage = document.getElementById('pack-reveal-stage');
+    const subtitle = document.getElementById('pack-reveal-subtitle');
+
+    if (!envelope || envelope.classList.contains('opening')) return;
+
+    envelope.classList.add('tearing');
+    setTimeout(() => {
+        envelope.classList.add('opening');
+    }, 150);
+
+    setTimeout(() => {
+        envelope.classList.add('hidden');
+        stage.classList.remove('hidden');
+        stage.classList.add('cards-entering');
+        subtitle.textContent = `${packRevealState.allSobres[packRevealState.currentSobre].length} cartas — Toca cada carta para revelarla`;
+    }, 1000);
 }
 
 function startPackReveal(sobres, bonusesPerSobre, isStarter, onComplete) {
@@ -3911,6 +4003,7 @@ function startPackReveal(sobres, bonusesPerSobre, isStarter, onComplete) {
     document.getElementById('pack-reveal-bonus').classList.add('hidden');
     document.getElementById('pack-reveal-next-btn').classList.add('hidden');
     document.getElementById('pack-reveal-done-btn').classList.add('hidden');
+    document.getElementById('pack-reveal-stage').classList.add('hidden');
 
     renderCurrentSobre();
     document.getElementById('modal-pack-reveal').classList.remove('hidden');
