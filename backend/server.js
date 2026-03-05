@@ -48,7 +48,13 @@ function calcPlayerOVR(p) {
         const fbScore = (p.pac * 0.35) + (p.def * 0.30) + (p.pas * 0.20) + (p.phy * 0.15) + 2;
         ovr = Math.round(Math.max(cbScore, fbScore));
     } else if (p.pos === 'POR') {
-        const score = (p.def * 0.70) + (p.phy * 0.20) + (p.pas * 0.10) + 6;
+        // En los porteros las stats significan:
+        // PAC = Estirada (DIV)
+        // SHO = Paradas/Reflejos (REF)
+        // PAS = Saque/Pase (KIC)
+        // PHY = Posicionamiento (POS)
+        // DEF = no se usa para OVR (suele ser ~20)
+        const score = (p.pac * 0.25) + (p.sho * 0.30) + (p.phy * 0.30) + (p.pas * 0.15) + 3;
         ovr = Math.round(score);
     }
     return Math.max(50, Math.min(99, ovr)); // Limitar entre 50 y 99
