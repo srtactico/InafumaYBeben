@@ -1769,8 +1769,31 @@ window.setMarketMode = function (mode) {
     document.getElementById('market-th-prem').style.display = mode === 'buy' ? "table-cell" : "none";
 
     // Change "Precio" header text to fit the context
-    const thPrecio = document.querySelector('#market-tbody').closest('table').querySelector('th:nth-child(5)');
+    const thPrecio = document.getElementById('market-th-price');
     if (thPrecio) thPrecio.textContent = mode === 'buy' ? "Precio" : "Valor Venta";
+
+    // Adjust column widths for each mode so separators stay aligned
+    const table = document.getElementById('market-table');
+    if (table) {
+        const ths = table.querySelectorAll('thead th');
+        if (mode === 'buy') {
+            // 7 columns: Jugador 30%, Pos 8%, OVR 8%, Rep 10%, Precio 14%, Premium 12%, Gestion 18%
+            if (ths[0]) ths[0].style.width = '30%';
+            if (ths[1]) ths[1].style.width = '8%';
+            if (ths[2]) ths[2].style.width = '8%';
+            if (ths[3]) ths[3].style.width = '10%';
+            if (ths[4]) ths[4].style.width = '14%';
+            if (ths[5]) ths[5].style.width = '12%';
+            if (ths[6]) ths[6].style.width = '18%';
+        } else {
+            // 5 visible columns: Jugador 35%, Pos 10%, OVR 10%, Valor Venta 20%, Gestion 25%
+            if (ths[0]) ths[0].style.width = '35%';
+            if (ths[1]) ths[1].style.width = '10%';
+            if (ths[2]) ths[2].style.width = '10%';
+            if (ths[4]) ths[4].style.width = '20%';
+            if (ths[6]) ths[6].style.width = '25%';
+        }
+    }
 
     // Clear search when switching modes
     const searchInput = document.getElementById('market-search');
