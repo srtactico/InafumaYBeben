@@ -35,11 +35,23 @@ function generateRoomId() {
    ========================================================================= */
 
 function calcPlayerOVR(p) {
-    if (p.pos === 'DEL') return Math.round((p.pac * 0.20) + (p.sho * 0.45) + (p.phy * 0.15) + (p.pas * 0.20));
-    if (p.pos === 'MED') return Math.round((p.pac * 0.10) + (p.pas * 0.45) + (p.def * 0.25) + (p.phy * 0.20));
-    if (p.pos === 'DEF') return Math.round((p.pac * 0.15) + (p.def * 0.50) + (p.phy * 0.25) + (p.pas * 0.10));
-    if (p.pos === 'POR') return Math.round((p.def * 0.70) + (p.phy * 0.20) + (p.pas * 0.10));
-    return 50;
+    let ovr = 50;
+    if (p.pos === 'DEL') {
+        const score = (p.pac * 0.15) + (p.sho * 0.40) + (p.pas * 0.30) + (p.phy * 0.15) + 5;
+        ovr = Math.round(score);
+    } else if (p.pos === 'MED') {
+        const attScore = (p.pas * 0.40) + (p.sho * 0.30) + (p.pac * 0.15) + (p.phy * 0.15) + 6;
+        const defScore = (p.pas * 0.30) + (p.def * 0.45) + (p.phy * 0.15) + (p.pac * 0.10) + 6;
+        ovr = Math.round(Math.max(attScore, defScore));
+    } else if (p.pos === 'DEF') {
+        const cbScore = (p.def * 0.55) + (p.phy * 0.25) + (p.pac * 0.15) + (p.pas * 0.05) + 2;
+        const fbScore = (p.pac * 0.35) + (p.def * 0.30) + (p.pas * 0.20) + (p.phy * 0.15) + 2;
+        ovr = Math.round(Math.max(cbScore, fbScore));
+    } else if (p.pos === 'POR') {
+        const score = (p.def * 0.70) + (p.phy * 0.20) + (p.pas * 0.10) + 6;
+        ovr = Math.round(score);
+    }
+    return Math.max(50, Math.min(99, ovr)); // Limitar entre 50 y 99
 }
 
 function calcTeamOvr(roster, lineup) {
