@@ -746,12 +746,14 @@
                                         <th class="w-10 text-center">Pos</th>
                                         <th>Mánager</th>
                                         <th>Club</th>
-                                        <th title="Partidos">PJ</th>
-                                        <th title="Victorias">V</th>
-                                        <th title="Empates">E</th>
-                                        <th title="Derrotas">D</th>
-                                        <th title="Reputación">REP</th>
-                                        <th title="Trofeos" class="text-yellow-400">🏆</th>
+                                        <th title="Partidos Jugados Online">PJ</th>
+                                        <th title="Victorias Online">V</th>
+                                        <th title="Empates Online">E</th>
+                                        <th title="Derrotas Online">D</th>
+                                        <th title="Goles a Favor">GF</th>
+                                        <th title="Goles en Contra">GC</th>
+                                        <th title="Diferencia de Goles">DG</th>
+                                        <th title="Puntos Totales" class="text-white">PTS</th>
                                     </tr>
                                 </thead>
                                 <tbody id="league-multi-tbody"></tbody>
@@ -851,12 +853,17 @@
                             <div
                                 class="bg-[#111119] border border-[#313145] p-6 rounded-xl hover:border-blue-500 transition flex flex-col justify-between">
                                 <div class="mb-6">
-                                    <h3 class="font-bold text-lg mb-2 text-blue-400 uppercase tracking-widest">Tono
-                                        Calmado</h3>
-                                    <p class="text-[11px] text-slate-400 italic">"Confiad en vuestro fútbol, salid y
-                                        disfrutad."</p>
-                                    <p class="text-[10px] text-slate-500 mt-4 bg-slate-800/50 p-2 rounded">Sube la moral
-                                        moderadamente. Sin efectos negativos.</p>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-lg text-blue-400 uppercase tracking-widest">Tono
+                                            Calmado</h3>
+                                        <button
+                                            onclick="showAlert('Sube la moral moderadamente. Sin efectos negativos.')"
+                                            class="text-slate-400 hover:text-white transition text-lg cursor-pointer"
+                                            title="Info">ℹ</button>
+                                    </div>
+                                    <img src="images/calma.webp" alt="Tono Calmado"
+                                        class="w-full rounded-lg border border-[#313145] object-cover"
+                                        style="max-height:180px;">
                                 </div>
                                 <button onclick="executeTalk('calm')"
                                     class="btn-action w-full py-3 text-xs bg-blue-600">Dar Discurso</button>
@@ -864,12 +871,17 @@
                             <div
                                 class="bg-[#111119] border border-[#313145] p-6 rounded-xl hover:border-red-500 transition flex flex-col justify-between">
                                 <div class="mb-6">
-                                    <h3 class="font-bold text-lg mb-2 text-red-500 uppercase tracking-widest">Tono
-                                        Agresivo</h3>
-                                    <p class="text-[11px] text-slate-400 italic">"¡Exijo intensidad máxima, quiero ver
-                                        sangre!"</p>
-                                    <p class="text-[10px] text-slate-500 mt-4 bg-slate-800/50 p-2 rounded">Riesgo Alto.
-                                        Puede motivar enormemente o causar rechazo.</p>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-lg text-red-500 uppercase tracking-widest">Tono
+                                            Agresivo</h3>
+                                        <button
+                                            onclick="showAlert('Riesgo Alto. Puede motivar enormemente o causar rechazo.')"
+                                            class="text-slate-400 hover:text-white transition text-lg cursor-pointer"
+                                            title="Info">ℹ</button>
+                                    </div>
+                                    <img src="images/bronca.jpg" alt="Tono Agresivo"
+                                        class="w-full rounded-lg border border-[#313145] object-cover"
+                                        style="max-height:180px;">
                                 </div>
                                 <button onclick="executeTalk('aggressive')"
                                     class="btn-action w-full py-3 text-xs bg-red-700 hover:bg-red-600">Lanzar
@@ -878,12 +890,16 @@
                             <div
                                 class="bg-[#111119] border border-[#313145] p-6 rounded-xl hover:border-yellow-500 transition flex flex-col justify-between">
                                 <div class="mb-6">
-                                    <h3 class="font-bold text-lg mb-2 text-yellow-400 uppercase tracking-widest">Tono
-                                        Apasionado</h3>
-                                    <p class="text-[11px] text-slate-400 italic">"¡Hacedlo por el escudo y por la
-                                        afición!"</p>
-                                    <p class="text-[10px] text-slate-500 mt-4 bg-slate-800/50 p-2 rounded">Riesgo Medio.
-                                        Depende de la afinidad individual.</p>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-lg text-yellow-400 uppercase tracking-widest">Tono
+                                            Apasionado</h3>
+                                        <button onclick="showAlert('Riesgo Medio. Depende de la afinidad individual.')"
+                                            class="text-slate-400 hover:text-white transition text-lg cursor-pointer"
+                                            title="Info">ℹ</button>
+                                    </div>
+                                    <img src="images/entusiasmado.jpg" alt="Tono Apasionado"
+                                        class="w-full rounded-lg border border-[#313145] object-cover"
+                                        style="max-height:180px;">
                                 </div>
                                 <button onclick="executeTalk('passionate')"
                                     class="btn-action w-full py-3 text-xs bg-yellow-600 hover:bg-yellow-500">Discurso
@@ -892,12 +908,17 @@
                             <div
                                 class="bg-[#111119] border border-[#313145] p-6 rounded-xl hover:border-green-500 transition flex flex-col justify-between">
                                 <div class="mb-6">
-                                    <h3 class="font-bold text-lg mb-2 text-green-400 uppercase tracking-widest">Tono
-                                        Asertivo</h3>
-                                    <p class="text-[11px] text-slate-400 italic">"Confío ciegamente en los 11 que salís
-                                        de inicio."</p>
-                                    <p class="text-[10px] text-slate-500 mt-4 bg-slate-800/50 p-2 rounded">Sube la moral
-                                        a titulares. Enfada a los suplentes.</p>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="font-bold text-lg text-green-400 uppercase tracking-widest">Tono
+                                            Asertivo</h3>
+                                        <button
+                                            onclick="showAlert('Sube la moral a titulares. Enfada a los suplentes.')"
+                                            class="text-slate-400 hover:text-white transition text-lg cursor-pointer"
+                                            title="Info">ℹ</button>
+                                    </div>
+                                    <img src="images/asertivo.jpg" alt="Tono Asertivo"
+                                        class="w-full rounded-lg border border-[#313145] object-cover"
+                                        style="max-height:180px;">
                                 </div>
                                 <button onclick="executeTalk('assertive')"
                                     class="btn-action w-full py-3 text-xs bg-green-700 hover:bg-green-600">Discurso

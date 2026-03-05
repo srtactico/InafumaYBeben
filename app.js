@@ -307,6 +307,7 @@ function cleanState(s) {
     if (!s.history) s.history = {};
     if (!s.activeBets) s.activeBets = [];
     if (!s.betHistory) s.betHistory = [];
+    if (!s.pvpStats) s.pvpStats = { matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0 };
     if (!s.nextFixtures) s.nextFixtures = [];
 
     // Plantilla a prueba de errores
@@ -1084,6 +1085,18 @@ function startMultiplayerSearch() {
         state.stats.goals += rewards.goalsScored;
         state.economy.coins += rewards.coins;
         state.stats.rep = Math.max(0, state.stats.rep + rewards.rep);
+
+        // --- Actualizar estadísticas PVP online ---
+        const myGF = (data.you === 'home') ? data.homeGoals : data.awayGoals;
+        const myGA = (data.you === 'home') ? data.awayGoals : data.homeGoals;
+        if (!state.pvpStats) state.pvpStats = { matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0 };
+        state.pvpStats.matches++;
+        state.pvpStats.gf += myGF;
+        state.pvpStats.ga += myGA;
+        if (rewards.result === 'win') { state.pvpStats.wins++; state.pvpStats.pts += 3; }
+        else if (rewards.result === 'draw') { state.pvpStats.draws++; state.pvpStats.pts += 1; }
+        else { state.pvpStats.losses++; }
+
         pvpMatchFinished = true;
         saveState();
     });
@@ -3112,40 +3125,58 @@ window.switchLeagueTab = function (tab) {
     if (tab === 'multi') loadMultiplayerLeaderboard();
 }
 
-// Load multiplayer leaderboard from Firestore
+// Load multiplayer leaderboard from Firestore (pvpStats only)
 window.loadMultiplayerLeaderboard = function () {
     const tbody = document.getElementById('league-multi-tbody');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-slate-500 py-6 text-xs">Cargando clasificación multijugador...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">Cargando clasificación multijugador...</td></tr>';
 
-    db.collection('users').orderBy('stats.rep', 'desc').limit(50).get().then(snap => {
+    db.collection('users').get().then(snap => {
         tbody.innerHTML = '';
         if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-slate-500 py-6 text-xs">No hay jugadores registrados aún.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">No hay jugadores registrados aún.</td></tr>';
             return;
         }
-        let pos = 0;
+        // Build array, sort by pvpStats.pts desc, then goal difference
+        const rows = [];
         snap.forEach(doc => {
-            pos++;
             const d = doc.data();
-            const s = d.stats || {};
-            const isMe = auth.currentUser && doc.id === auth.currentUser.uid;
+            const p = d.pvpStats || {};
+            rows.push({
+                uid: doc.id,
+                manager: d.team?.manager || doc.id,
+                club: d.team?.name || 'Sin club',
+                pj: p.matches || 0,
+                w: p.wins || 0,
+                e: p.draws || 0,
+                l: p.losses || 0,
+                gf: p.gf || 0,
+                ga: p.ga || 0,
+                pts: p.pts || 0
+            });
+        });
+        rows.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+        rows.forEach((r, i) => {
+            const isMe = auth.currentUser && r.uid === auth.currentUser.uid;
             const rowClass = isMe ? 'user-row' : '';
+            const dg = r.gf - r.ga;
             tbody.innerHTML += `
             <tr class="${rowClass}">
-                <td class="text-center font-bold">${pos}</td>
-                <td class="text-white font-bold">${d.team?.manager || doc.id}</td>
-                <td class="text-slate-300">${d.team?.name || 'Sin club'}</td>
-                <td>${s.matches || 0}</td>
-                <td>${s.wins || 0}</td>
-                <td>${s.draws || 0}</td>
-                <td>${s.losses || 0}</td>
-                <td class="text-blue-400 font-bold">★ ${s.rep || 0}</td>
-                <td class="text-yellow-400 font-bold text-center">${s.trophies || 0}</td>
+                <td class="text-center font-bold">${i + 1}</td>
+                <td class="text-white font-bold">${r.manager}</td>
+                <td class="text-slate-300">${r.club}</td>
+                <td>${r.pj}</td>
+                <td>${r.w}</td>
+                <td>${r.e}</td>
+                <td>${r.l}</td>
+                <td>${r.gf}</td>
+                <td>${r.ga}</td>
+                <td>${dg}</td>
+                <td class="text-white font-bold text-sm bg-slate-800/50 text-center">${r.pts}</td>
             </tr>`;
         });
     }).catch(() => {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-red-400 py-6 text-xs">Error al cargar. Inténtalo de nuevo.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-red-400 py-6 text-xs">Error al cargar. Inténtalo de nuevo.</td></tr>';
     });
 }
 
@@ -3250,17 +3281,45 @@ window.initBgMusic = function () {
     if (localStorage.getItem('inafuma_music_playing') === 'true' || localStorage.getItem('inafuma_cookies')) {
         tryPlay();
     }
+
+    // Preload next track proactively
+    preloadNextTrack();
+
+    // Also preload when ~10 seconds remain in current track
+    audio.addEventListener('timeupdate', function () {
+        if (!preloadedNextTrack && audio.duration && audio.duration - audio.currentTime < 10) {
+            preloadNextTrack();
+        }
+    });
+}
+
+let preloadedNextTrack = null;
+
+function preloadNextTrack() {
+    const nextIdx = pickRandomTrack(currentTrackIndex);
+    const preload = new Audio();
+    preload.src = MUSIC_PLAYLIST[nextIdx].src;
+    preload.preload = 'auto';
+    preloadedNextTrack = { index: nextIdx, audio: preload };
 }
 
 function handleTrackEnded() {
     const audio = document.getElementById('bg-music');
     if (!audio) return;
-    currentTrackIndex = pickRandomTrack(currentTrackIndex);
-    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    if (preloadedNextTrack) {
+        currentTrackIndex = preloadedNextTrack.index;
+        audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+        preloadedNextTrack = null;
+    } else {
+        currentTrackIndex = pickRandomTrack(currentTrackIndex);
+        audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    }
     localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
     localStorage.setItem('inafuma_music_time', '0');
     updateNowPlaying();
     audio.play().catch(() => { });
+    // Preload the next one right away
+    preloadNextTrack();
 }
 
 
