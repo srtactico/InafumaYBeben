@@ -1713,12 +1713,12 @@ function renderTactics() {
     pitch.innerHTML = ''; benchContainer.innerHTML = '';
 
     const layouts = {
-        '4-4-2': [{ x: 50, y: 85 }, { x: 20, y: 65 }, { x: 40, y: 70 }, { x: 60, y: 70 }, { x: 80, y: 65 }, { x: 20, y: 35 }, { x: 40, y: 40 }, { x: 60, y: 40 }, { x: 80, y: 35 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
-        '4-3-3': [{ x: 50, y: 85 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 30, y: 45 }, { x: 50, y: 40 }, { x: 70, y: 45 }, { x: 20, y: 20 }, { x: 50, y: 15 }, { x: 80, y: 20 }],
-        '5-3-2': [{ x: 50, y: 85 }, { x: 10, y: 65 }, { x: 30, y: 75 }, { x: 50, y: 78 }, { x: 70, y: 75 }, { x: 90, y: 65 }, { x: 30, y: 40 }, { x: 50, y: 45 }, { x: 70, y: 40 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
-        '3-4-3': [{ x: 50, y: 85 }, { x: 25, y: 70 }, { x: 50, y: 75 }, { x: 75, y: 70 }, { x: 15, y: 45 }, { x: 38, y: 40 }, { x: 62, y: 40 }, { x: 85, y: 45 }, { x: 25, y: 20 }, { x: 50, y: 15 }, { x: 75, y: 20 }],
-        '4-2-3-1': [{ x: 50, y: 85 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 35, y: 50 }, { x: 65, y: 50 }, { x: 20, y: 30 }, { x: 50, y: 25 }, { x: 80, y: 30 }, { x: 50, y: 10 }],
-        '5-4-1': [{ x: 50, y: 85 }, { x: 10, y: 70 }, { x: 30, y: 75 }, { x: 50, y: 78 }, { x: 70, y: 75 }, { x: 90, y: 70 }, { x: 20, y: 45 }, { x: 40, y: 50 }, { x: 60, y: 50 }, { x: 80, y: 45 }, { x: 50, y: 20 }]
+        '4-4-2': [{ x: 50, y: 92 }, { x: 20, y: 65 }, { x: 40, y: 70 }, { x: 60, y: 70 }, { x: 80, y: 65 }, { x: 20, y: 35 }, { x: 40, y: 40 }, { x: 60, y: 40 }, { x: 80, y: 35 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
+        '4-3-3': [{ x: 50, y: 92 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 30, y: 45 }, { x: 50, y: 40 }, { x: 70, y: 45 }, { x: 20, y: 20 }, { x: 50, y: 15 }, { x: 80, y: 20 }],
+        '5-3-2': [{ x: 50, y: 92 }, { x: 10, y: 65 }, { x: 30, y: 72 }, { x: 50, y: 75 }, { x: 70, y: 72 }, { x: 90, y: 65 }, { x: 30, y: 40 }, { x: 50, y: 45 }, { x: 70, y: 40 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
+        '3-4-3': [{ x: 50, y: 92 }, { x: 25, y: 70 }, { x: 50, y: 75 }, { x: 75, y: 70 }, { x: 15, y: 45 }, { x: 38, y: 40 }, { x: 62, y: 40 }, { x: 85, y: 45 }, { x: 25, y: 20 }, { x: 50, y: 15 }, { x: 75, y: 20 }],
+        '4-2-3-1': [{ x: 50, y: 92 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 35, y: 50 }, { x: 65, y: 50 }, { x: 20, y: 30 }, { x: 50, y: 25 }, { x: 80, y: 30 }, { x: 50, y: 10 }],
+        '5-4-1': [{ x: 50, y: 92 }, { x: 10, y: 70 }, { x: 30, y: 72 }, { x: 50, y: 75 }, { x: 70, y: 72 }, { x: 90, y: 70 }, { x: 20, y: 45 }, { x: 40, y: 50 }, { x: 60, y: 50 }, { x: 80, y: 45 }, { x: 50, y: 20 }]
     };
 
     layouts[state.formation].forEach((pos, index) => {
@@ -1734,14 +1734,14 @@ function renderTactics() {
         } else {
             innerHTML = `<div class="pitch-shirt border-dashed bg-black/50 text-slate-400">+</div>`;
         }
-        pitch.innerHTML += `<div class="pitch-player" style="left:${pos.x}%; top:${pos.y}%;" ondragover="allowDrop(event)" ondrop="dropOnPitch(event, ${index})">${innerHTML}</div>`;
+        pitch.innerHTML += `<div class="pitch-player" data-slot="${index}" style="left:${pos.x}%; top:${pos.y}%;" ondragover="allowDrop(event)" ondrop="dropOnPitch(event, ${index})">${innerHTML}</div>`;
     });
 
     const benchPlayers = state.roster.filter(p => !state.lineup.includes(p.id));
     benchPlayers.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         benchContainer.innerHTML += `
-        <div class="bench-player" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
+        <div class="bench-player" data-pid="${p.id}" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
             <div class="flex items-center gap-2">
                 <img src="${p.img}" class="w-6 h-6 rounded-full object-cover border border-[#313145]">
                 <span class="pos-badge ${pClass} text-[8px] w-auto px-1">${p.pos}</span>
@@ -1753,6 +1753,103 @@ function renderTactics() {
             </div>
         </div>`;
     });
+
+    // Init touch drag for mobile
+    initTouchDrag();
+}
+
+/* Touch drag support for mobile tactics */
+let touchDragData = { id: null, slot: null, ghost: null };
+
+function initTouchDrag() {
+    const pitch = document.getElementById('pitch-players');
+    const bench = document.getElementById('bench-list');
+    if (!pitch || !bench) return;
+
+    pitch.querySelectorAll('.pitch-player').forEach(el => {
+        const shirt = el.querySelector('.pitch-shirt[draggable="true"]');
+        if (!shirt) return;
+        shirt.addEventListener('touchstart', handleTouchStart, { passive: false });
+        shirt.addEventListener('touchmove', handleTouchMove, { passive: false });
+        shirt.addEventListener('touchend', handleTouchEnd, { passive: false });
+    });
+
+    bench.querySelectorAll('.bench-player').forEach(el => {
+        el.addEventListener('touchstart', handleTouchStart, { passive: false });
+        el.addEventListener('touchmove', handleTouchMove, { passive: false });
+        el.addEventListener('touchend', handleTouchEnd, { passive: false });
+    });
+}
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    const el = e.currentTarget;
+    const pitchPlayer = el.closest('.pitch-player');
+
+    if (pitchPlayer) {
+        const slotIndex = parseInt(pitchPlayer.dataset.slot);
+        const playerId = state.lineup[slotIndex];
+        if (!playerId) return;
+        touchDragData = { id: playerId, slot: slotIndex };
+    } else {
+        const benchPlayer = el.closest('.bench-player');
+        if (!benchPlayer) return;
+        const pid = parseInt(benchPlayer.dataset.pid);
+        touchDragData = { id: pid, slot: null };
+    }
+
+    const player = state.roster.find(p => p.id === touchDragData.id);
+    const ghost = document.createElement('div');
+    ghost.id = 'touch-drag-ghost';
+    ghost.style.cssText = 'position:fixed;z-index:9999;width:44px;height:44px;border-radius:50%;border:2px solid #facc15;background-size:cover;background-position:center;pointer-events:none;opacity:0.9;box-shadow:0 0 15px rgba(250,204,21,0.5);';
+    if (player) ghost.style.backgroundImage = `url(${player.img})`;
+    document.body.appendChild(ghost);
+    touchDragData.ghost = ghost;
+
+    const touch = e.touches[0];
+    ghost.style.left = (touch.clientX - 22) + 'px';
+    ghost.style.top = (touch.clientY - 22) + 'px';
+    el.classList.add('opacity-50');
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    if (!touchDragData.ghost) return;
+    const touch = e.touches[0];
+    touchDragData.ghost.style.left = (touch.clientX - 22) + 'px';
+    touchDragData.ghost.style.top = (touch.clientY - 22) + 'px';
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    if (!touchDragData.id) return;
+
+    if (touchDragData.ghost) { touchDragData.ghost.remove(); touchDragData.ghost = null; }
+    document.querySelectorAll('.opacity-50').forEach(el => el.classList.remove('opacity-50'));
+
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!dropTarget) { touchDragData = { id: null, slot: null, ghost: null }; return; }
+
+    const pitchSlot = dropTarget.closest('.pitch-player');
+    if (pitchSlot) {
+        const targetSlot = parseInt(pitchSlot.dataset.slot);
+        const targetPlayerId = state.lineup[targetSlot];
+        if (touchDragData.slot !== null) {
+            state.lineup[touchDragData.slot] = targetPlayerId;
+            state.lineup[targetSlot] = touchDragData.id;
+        } else {
+            state.lineup[targetSlot] = touchDragData.id;
+        }
+        saveState(); renderTactics();
+    } else if (dropTarget.closest('#bench-list') || dropTarget.closest('#tactics-bench')) {
+        if (touchDragData.slot !== null) {
+            state.lineup[touchDragData.slot] = null;
+            saveState(); renderTactics();
+        }
+    }
+
+    touchDragData = { id: null, slot: null, ghost: null };
 }
 
 /* =========================================================================
