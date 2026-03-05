@@ -1834,7 +1834,7 @@ window.filterMarket = function (pos) {
             const canRep = state.stats.rep >= p.rep;
             tbody.innerHTML += `
             <tr>
-                <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
+                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
@@ -1846,7 +1846,7 @@ window.filterMarket = function (pos) {
             const sellValue = Math.floor(p.priceBasic * 0.6);
             tbody.innerHTML += `
             <tr>
-                <td class="font-bold text-white flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</td>
+                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="font-mono text-green-400 text-right pr-4 font-bold">+ €${formatM(sellValue)}</td>

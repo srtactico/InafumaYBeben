@@ -922,6 +922,17 @@ h4 {
     width: 100%;
 }
 
+.market-table td {
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+.market-table td:first-child div {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .hamburger-btn {
@@ -1060,23 +1071,64 @@ h4 {
         border-radius: 4px;
     }
 
-    /* Tactics pitch */
+    /* Tactics tab — mobile layout */
+    #tab-tactics {
+        height: auto !important;
+    }
+
+    #tab-tactics>div {
+        height: auto !important;
+        padding-bottom: 16px;
+    }
+
+    #tactics-controls {
+        flex-direction: column !important;
+        gap: 10px !important;
+        align-items: stretch !important;
+        padding: 10px !important;
+    }
+
+    #tactics-controls>div:first-child {
+        font-size: 10px;
+    }
+
+    #tactics-controls>div:last-child {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    #tactics-layout {
+        flex-direction: column !important;
+        overflow: visible !important;
+        gap: 12px !important;
+    }
+
+    #tactics-bench {
+        width: 100% !important;
+        max-height: 220px;
+    }
+
     .pitch-container {
-        min-height: 250px !important;
+        min-height: 380px !important;
+        width: 100% !important;
     }
 
     .pitch-player {
-        width: 50px;
+        width: 44px;
     }
 
     .pitch-shirt {
-        width: 32px;
-        height: 32px;
-        font-size: 10px;
+        width: 30px;
+        height: 30px;
+        font-size: 9px;
     }
 
     .pitch-name {
         font-size: 7px;
+    }
+
+    .bench-player {
+        padding: 6px 8px !important;
     }
 
     /* Bet section stacked */
