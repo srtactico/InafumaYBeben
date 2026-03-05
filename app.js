@@ -302,7 +302,7 @@ function cleanState(s) {
     }
 
     if (!s.flags) s.flags = { canTrain: true, canTalk: true };
-    if (!s.settings) s.settings = { volMusic: 0.15, volSfx: 0.5 };
+    if (!s.settings) s.settings = { volMusic: 0.05, volSfx: 0.5 };
     if (!s.playedTeams || !Array.isArray(s.playedTeams)) s.playedTeams = [];
     if (!s.history) s.history = {};
     if (!s.activeBets) s.activeBets = [];
@@ -455,7 +455,6 @@ window.updatePreviewBadge = function () {
     const badgeEl = document.getElementById('preview-badge');
     const nameEl = document.getElementById('set-team');
     const patternEl = document.getElementById('set-pattern');
-    const iconEl = document.getElementById('set-icon');
 
     if (!badgeEl) return;
 
@@ -464,7 +463,6 @@ window.updatePreviewBadge = function () {
     const c2 = c2El ? c2El.value : '#1e293b';
     const name = nameEl ? nameEl.value : 'CLUB';
     const pattern = patternEl ? patternEl.value : 'diagonal';
-    const icon = iconEl ? iconEl.value : '';
 
     let bg = '';
     if (pattern === 'diagonal') bg = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
@@ -475,7 +473,7 @@ window.updatePreviewBadge = function () {
 
     badgeEl.className = `w-24 h-28 club-badge text-sm shadow-lg ${shape}`;
     badgeEl.style.background = bg;
-    badgeEl.innerHTML = (icon ? `<span class="badge-icon">${icon}</span>` : '') + name.substring(0, 4).toUpperCase();
+    badgeEl.innerHTML = name.substring(0, 4).toUpperCase();
 }
 
 const teamInput = document.getElementById('set-team');
@@ -495,7 +493,7 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
         c1: c1El ? c1El.value : '#e11d48',
         c2: c2El ? c2El.value : '#1e293b',
         pattern: document.getElementById('set-pattern') ? document.getElementById('set-pattern').value : 'diagonal',
-        icon: document.getElementById('set-icon') ? document.getElementById('set-icon').value : ''
+        icon: ''
     };
     state.league = initLeague();
 
@@ -515,7 +513,7 @@ window.logout = function () { auth.signOut().then(() => { state = null; location
 
 // Abrir Ajustes
 window.openSettings = function () {
-    const s = state.settings || { volMusic: 0.15, volSfx: 0.5 };
+    const s = state.settings || { volMusic: 0.05, volSfx: 0.5 };
     const musicSlider = document.getElementById('setting-music');
     const sfxSlider = document.getElementById('setting-sfx');
     if (musicSlider) musicSlider.value = s.volMusic;
@@ -540,7 +538,7 @@ window.openSettings = function () {
 // Update Volume
 window.updateVolume = function (type, val) {
     if (state) {
-        if (!state.settings) state.settings = { volMusic: 0.15, volSfx: 0.5 };
+        if (!state.settings) state.settings = { volMusic: 0.05, volSfx: 0.5 };
         const volume = parseFloat(val);
         if (type === 'music') {
             state.settings.volMusic = volume;
@@ -570,12 +568,27 @@ window.updateSimSpeed = function (val) {
     simSpeedMs = SIM_SPEED_MAP[simSpeedLevel] || 350;
     const lbl = document.getElementById('sim-speed-label');
     if (lbl) lbl.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
+    // If a local match is running, restart the intervals with new speed
+    if (matchState && matchState.interval) {
+        clearInterval(matchState.interval);
+        runMatchLoop(matchState._targetMinute || 90);
+    }
+    if (matchState && matchState.pitchInterval) {
+        animatePitchTokens();
+    }
 }
 
 window.toggleProfileMenu = function () { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
 
 window.showSubpage = function (id) {
     document.getElementById('page-' + id).classList.remove('hidden');
+    if (id === 'settings') {
+        const s = (state && state.settings) ? state.settings : { volMusic: 0.05, volSfx: 0.5 };
+        const musicSlider = document.getElementById('setting-music');
+        const sfxSlider = document.getElementById('setting-sfx');
+        if (musicSlider) musicSlider.value = s.volMusic;
+        if (sfxSlider) sfxSlider.value = s.volSfx;
+    }
     if (id === 'stats') {
         document.getElementById('stat-goals').textContent = state.stats.goals;
         document.getElementById('stat-matches').textContent = state.stats.matches;
@@ -766,7 +779,7 @@ function startMultiplayerSearch() {
                     }
                 } else {
                     const shift = t.side === 'home' ? homeBlockX : awayBlockX;
-                    const jitterX = (Math.random() - 0.5) * 6; const jitterY = (Math.random() - 0.5) * 8;
+                    const jitterX = (Math.random() - 0.5) * 4; const jitterY = (Math.random() - 0.5) * 5;
                     newX = t.baseX + shift + jitterX; newY = t.baseY + jitterY;
                     const distToBall = Math.sqrt(Math.pow(newX - ballX, 2) + Math.pow(newY - ballY, 2));
                     let pullFactor;
@@ -782,7 +795,7 @@ function startMultiplayerSearch() {
                 newX = Math.max(1, Math.min(99, newX)); newY = Math.max(3, Math.min(97, newY));
                 t.el.style.left = newX + '%'; t.el.style.top = newY + '%';
             });
-        }, Math.round(simSpeedMs * 2.5));
+        }, 1800);
     }
 
     function pvpStopPitchAnimation() {
@@ -873,6 +886,18 @@ function startMultiplayerSearch() {
         document.getElementById('pvp-match-modal').classList.remove('hidden');
         document.getElementById('pvp-halftime-actions').classList.add('hidden');
         document.getElementById('pvp-post-match').classList.add('hidden');
+        setNowPlayingVisibility();
+
+        // Re-enable halftime talk buttons for the new match
+        const pvpBtnM = document.getElementById('pvp-btn-talk-motivar');
+        const pvpBtnB = document.getElementById('pvp-btn-talk-bronca');
+        [pvpBtnM, pvpBtnB].forEach(btn => {
+            if (!btn) return;
+            btn.disabled = false;
+            btn.classList.remove('fm-dugout-btn-disabled');
+        });
+        if (pvpBtnM) pvpBtnM.onclick = function () { pvpHalftimeAction('animar'); };
+        if (pvpBtnB) pvpBtnB.onclick = function () { pvpHalftimeAction('bronca'); };
 
         // Reset state
         pvpMatchState.stats = { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 };
@@ -916,9 +941,22 @@ function startMultiplayerSearch() {
             document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]');
         }
 
-        // Render formation panels
+        // Render formation panels — use real opponent roster if available from server
         const myPlayers = getStartingXI().map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
-        const oppPlayers = generateAIPlayers(pvpSide === 'home' ? data.awayName : data.homeName, pvpSide === 'home' ? data.awayOvr : data.homeOvr);
+        let oppPlayers;
+        if (data.opponentRoster && data.opponentRoster.length > 0) {
+            // Use real opponent roster sent by server (with lineup filter if available)
+            let oppRosterFull = data.opponentRoster;
+            if (data.opponentLineup && data.opponentLineup.length === 11) {
+                const lineupPlayers = data.opponentLineup.map(id => oppRosterFull.find(p => p.id === id)).filter(Boolean);
+                oppPlayers = lineupPlayers.length >= 11 ? lineupPlayers : oppRosterFull.slice(0, 11);
+            } else {
+                oppPlayers = oppRosterFull.slice(0, 11);
+            }
+            oppPlayers = oppPlayers.map(p => ({ name: p.name, pos: p.pos, ovr: p.ovr || calcPlayerOVR(p), img: p.img || '' }));
+        } else {
+            oppPlayers = generateAIPlayers(pvpSide === 'home' ? data.awayName : data.homeName, pvpSide === 'home' ? data.awayOvr : data.homeOvr);
+        }
         const homeColor = pvpSide === 'home' ? (myBadge.c1 || '#2563eb') : (oppBadge.c1 || '#2563eb');
         const awayColor = pvpSide === 'home' ? (oppBadge.c1 || '#dc2626') : (myBadge.c1 || '#dc2626');
 
@@ -1093,6 +1131,42 @@ window.pvpHalftimeAction = function (action) {
     if (pvpSocket && pvpRoomId) {
         pvpSocket.emit('match_halftime_action', { roomId: pvpRoomId, action: action });
     }
+    // Disable both talk buttons after choosing
+    const btnM = document.getElementById('pvp-btn-talk-motivar');
+    const btnB = document.getElementById('pvp-btn-talk-bronca');
+    [btnM, btnB].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('fm-dugout-btn-disabled');
+        btn.onclick = null;
+    });
+    const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2ª PARTE" para continuar.</div>';
+}
+
+window.pvpGoToTactics = function () {
+    document.getElementById('pvp-match-modal').classList.add('hidden');
+    document.getElementById('app-layout').classList.remove('hidden');
+    setNowPlayingVisibility();
+    switchTab('tactics');
+
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'VOLVER AL PARTIDO ⏱';
+    topBtn.className = "btn-continue shadow-lg bg-yellow-600";
+    topBtn.onclick = function () {
+        document.getElementById('app-layout').classList.add('hidden');
+        document.getElementById('pvp-match-modal').classList.remove('hidden');
+        setNowPlayingVisibility();
+        topBtn.innerHTML = 'CONTINUAR ⏭';
+        topBtn.className = "btn-continue shadow-lg";
+        topBtn.onclick = startMatch;
+    };
+}
+
+window.pvpResumeMatch = function () {
+    if (pvpSocket && pvpRoomId) {
+        pvpSocket.emit('resume_match', { roomId: pvpRoomId });
+    }
 }
 
 window.cancelMultiplayerSearch = function () {
@@ -1113,6 +1187,7 @@ window.exitPvpMatch = function () {
     pvpSide = null;
     pvpMatchFinished = false;
     document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    setNowPlayingVisibility();
     routeView();
 }
 
@@ -1985,14 +2060,29 @@ function renderFormationPanel(containerId, players, teamColor) {
 }
 
 function generateAIPlayers(teamName, ovr) {
-    const firstNames = ['J.', 'M.', 'A.', 'D.', 'L.', 'R.', 'S.', 'C.', 'P.', 'K.', 'N.'];
-    const lastNames = ['García', 'López', 'Martín', 'Silva', 'Santos', 'Torres', 'Costa', 'Alves', 'Rojas', 'Cruz', 'Pérez', 'Gómez', 'Díaz', 'Ruiz', 'Mora'];
     const positions = ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL'];
     const players = [];
+    const usedIds = new Set();
     for (let i = 0; i < 11; i++) {
-        const name = firstNames[Math.floor(Math.random() * firstNames.length)] + ' ' + lastNames[Math.floor(Math.random() * lastNames.length)];
-        const pOvr = Math.max(40, ovr + Math.floor(Math.random() * 15) - 7);
-        players.push({ name, pos: positions[i], ovr: pOvr, img: '' });
+        const pos = positions[i];
+        const candidates = PLAYERS_DB.filter(p => p.pos === pos && !usedIds.has(p.id));
+        if (candidates.length > 0) {
+            const pick = candidates[Math.floor(Math.random() * candidates.length)];
+            usedIds.add(pick.id);
+            const pOvr = pick.ovr || calcPlayerOVR(pick);
+            players.push({ name: pick.name, pos: pick.pos, ovr: pOvr, img: pick.img || '' });
+        } else {
+            const allPos = PLAYERS_DB.filter(p => !usedIds.has(p.id));
+            if (allPos.length > 0) {
+                const pick = allPos[Math.floor(Math.random() * allPos.length)];
+                usedIds.add(pick.id);
+                const pOvr = pick.ovr || calcPlayerOVR(pick);
+                players.push({ name: pick.name, pos: pos, ovr: pOvr, img: pick.img || '' });
+            } else {
+                const pOvr = Math.max(40, ovr + Math.floor(Math.random() * 15) - 7);
+                players.push({ name: 'Jugador ' + (i + 1), pos: pos, ovr: pOvr, img: '' });
+            }
+        }
     }
     return players;
 }
@@ -2179,8 +2269,8 @@ function animatePitchTokens() {
             // Normal positioning with block shift
             else {
                 const shift = t.side === 'home' ? homeBlockX : awayBlockX;
-                const jitterX = (Math.random() - 0.5) * 6;
-                const jitterY = (Math.random() - 0.5) * 8;
+                const jitterX = (Math.random() - 0.5) * 4;
+                const jitterY = (Math.random() - 0.5) * 5;
                 newX = t.baseX + shift + jitterX;
                 newY = t.baseY + jitterY;
 
@@ -2297,6 +2387,7 @@ window.startMatch = function () {
     document.getElementById('match-modal').classList.remove('hidden');
     document.getElementById('match-post').classList.add('hidden');
     document.getElementById('match-halftime').classList.add('hidden');
+    setNowPlayingVisibility();
 
     const homeName = isHome ? state.team.name : currentOpponent.name;
     const awayName = isHome ? currentOpponent.name : state.team.name;
@@ -2384,6 +2475,7 @@ window.startMatch = function () {
 }
 
 function runMatchLoop(targetMinute) {
+    matchState._targetMinute = targetMinute;
     const logDiv = document.getElementById('match-narrative');
     const commentary = [
         "Controlando el ritmo del partido.", "Pase filtrado peligroso que corta la zaga.",
@@ -2564,6 +2656,7 @@ window.matchTalk = function (type) {
 window.goToTacticsFromMatch = function () {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
+    setNowPlayingVisibility();
     switchTab('tactics');
 
     const topBtn = document.getElementById('top-continue-btn');
@@ -2575,6 +2668,7 @@ window.goToTacticsFromMatch = function () {
 window.returnToMatch = function () {
     document.getElementById('app-layout').classList.add('hidden');
     document.getElementById('match-modal').classList.remove('hidden');
+    setNowPlayingVisibility();
 
     const topBtn = document.getElementById('top-continue-btn');
     topBtn.innerHTML = 'CONTINUAR ⏭';
@@ -2705,6 +2799,7 @@ function finishMatch(mG, oG) {
 window.endMatchAndReturn = function () {
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
+    setNowPlayingVisibility();
 
     if (state.stats.matchday > 38) {
         endSeason();
@@ -2936,9 +3031,16 @@ window.loadMultiplayerLeaderboard = function () {
 
 // Playlist de canciones
 const MUSIC_PLAYLIST = [
-    'music/We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (Olodum Mix).mp3',
-    'music/John Newman - Love Me Again - JohnNewmanVEVO.mp3',
-    'music/Joy Crookes - Feet Don\'t Fail Me Now (Official Video) - JoyCrookesVEVO.mp3'
+    { src: 'music/We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (Olodum Mix).mp3', title: 'We Are One (Ole Ola) — Pitbull ft. J.Lo' },
+    { src: 'music/John Newman - Love Me Again - JohnNewmanVEVO.mp3', title: 'John Newman — Love Me Again' },
+    { src: 'music/Joy Crookes - Feet Don\'t Fail Me Now (Official Video) - JoyCrookesVEVO.mp3', title: 'Joy Crookes — Feet Don\'t Fail Me Now' },
+    { src: 'music/Avicii - Levels (Lyrics) - Creative Chaos.mp3', title: 'Avicii — Levels' },
+    { src: 'music/Avicii - The Nights (Lyrics) my father told me - Unique Sound.mp3', title: 'Avicii — The Nights' },
+    { src: 'music/Glass Animals - Heat Waves - LatinHype.mp3', title: 'Glass Animals — Heat Waves' },
+    { src: 'music/Imagine Dragons - On Top Of The World (Official Music Video) - ImagineDragonsVEVO.mp3', title: 'Imagine Dragons — On Top Of The World' },
+    { src: 'music/My Type - Saint Motel (Lyrics)  Pop Song - Astro.mp3', title: 'Saint Motel — My Type' },
+    { src: 'music/Travis Scott - goosebumps (Official Video) ft. Kendrick Lamar - TravisScottVEVO.mp3', title: 'Travis Scott — Goosebumps ft. Kendrick Lamar' },
+    { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons — Warriors' }
 ];
 let currentTrackIndex = -1;
 
@@ -2950,6 +3052,34 @@ function pickRandomTrack(excludeIndex) {
 }
 
 // Audio control - start after cookie acceptance, persist across reloads
+function updateNowPlaying() {
+    const titleEl = document.getElementById('now-playing-title');
+    if (titleEl && currentTrackIndex >= 0 && currentTrackIndex < MUSIC_PLAYLIST.length) {
+        titleEl.textContent = MUSIC_PLAYLIST[currentTrackIndex].title;
+    }
+}
+
+function setNowPlayingVisibility() {
+    const bar = document.getElementById('now-playing-bar');
+    if (!bar) return;
+    const matchLocal = document.getElementById('match-modal');
+    const matchPvp = document.getElementById('pvp-match-modal');
+    const inMatch = (matchLocal && !matchLocal.classList.contains('hidden'))
+        || (matchPvp && !matchPvp.classList.contains('hidden'));
+    bar.classList.toggle('hidden', inMatch);
+}
+
+window.skipToNextTrack = function () {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    currentTrackIndex = pickRandomTrack(currentTrackIndex);
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+    localStorage.setItem('inafuma_music_time', '0');
+    updateNowPlaying();
+    audio.play().catch(() => { });
+}
+
 window.initBgMusic = function () {
     const audio = document.getElementById('bg-music');
     if (!audio) return;
@@ -2961,18 +3091,21 @@ window.initBgMusic = function () {
     } else {
         currentTrackIndex = pickRandomTrack(-1);
     }
-    audio.src = MUSIC_PLAYLIST[currentTrackIndex];
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
     localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
 
     // Restore saved playback position
     const savedTime = parseFloat(localStorage.getItem('inafuma_music_time') || '0');
     if (savedTime > 0) audio.currentTime = savedTime;
 
-    audio.volume = (state && state.settings && state.settings.volMusic !== undefined) ? state.settings.volMusic : 0.15;
+    audio.volume = (state && state.settings && state.settings.volMusic !== undefined) ? state.settings.volMusic : 0.05;
 
-    // When a song ends, pick a different random song and play it
+    // When a song ends, pick a different random song and play it immediately
     audio.removeEventListener('ended', handleTrackEnded);
     audio.addEventListener('ended', handleTrackEnded);
+
+    updateNowPlaying();
+    setNowPlayingVisibility();
 
     // Save position periodically so music resumes after reload
     setInterval(() => {
@@ -3003,9 +3136,10 @@ function handleTrackEnded() {
     const audio = document.getElementById('bg-music');
     if (!audio) return;
     currentTrackIndex = pickRandomTrack(currentTrackIndex);
-    audio.src = MUSIC_PLAYLIST[currentTrackIndex];
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
     localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
     localStorage.setItem('inafuma_music_time', '0');
+    updateNowPlaying();
     audio.play().catch(() => { });
 }
 

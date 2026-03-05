@@ -274,7 +274,10 @@ h4 {
 
 /* Squad table: sin bordes inferiores en celdas, separación por color alterno */
 .squad-table td {
-    border-bottom: none;
+    border-bottom: 1px solid rgba(30, 58, 95, 0.3);
+    padding: 8px 12px;
+    height: 44px;
+    box-sizing: border-box;
 }
 
 .squad-table tbody tr:nth-child(even) td {
@@ -836,6 +839,18 @@ h4 {
     appearance: textfield;
 }
 
+/* Hide arrows on bet-amount number input */
+#bet-amount::-webkit-outer-spin-button,
+#bet-amount::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+#bet-amount[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 /* League sub-tabs */
 .league-sub-tab {
     padding: 6px 18px;
@@ -1334,6 +1349,84 @@ h4 {
 .fm-dugout-btn-gold { background: linear-gradient(135deg, #facc15, #f59e0b); color: #0b1628; }
 .fm-dugout-btn-gold:hover { filter: brightness(1.1); }
 
+/* Now Playing mini-bar */
+.now-playing-bar {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    pointer-events: auto;
+    animation: npSlideUp 0.35s ease-out;
+}
+@keyframes npSlideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.now-playing-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(10, 15, 28, 0.92);
+    border: 1px solid rgba(49, 49, 69, 0.7);
+    border-radius: 12px;
+    padding: 8px 16px 8px 12px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    max-width: 380px;
+    min-width: 240px;
+}
+.now-playing-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    animation: npPulse 1.5s ease-in-out infinite;
+}
+@keyframes npPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+.now-playing-text {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    flex: 1;
+}
+.now-playing-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+    font-weight: 700;
+}
+.now-playing-title {
+    font-size: 11px;
+    color: #e2e8f0;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.now-playing-next {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    background: rgba(30, 41, 59, 0.7);
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.now-playing-next:hover {
+    color: #facc15;
+    border-color: #facc15;
+    background: rgba(250, 204, 21, 0.1);
+}
+
 /* Mini Pitch */
 .fm-pitch-panel {
     grid-column: 2 / 4;
@@ -1409,7 +1502,7 @@ h4 {
     background: #fff;
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(255,255,255,0.8);
-    transition: left 0.8s ease, top 0.8s ease;
+    transition: left 1.4s cubic-bezier(0.25, 0.1, 0.25, 1), top 1.4s cubic-bezier(0.25, 0.1, 0.25, 1);
     z-index: 20;
     left: 50%;
     top: 50%;
@@ -1422,7 +1515,7 @@ h4 {
     height: 14px;
     border-radius: 50%;
     border: 2px solid rgba(255,255,255,0.5);
-    transition: left 1s ease, top 1s ease;
+    transition: left 1.4s cubic-bezier(0.25, 0.1, 0.25, 1), top 1.4s cubic-bezier(0.25, 0.1, 0.25, 1);
     z-index: 10;
     transform: translate(-50%, -50%);
     box-shadow: 0 2px 6px rgba(0,0,0,0.5);

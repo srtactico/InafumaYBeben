@@ -123,6 +123,20 @@
     <!-- Audio de fondo global -->
     <audio id="bg-music" preload="auto"></audio>
 
+    <!-- Now Playing mini-window -->
+    <div id="now-playing-bar" class="now-playing-bar hidden">
+        <div class="now-playing-inner">
+            <div class="now-playing-icon">🎵</div>
+            <div class="now-playing-text">
+                <span class="now-playing-label">Reproduciendo</span>
+                <span id="now-playing-title" class="now-playing-title">—</span>
+            </div>
+            <button id="now-playing-next" class="now-playing-next" onclick="skipToNextTrack()" title="Siguiente canción">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l11-7z"/><rect x="18" y="5" width="2" height="14"/></svg>
+            </button>
+        </div>
+    </div>
+
     <main id="view-landing" class="view-section"
         style="position:fixed;inset:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:50;">
         <!-- Video de fondo -->
@@ -171,7 +185,11 @@
         </div>
     </main>
 
-    <main id="view-setup" class="view-section bg-[#0b1628] hidden items-center justify-center">
+    <main id="view-setup" class="view-section bg-[#0b1628] hidden items-center justify-center" style="position:relative;">
+        <!-- Gear icon for settings on setup -->
+        <button onclick="showSubpage('settings')" class="settings-gear-float" title="Ajustes" style="z-index:15;position:fixed;bottom:24px;right:24px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         <div
             class="glass-panel p-10 rounded-2xl max-w-lg w-full border-t-4 border-green-400 shadow-[0_0_50px_rgba(74,222,128,0.15)]">
             <h2 class="text-2xl font-gaming text-center text-white mb-8 uppercase tracking-widest">Fundación del Club
@@ -195,8 +213,7 @@
                         de Escudos</label>
                     <div class="flex flex-col items-center gap-4 bg-[#111119] p-5 rounded-xl border border-[#313145]">
                         <div id="preview-badge" class="w-24 h-28 club-badge shape-shield text-sm shadow-lg"
-                            style="background: linear-gradient(135deg, #e11d48 50%, #1e293b 50%);"><span
-                                class="badge-icon"></span>CLUB</div>
+                            style="background: linear-gradient(135deg, #e11d48 50%, #1e293b 50%);">CLUB</div>
                         <div class="w-full space-y-3">
                             <select id="set-shape" class="input-fm text-xs py-2 px-3 cursor-pointer"
                                 onchange="updatePreviewBadge()">
@@ -215,18 +232,7 @@
                                 <option value="solid">Color Sólido</option>
                                 <option value="gradient">Degradado</option>
                             </select>
-                            <select id="set-icon" class="input-fm text-xs py-2 px-3 cursor-pointer"
-                                onchange="updatePreviewBadge()">
-                                <option value="">Sin Icono</option>
-                                <option value="⚽">⚽ Balón</option>
-                                <option value="⭐">⭐ Estrella</option>
-                                <option value="🦁">🦁 León</option>
-                                <option value="🦅">🦅 Águila</option>
-                                <option value="⚔️">⚔️ Espadas</option>
-                                <option value="🏆">🏆 Trofeo</option>
-                                <option value="🔥">🔥 Fuego</option>
-                                <option value="👑">👑 Corona</option>
-                            </select>
+
                             <div class="flex gap-3 justify-center">
                                 <input type="color" id="set-c1" value="#e11d48" class="color-select"
                                     onchange="updatePreviewBadge()" title="Color Principal">
@@ -425,9 +431,11 @@
                         <div class="fm-dugout-section">
                             <div class="fm-dugout-label">&#9200; Medio Tiempo — Acciones</div>
                             <div class="flex gap-2 mt-2">
-                                <button onclick="pvpHalftimeAction('animar')" class="fm-dugout-btn fm-dugout-btn-blue">Motivar</button>
-                                <button onclick="pvpHalftimeAction('bronca')" class="fm-dugout-btn fm-dugout-btn-red">Bronca</button>
+                                <button id="pvp-btn-talk-motivar" onclick="pvpHalftimeAction('animar')" class="fm-dugout-btn fm-dugout-btn-blue">Motivar</button>
+                                <button id="pvp-btn-talk-bronca" onclick="pvpHalftimeAction('bronca')" class="fm-dugout-btn fm-dugout-btn-red">Bronca</button>
                             </div>
+                            <button onclick="pvpGoToTactics()" class="fm-dugout-btn fm-dugout-btn-gray mt-2 w-full">Cambios Tácticos</button>
+                            <button onclick="pvpResumeMatch()" class="fm-dugout-btn fm-dugout-btn-green mt-2 w-full">&#9654; JUGAR 2ª PARTE</button>
                         </div>
                     </div>
                     <div id="pvp-post-match" class="hidden">
@@ -1266,7 +1274,7 @@
             <div class="space-y-8">
                 <!-- Simulation Speed (only visible during match) -->
                 <div id="settings-sim-speed-section" class="hidden">
-                    <h3 class="text-xs text-yellow-400 font-bold uppercase mb-4 tracking-widest">Velocidad de Simulación</h3>
+                    <h3 class="text-xs text-yellow-400 font-bold uppercase mb-4 tracking-widest">Velocidad de Simulación (Modo Local)</h3>
                     <div class="space-y-4 bg-[#111119] p-6 rounded border border-[#313145]">
                         <div class="flex items-center justify-between">
                             <label class="text-xs text-slate-300 font-bold uppercase">Velocidad del Partido</label>
@@ -1296,7 +1304,7 @@
                         <div class="flex items-center justify-between">
                             <label class="text-xs text-slate-300 font-bold uppercase">Música de Menús</label>
                             <input type="range" id="setting-music" class="w-1/2 cursor-pointer" min="0" max="1"
-                                step="0.01" oninput="updateVolume('music', this.value)">
+                                step="0.01" value="0.05" oninput="updateVolume('music', this.value)">
                         </div>
                         <div class="flex items-center justify-between">
                             <label class="text-xs text-slate-300 font-bold uppercase">Sonido de Partido</label>

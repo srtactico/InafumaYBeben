@@ -220,7 +220,7 @@ function runMatchLoop(roomId, targetMinute) {
             });
         }
 
-    }, 400);
+    }, 800);
 }
 
 /* =========================================================================
@@ -365,6 +365,11 @@ io.on('connection', (socket) => {
 
             console.log(`⚽ ¡PARTIDO CREADO! ${opponent.teamName} vs ${playerInfo.teamName} [Sala: ${roomId}]`);
 
+            // Sanitize roster for transmission (strip socket references, send only display data)
+            function sanitizeRoster(roster) {
+                return (roster || []).map(p => ({ id: p.id, name: p.name, pos: p.pos, ovr: p.ovr || calcPlayerOVR(p), img: p.img || '' }));
+            }
+
             // Notificar a ambos
             opponent.socket.emit('match_start', {
                 roomId: roomId,
@@ -373,7 +378,9 @@ io.on('connection', (socket) => {
                 awayName: playerInfo.teamName,
                 homeOvr: homeOvr,
                 awayOvr: awayOvr,
-                opponentBadge: playerInfo.badge
+                opponentBadge: playerInfo.badge,
+                opponentRoster: sanitizeRoster(playerInfo.roster),
+                opponentLineup: playerInfo.lineup
             });
 
             socket.emit('match_start', {
@@ -383,7 +390,9 @@ io.on('connection', (socket) => {
                 awayName: playerInfo.teamName,
                 homeOvr: homeOvr,
                 awayOvr: awayOvr,
-                opponentBadge: opponent.badge
+                opponentBadge: opponent.badge,
+                opponentRoster: sanitizeRoster(opponent.roster),
+                opponentLineup: opponent.lineup
             });
 
             // Arrancar primera parte tras 3 segundos de cortesía
