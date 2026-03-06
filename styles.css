@@ -969,6 +969,12 @@ h4 {
     text-overflow: ellipsis;
 }
 
+/* Market scroll containers (desktop: normal overflow) */
+.market-scroll-outer {
+    overflow-y: auto;
+    flex: 1;
+}
+
 /* =========================================================================
    MOBILE RESPONSIVE — VERTICAL MODE (max-width: 768px)
    ========================================================================= */
@@ -1044,6 +1050,7 @@ h4 {
     /* --- Main content area --- */
     .flex-1.overflow-y-auto.p-6 {
         padding: 10px !important;
+        padding-bottom: 60px !important;
     }
 
     #tab-dash,
@@ -1110,10 +1117,28 @@ h4 {
         font-size: 9px !important;
     }
 
+    .market-table {
+        table-layout: auto !important;
+        min-width: 620px;
+        width: 100%;
+    }
+
     .market-table th,
     .market-table td {
-        padding: 5px 3px !important;
-        font-size: 9px !important;
+        padding: 6px 5px !important;
+        font-size: 10px !important;
+        white-space: nowrap;
+    }
+
+    /* Market scroll: outer = vertical, inner = horizontal */
+    .market-scroll-outer {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    .market-scroll-inner {
+        overflow-x: auto !important;
+        overflow-y: visible !important;
     }
 
     .search-input-centered {

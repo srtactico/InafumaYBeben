@@ -956,15 +956,15 @@
                                             Moral</th>
                                         <th class="text-center text-yellow-400" style="width:50px"
                                             title="Overall — media general del jugador según su posición">OVR</th>
-                                        <th class="text-center" title="Pace — velocidad y aceleración"
+                                        <th class="text-center" title="PAC / SAL (porteros)"
                                             style="width:50px">PAC</th>
-                                        <th class="text-center" title="Shooting — capacidad de tiro y finalización"
+                                        <th class="text-center" title="SHO / PAR (porteros)"
                                             style="width:50px">SHO</th>
-                                        <th class="text-center" title="Passing — precisión de pases y visión de juego"
+                                        <th class="text-center" title="PAS / SAQ (porteros)"
                                             style="width:50px">PAS</th>
-                                        <th class="text-center" title="Defending — capacidad defensiva y tackleo"
+                                        <th class="text-center" title="DEF / REF (porteros)"
                                             style="width:50px">DEF</th>
-                                        <th class="text-center" title="Physical — fuerza física y resistencia"
+                                        <th class="text-center" title="PHY / POS (porteros)"
                                             style="width:50px">PHY</th>
                                     </tr>
                                 </thead>
@@ -1064,7 +1064,8 @@
                             <button id="filter-POR" class="filter-btn" onclick="filterMarket('POR')">POR</button>
                         </div>
 
-                        <div class="overflow-y-auto flex-1 bg-[#111119]">
+                        <div class="market-scroll-outer flex-1 bg-[#111119]">
+                          <div class="market-scroll-inner">
                             <table class="fm-table market-table" id="market-table">
                                 <thead>
                                     <tr>
@@ -1080,6 +1081,7 @@
                                 </thead>
                                 <tbody id="market-tbody"></tbody>
                             </table>
+                          </div>
                         </div>
                     </div>
                 </div>
@@ -1157,7 +1159,7 @@
                             </div>
                             <div class="mt-4 grid grid-cols-2 gap-4 text-center text-xs">
                                 <div class="bg-[#111119] p-3 rounded border border-green-500/30">
-                                    <div class="text-green-400 font-bold">💰 Bonus Dinero</div>
+                                    <div class="text-green-400 font-bold">Bonus Dinero</div>
                                     <div class="text-white font-mono">40% de probabilidad</div>
                                 </div>
                                 <div class="bg-[#111119] p-3 rounded border border-yellow-500/30">
