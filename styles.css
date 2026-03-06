@@ -3185,7 +3185,7 @@ h4 {
 /* Settings gear icon — floating on login page */
 .settings-gear-float {
     position: absolute;
-    bottom: 24px;
+    top: 24px;
     right: 24px;
     background: rgba(15, 31, 58, 0.85);
     border: 1px solid rgba(30, 58, 95, 0.7);
