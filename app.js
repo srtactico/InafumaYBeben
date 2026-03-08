@@ -348,6 +348,16 @@ function cleanState(s) {
     if (!s.pvpStats) s.pvpStats = { matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0 };
     if (!s.nextFixtures) s.nextFixtures = [];
 
+    // Sistema Competitivo
+    if (!s.competitive) {
+        s.competitive = {
+            rank: 'Novato',
+            subrank: 1, // 1 a 3 (I, II, III). 1 = Novato I, 2 = Novato II, etc.
+            points: 0,
+            history: [] // Historial de partidos
+        };
+    }
+
     // Plantilla a prueba de errores
     if (!s.roster || s.roster.length < 11) {
         const randomRoster = generateRandomInitialRoster();
@@ -715,10 +725,10 @@ window.selectGameMode = function (mode) {
         document.getElementById('app-layout').classList.remove('hidden');
         updateUI();
         startMatch();
-    } else if (mode === 'multiplayer') {
+    } else if (mode === 'multiplayer-normal' || mode === 'multiplayer-ranked') {
         // Modo PvP — conectar al servidor y buscar rival
         document.getElementById('app-layout').classList.remove('hidden');
-        startMultiplayerSearch();
+        startMultiplayerSearch(mode);
     }
 }
 
@@ -729,7 +739,7 @@ const PVP_SERVER_URL = window.location.hostname === 'localhost' || window.locati
     ? 'http://localhost:3001'
     : 'https://inafumaybeben1.onrender.com';
 
-function startMultiplayerSearch() {
+function startMultiplayerSearch(mode) {
     document.getElementById('pvp-searching-overlay').classList.remove('hidden');
     document.getElementById('pvp-search-status').textContent = 'Conectando al servidor...';
 
@@ -1287,7 +1297,7 @@ window.switchTab = function (tabId) {
     const targetBtn = document.getElementById('nav-' + tabId);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'sobres': 'Sobres de Jugadores', 'bet': 'Apuestas' };
+    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'sobres': 'Sobres de Jugadores', 'bet': 'Apuestas', 'comp': 'Competición' };
     const pTitle = document.getElementById('page-title');
     if (pTitle) pTitle.textContent = titles[tabId] || 'Panel';
 
@@ -1304,6 +1314,14 @@ window.switchTab = function (tabId) {
     if (tabId === 'sobres') renderSobresTab();
     if (tabId === 'dash') updateUI();
     if (tabId === 'squad') renderSquad();
+}
+
+window.showRanksInfo = function () {
+    document.getElementById('modal-comp-ranks-info').classList.remove('hidden');
+}
+
+window.closeRanksInfo = function () {
+    document.getElementById('modal-comp-ranks-info').classList.add('hidden');
 }
 
 function addEmail(sender, subject, body) {
@@ -1410,6 +1428,52 @@ function updateUI() {
     document.getElementById('dash-wins').textContent = state.stats.wins;
     document.getElementById('dash-draws').textContent = state.stats.draws;
     document.getElementById('dash-losses').textContent = state.stats.losses;
+
+    // Actualizar UI del Modo Competitivo
+    if (state.competitive) {
+        let rankNameEl = document.getElementById('comp-rank-name');
+        let pointsTextEl = document.getElementById('comp-rank-points-text');
+        let progressBarEl = document.getElementById('comp-rank-progress-bar');
+
+        if (rankNameEl) {
+            let rootRankStr = state.competitive.rank || 'Novato';
+            let subRanks = ['I', 'II', 'III'];
+            // subrank 1 -> I, 2 -> II, 3 -> III
+            let subIndex = Math.max(1, Math.min(3, state.competitive.subrank || 1)) - 1;
+            rankNameEl.textContent = `${rootRankStr} ${subRanks[subIndex]}`;
+        }
+        if (pointsTextEl && progressBarEl) {
+            let pts = Math.max(0, Math.min(100, state.competitive.points || 0));
+            pointsTextEl.textContent = `${pts} / 100 PTS`;
+            progressBarEl.style.width = `${pts}%`;
+        }
+
+        // Historial de Partidos (Empty state o historial)
+        let histContainer = document.getElementById('comp-match-history');
+        if (histContainer) {
+            if (!state.competitive.history || state.competitive.history.length === 0) {
+                histContainer.innerHTML = `
+                    <div>
+                        <div class="text-3xl mb-2 opacity-50">⚽</div>
+                        Aún no has jugado partidos clasificatorios
+                    </div>
+                `;
+            } else {
+                // En el futuro, renderizar historial aquí
+                histContainer.innerHTML = '';
+                state.competitive.history.slice(-5).reverse().forEach(match => {
+                    let resultClass = match.result === 'win' ? 'text-green-500' : (match.result === 'loss' ? 'text-red-500' : 'text-gray-400');
+                    histContainer.innerHTML += `
+                        <div class="flex justify-between items-center w-full p-2 bg-[#0b1628] rounded border border-[#313145]">
+                            <span class="${resultClass} font-bold w-12 text-left">${match.result === 'win' ? 'V' : (match.result === 'loss' ? 'D' : 'E')}</span>
+                            <span class="flex-1 text-white">${match.opponent}</span>
+                            <span class="text-yellow-400 font-mono w-16 text-right">${match.pointsChange > 0 ? '+' : ''}${match.pointsChange}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+    }
 
     renderInbox(); renderSquad();
     if (document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
@@ -3575,16 +3639,16 @@ function handleTrackEnded() {
 const PACK_CONFIG = {
     single: { sobres: 1, cardsPerSobre: 4, cost: 5000 },
     triple: { sobres: 3, cardsPerSobre: 4, cost: 15000 },
-    mega:   { sobres: 5, cardsPerSobre: 4, cost: 25000 }
+    mega: { sobres: 5, cardsPerSobre: 4, cost: 25000 }
 };
 
 // Rareza: icono 2%, diamante 8%, oro 20%, plata 35%, bronce 35%
 const RARITY_THRESHOLDS = [
-    { rarity: 'icono',    chance: 0.02, ovrMin: 94, ovrMax: 99, img: 'images/Icono3.png' },
+    { rarity: 'icono', chance: 0.02, ovrMin: 94, ovrMax: 99, img: 'images/Icono3.png' },
     { rarity: 'diamante', chance: 0.08, ovrMin: 88, ovrMax: 93, img: 'images/Diamante3.png' },
-    { rarity: 'oro',      chance: 0.20, ovrMin: 82, ovrMax: 87, img: 'images/Oro3.png' },
-    { rarity: 'plata',    chance: 0.35, ovrMin: 76, ovrMax: 81, img: 'images/Plata3.png' },
-    { rarity: 'bronce',   chance: 0.35, ovrMin: 70, ovrMax: 75, img: 'images/Bronce.png' }
+    { rarity: 'oro', chance: 0.20, ovrMin: 82, ovrMax: 87, img: 'images/Oro3.png' },
+    { rarity: 'plata', chance: 0.35, ovrMin: 76, ovrMax: 81, img: 'images/Plata3.png' },
+    { rarity: 'bronce', chance: 0.35, ovrMin: 70, ovrMax: 75, img: 'images/Bronce.png' }
 ];
 
 // Jugadores retirados / inactivos (iconos)
