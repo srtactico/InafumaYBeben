@@ -23,7 +23,8 @@ const PORT = process.env.PORT || 3001;
 /* =========================================================================
    LOBBY — Cola de espera y emparejamiento
    ========================================================================= */
-let waitingPlayer = null;        // Socket del jugador esperando
+let waitingNormal = null;        // Jugador esperando en modo Normal
+let waitingRanked = null;        // Jugador esperando en modo Ranked
 const rooms = new Map();          // roomId → { players: [...], matchState }
 
 function generateRoomId() {
@@ -513,10 +514,14 @@ io.on('connection', (socket) => {
             }, 3000);
 
         } else {
-            // Poner en cola de espera
-            waitingPlayer = playerInfo;
+            // Poner en cola de espera en la cola correspondiente
+            if (mode === 'multiplayer-ranked') {
+                waitingRanked = playerInfo;
+            } else {
+                waitingNormal = playerInfo;
+            }
             socket.emit('lobby_waiting', { message: 'Esperando rival... Eres el primero en la sala.' });
-            console.log(`⏳ ${playerInfo.teamName} en cola de espera.`);
+            console.log(`⏳ ${playerInfo.teamName} en cola de espera (${mode}).`);
         }
     });
 
