@@ -391,6 +391,20 @@ io.on('connection', (socket) => {
         const mode = data.mode || 'multiplayer-normal';
         console.log(`🎮 ${data.teamName || 'Equipo desconocido'} busca rival en modo: ${mode}...`);
 
+        // Validate for injured players in lineup
+        if (data.roster && data.lineup) {
+            const hasInjured = data.lineup.some(id => {
+                if (!id) return false;
+                const p = data.roster.find(x => x.id === id);
+                return p && p.injuryMatches && p.injuryMatches > 0;
+            });
+            if (hasInjured) {
+                console.log(`❌ ${data.teamName} intentó jugar con lesionados.`);
+                socket.emit('match_error', { message: 'Alineación inválida: Tienes jugadores lesionados de titulares.' });
+                return;
+            }
+        }
+
         // Calcular OVR del servidor (no confiar en el cliente)
         const teamOvr = data.roster && data.lineup
             ? calcTeamOvr(data.roster, data.lineup)

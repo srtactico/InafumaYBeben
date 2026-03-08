@@ -297,6 +297,7 @@ PLAYERS_DB.forEach(p => {
     p.ovr = calcPlayerOVR(p);
     p.morale = 100;
     p.con = 100;
+    p.injuryMatches = 0;
 });
 
 /* =========================================================================
@@ -446,7 +447,11 @@ function cleanState(s) {
         const randomRoster = generateRandomInitialRoster();
         s.roster = randomRoster;
     }
-    s.roster.forEach(p => { if (p.con === undefined) p.con = 100; if (p.morale === undefined) p.morale = 100; });
+    s.roster.forEach(p => {
+        if (p.con === undefined) p.con = 100;
+        if (p.morale === undefined) p.morale = 100;
+        if (p.injuryMatches === undefined) p.injuryMatches = 0;
+    });
 
     if (!s.lineup || s.lineup.length !== 11) s.lineup = s.roster.slice(0, 11).map(p => p.id);
     if (!s.formation) s.formation = '4-4-2';
@@ -1336,6 +1341,19 @@ function startMultiplayerSearch(mode) {
             document.getElementById('pvp-rewards-text').innerHTML += ` | RANK: <span class="${ptsChange >= 0 ? 'text-green-400' : 'text-red-400'}">${ptsSign}${ptsChange} PTS</span>`;
         }
 
+        // --- Condición Física y Lesiones Post-Partido (PvP) ---
+        state.lineup.forEach(id => {
+            if (!id) return;
+            const p = state.roster.find(x => x.id === id);
+            if (p) p.con = Math.max(30, p.con - 15);
+        });
+        state.roster.forEach(p => {
+            if (p.injuryMatches && p.injuryMatches > 0) {
+                p.injuryMatches--;
+                if (p.injuryMatches <= 0) p.con = 80; // Sale de lesión con 80%  
+            }
+        });
+
         pvpMatchFinished = true;
         saveState();
     });
@@ -1916,6 +1934,71 @@ function getAttrClass(val) {
     return 'bg-[#ef4444] text-white';
 }
 
+window.executeTraining = function () {
+    let injuredCount = 0;
+    let recoveredCount = 0;
+
+    state.roster.forEach(p => {
+        if (p.injuryMatches && p.injuryMatches > 0) return; // Injured players can't train
+
+        if (p.con < 85) {
+            p.con = Math.min(100, p.con + 15);
+            recoveredCount++;
+        } else {
+            // Risk of overtraining
+            if (Math.random() < 0.3) {
+                p.con = 30;
+                p.injuryMatches = Math.floor(Math.random() * 3) + 1; // 1 to 3 matches
+                injuredCount++;
+            } else {
+                p.con = 100;
+            }
+        }
+    });
+
+    saveState();
+    renderSquad();
+    renderTactics();
+
+    if (injuredCount > 0) {
+        showConfirm(`Entrenamiento finalizado. ¡CUIDADO! ${injuredCount} jugador(es) se han lesionado por sobrecarga física. Revisa la Enfermería.`, () => { });
+    } else {
+        showAlert("Entrenamiento completado. La plantilla ha recuperado condición física.");
+    }
+};
+
+window.showInjuries = function () {
+    const listEl = document.getElementById('injuries-list');
+    const modal = document.getElementById('modal-injuries');
+    if (!listEl || !modal) return;
+
+    listEl.innerHTML = '';
+    const injured = state.roster.filter(p => p.injuryMatches && p.injuryMatches > 0);
+
+    if (injured.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-slate-400 py-6 text-sm">No hay jugadores en la enfermería. ¡Plantilla sana! 🍏</div>';
+    } else {
+        injured.forEach(p => {
+            listEl.innerHTML += `
+            <div class="flex justify-between items-center bg-[#1c1c28] p-3 rounded border border-red-900/50">
+                <div class="flex items-center gap-3">
+                    <img src="${p.img}" class="w-8 h-8 rounded-full border border-red-500">
+                    <div>
+                        <p class="text-white font-bold text-sm">${p.name}</p>
+                        <p class="text-xs text-slate-400">OVR: ${p.ovr} &bull; POS: ${p.pos}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-red-500 font-bold text-lg leading-none mb-1">🤕 ${p.injuryMatches}</p>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-widest leading-none">Partidos de Baja</p>
+                </div>
+            </div>`;
+        });
+    }
+
+    modal.classList.remove('hidden');
+};
+
 function renderSquad() {
     const tbody = document.getElementById('squad-tbody');
     if (!tbody) return;
@@ -1929,11 +2012,18 @@ function renderSquad() {
         let conIcon = p.con >= 85 ? '🟢' : p.con >= 60 ? '🟡' : '🔴';
         let moralColor = p.morale >= 80 ? '#10b981' : p.morale >= 40 ? '#f59e0b' : '#ef4444';
 
+        let conDisplay = `${conIcon} ${p.con}%`;
+        let nameDisplay = p.name;
+        if (p.injuryMatches && p.injuryMatches > 0) {
+            conDisplay = `<span class="text-red-500 text-xs">🤕 ${p.injuryMatches}P</span>`;
+            nameDisplay = `<span class="text-red-400">${p.name}</span>`;
+        }
+
         tbody.innerHTML += `
         <tr>
             <td class="text-center" title="${p.pos === 'POR' ? 'Portero' : p.pos === 'DEF' ? 'Defensa' : p.pos === 'MED' ? 'Mediocampista' : 'Delantero'}"><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${p.name}</div></td>
-            <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conIcon} ${p.con}%</td>
+            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
+            <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conDisplay}</td>
             <td title="Moral: ${p.morale}%">
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
             </td>
@@ -1973,6 +2063,12 @@ window.allowDrop = function (e) { e.preventDefault(); };
 window.dropOnPitch = function (e, targetSlotIndex) {
     e.preventDefault(); if (!dragSrc.id) return;
 
+    const dragPlayer = state.roster.find(p => p.id === dragSrc.id);
+    if (dragPlayer && dragPlayer.injuryMatches > 0) {
+        showAlert("No puedes alinear a un jugador lesionado.");
+        return;
+    }
+
     const targetPlayerId = state.lineup[targetSlotIndex];
     if (dragSrc.slot !== null) {
         state.lineup[dragSrc.slot] = targetPlayerId;
@@ -2001,7 +2097,7 @@ window.autoFillLineup = function () {
     };
     const targetLayout = posMap[state.formation];
     let newLineup = new Array(11).fill(null);
-    let availableRoster = [...state.roster].sort((a, b) => b.ovr - a.ovr);
+    let availableRoster = [...state.roster].filter(p => !p.injuryMatches || p.injuryMatches <= 0).sort((a, b) => b.ovr - a.ovr);
 
     for (let i = 0; i < 11; i++) {
         let neededPos = targetLayout[i];
@@ -2042,9 +2138,14 @@ function renderTactics() {
         let innerHTML = '';
         if (player) {
             let conColor = player.con >= 85 ? '#10b981' : player.con >= 60 ? '#eab308' : '#ef4444';
+            let injuryBadge = '';
+            if (player.injuryMatches && player.injuryMatches > 0) {
+                conColor = '#ef4444';
+                injuryBadge = `<div class="absolute -top-1 -right-1 bg-red-600 rounded-full text-[10px] w-4 h-4 flex items-center justify-center">🤕</div>`;
+            }
             innerHTML = `
                 <div class="pitch-ovr-tag">${player.ovr}</div>
-                <div class="pitch-shirt" style="background-image:url(${player.img}); border-color: ${conColor}" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)"></div>
+                <div class="pitch-shirt relative" style="background-image:url(${player.img}); border-color: ${conColor}" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)">${injuryBadge}</div>
                 <div class="pitch-name">${player.name.split(' ').pop()}</div>
             `;
         } else {
@@ -2056,15 +2157,21 @@ function renderTactics() {
     const benchPlayers = state.roster.filter(p => !state.lineup.includes(p.id));
     benchPlayers.forEach(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
+        let nameDisplay = p.name;
+        let conDisplay = `Con: ${p.con}%`;
+        if (p.injuryMatches && p.injuryMatches > 0) {
+            nameDisplay = `<span class="text-red-400">${p.name} 🤕</span>`;
+            conDisplay = `<span class="text-red-500">${p.injuryMatches}P</span>`;
+        }
         benchContainer.innerHTML += `
         <div class="bench-player" data-pid="${p.id}" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
             <div class="flex items-center gap-2">
                 <img src="${p.img}" class="w-6 h-6 rounded-full object-cover border border-[#313145]">
                 <span class="pos-badge ${pClass} text-[8px] w-auto px-1">${p.pos}</span>
-                <span class="text-white text-[10px] font-bold truncate max-w-[80px] block">${p.name}</span>
+                <span class="text-white text-[10px] font-bold truncate max-w-[80px] block">${nameDisplay}</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="text-[9px] text-slate-400">Con: ${p.con}%</span>
+                <span class="text-[9px] text-slate-400">${conDisplay}</span>
                 <span class="text-yellow-400 font-bold bg-[#111119] px-1.5 py-0.5 rounded text-[10px] border border-[#313145]">${p.ovr}</span>
             </div>
         </div>`;
@@ -3357,10 +3464,20 @@ function finishMatch(mG, oG) {
     state.flags.canTrain = true;
     state.flags.canTalk = true;
 
-    // Reducir suspensiones de jugadores
+    // --- Condición Física y Lesiones Post-Partido (Local) ---
+    state.lineup.forEach(id => {
+        if (!id) return;
+        const p = state.roster.find(x => x.id === id);
+        if (p) p.con = Math.max(30, p.con - 15);
+    });
+    // Reducir suspensiones e injurias de jugadores
     if (state.roster) {
         state.roster.forEach(p => {
             if (p.suspension > 0) p.suspension--;
+            if (p.injuryMatches && p.injuryMatches > 0) {
+                p.injuryMatches--;
+                if (p.injuryMatches <= 0) p.con = 80;
+            }
         });
     }
 

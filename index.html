@@ -40,6 +40,25 @@
         </div>
     </div>
 
+    <!-- Modal Enfermería (Lesiones) -->
+    <div id="modal-injuries"
+        class="fixed inset-0 bg-black/95 z-[9990] hidden flex items-center justify-center backdrop-blur-md p-3">
+        <div
+            class="glass-panel p-6 md:p-8 rounded-xl max-w-lg w-full text-center border-t-4 border-red-500 shadow-2xl relative">
+            <button onclick="document.getElementById('modal-injuries').classList.add('hidden')"
+                class="absolute top-4 right-6 text-slate-500 hover:text-white font-bold text-2xl transition">&times;</button>
+            <h2 class="text-2xl font-gaming text-red-500 mb-2 uppercase tracking-widest">Enfermería</h2>
+            <p class="text-slate-400 mb-6 text-xs uppercase tracking-widest">Lista de jugadores lesionados y su tiempo
+                de recuperación</p>
+            <div id="injuries-list"
+                class="max-h-[50vh] overflow-y-auto space-y-3 mb-6 bg-[#111119] p-4 rounded border border-[#313145] text-left">
+                <!-- Injected via JS -->
+            </div>
+            <button class="w-full btn-action py-3 rounded font-bold tracking-widest text-sm bg-slate-700"
+                onclick="document.getElementById('modal-injuries').classList.add('hidden')">CERRAR ENFERMERÍA</button>
+        </div>
+    </div>
+
     <div id="modal-cookies"
         class="fixed inset-0 bg-black/95 z-[9990] hidden flex items-center justify-center backdrop-blur-md p-3">
         <div
@@ -1020,7 +1039,15 @@
                     <div class="glass-panel flex flex-col h-[80vh] overflow-hidden">
                         <div
                             class="bg-[#272738] p-3 flex justify-between items-center text-xs font-bold uppercase tracking-widest border-b border-[#313145] shrink-0">
-                            <span>Plantilla del Club</span>
+                            <div class="flex items-center gap-4">
+                                <span>Plantilla del Club</span>
+                                <button onclick="executeTraining()"
+                                    class="bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded transition shadow-lg flex items-center gap-2"
+                                    title="Entrenar a todo el equipo"><span>🏋️</span>Entrenar</button>
+                                <button onclick="showInjuries()"
+                                    class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded transition shadow-lg flex items-center gap-2"
+                                    title="Ver jugadores lesionados"><span>🤕</span>Enfermería</button>
+                            </div>
                             <span class="text-yellow-400 bg-[#111119] px-3 py-1 rounded">OVR 11 Titular: <span
                                     id="squad-ovr" class="font-black text-sm ml-1">0</span></span>
                         </div>
