@@ -161,6 +161,89 @@ const PLAYERS_DB = [
     { id: 711, name: "Luismi Cruz", pos: "DEL", pac: 82, sho: 68, pas: 66, def: 38, phy: 62, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/610461-1647594517.jpg?lm=1" },
 ];
 
+// === COMPETITIVE RANK CONSTANTS & LOGIC ===
+const RANK_NAMES = [
+    'Novato', 'Principiante', 'Amateur', 'Intermedio',
+    'Avanzado', 'Pro', 'Maestro', 'Leyenda', 'Top Global'
+];
+
+function getRankIndex(rankName) {
+    return RANK_NAMES.indexOf(rankName);
+}
+
+function calculateRankPoints(currentRank, currentSubrank, matchResult) {
+    const rankIdx = getRankIndex(currentRank);
+    let ptsChange = 0;
+
+    if (matchResult === 'win') {
+        // Asymmetric logic: lower ranks gain more points, higher ranks gain fewer
+        if (rankIdx <= 1) ptsChange = 30; // Novato, Principiante
+        else if (rankIdx <= 3) ptsChange = 25; // Amateur, Intermedio
+        else if (rankIdx <= 5) ptsChange = 20; // Avanzado, Pro
+        else if (rankIdx <= 7) ptsChange = 15; // Maestro, Leyenda
+        else ptsChange = 10; // Top Global
+    }
+    else if (matchResult === 'draw') {
+        if (rankIdx <= 2) ptsChange = 10;
+        else if (rankIdx <= 5) ptsChange = 5;
+        else if (rankIdx <= 7) ptsChange = 0;
+        else ptsChange = -5; // Top Global gets penalized slightly for draws
+    }
+    else { // loss
+        // Asymmetric logic: lower ranks lose fewer points, higher ranks lose more
+        if (rankIdx === 0) ptsChange = -5; // Novato
+        else if (rankIdx <= 2) ptsChange = -10; // Principiante, Amateur
+        else if (rankIdx <= 4) ptsChange = -15; // Intermedio, Avanzado
+        else if (rankIdx <= 6) ptsChange = -20; // Pro, Maestro
+        else ptsChange = -25; // Leyenda, Top Global
+    }
+
+    return ptsChange;
+}
+
+function processRankUpdate(state, ptsChange) {
+    let comp = state.competitive;
+    if (!comp) return;
+
+    comp.points += ptsChange;
+
+    // Promotion logic (100 pts to next subrank)
+    if (comp.points >= 100) {
+        if (comp.subrank < 3) {
+            comp.subrank++;
+            comp.points -= 100;
+        } else {
+            // Next Rank!
+            const nextRankIdx = getRankIndex(comp.rank) + 1;
+            if (nextRankIdx < RANK_NAMES.length) {
+                comp.rank = RANK_NAMES[nextRankIdx];
+                comp.subrank = 1;
+                comp.points -= 100;
+            } else {
+                // Max rank reached, cap points
+                comp.points = 100;
+            }
+        }
+    }
+    // Demotion logic
+    else if (comp.points < 0) {
+        if (comp.subrank > 1) {
+            comp.subrank--;
+            comp.points += 100;
+        } else {
+            const prevRankIdx = getRankIndex(comp.rank) - 1;
+            // Never drop below Novato I
+            if (prevRankIdx >= 0) {
+                comp.rank = RANK_NAMES[prevRankIdx];
+                comp.subrank = 3;
+                comp.points += 100;
+            } else {
+                comp.points = 0; // Hard cap at Novato I (0 points)
+            }
+        }
+    }
+}
+
 function calcPlayerOVR(p) {
     let ovr = 50;
     if (p.pos === 'DEL') {
@@ -678,6 +761,57 @@ window.showSubpage = function (id) {
         document.getElementById('stat-draws').textContent = state.stats.draws;
         document.getElementById('stat-losses').textContent = state.stats.losses;
     }
+    // Ranked
+    if (document.getElementById('comp-rank-name')) {
+        document.getElementById('comp-rank-name').textContent = `${state.competitive.rank} ${'I'.repeat(state.competitive.subrank)}`;
+        document.getElementById('comp-rank-points-text').textContent = `${state.competitive.points} / 100 PTS`;
+        document.getElementById('comp-rank-progress-bar').style.width = `${state.competitive.points}%`;
+
+        const historyContainer = document.getElementById('comp-match-history');
+        if (!state.competitive.history || state.competitive.history.length === 0) {
+            historyContainer.innerHTML = `
+            <div>
+                <div class="text-3xl mb-2 opacity-50">⚽</div>
+                Aún no has jugado partidos clasificatorios
+            </div>`;
+        } else {
+            // Render actual history
+            historyContainer.innerHTML = '';
+            historyContainer.classList.remove('items-center', 'justify-center', 'text-slate-500'); // Remove empty state centering
+            historyContainer.classList.add('space-y-4'); // better spacing for list
+
+            state.competitive.history.forEach((match) => {
+                const isWin = match.result === 'win';
+                const isDraw = match.result === 'draw';
+
+                let resultClass = 'text-red-400';
+                let resultText = 'DERROTA';
+                if (isWin) { resultClass = 'text-green-400'; resultText = 'VICTORIA'; }
+                else if (isDraw) { resultClass = 'text-yellow-400'; resultText = 'EMPATE'; }
+
+                const pointsSign = match.pointsChange > 0 ? '+' : '';
+                const pointsClass = match.pointsChange > 0 ? 'text-green-500' : (match.pointsChange < 0 ? 'text-red-500' : 'text-slate-400');
+
+                // Formatear fecha
+                const d = new Date(match.date);
+                const dateStr = `${d.getDate()}/${d.getMonth() + 1} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+
+                historyContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-[#111119] rounded-lg border border-[#313145]">
+                        <div class="flex items-center gap-4">
+                            <div class="font-bold ${resultClass} text-xs w-20">${resultText}</div>
+                            <div class="text-white font-gaming text-sm">${match.myGoals} - ${match.oppGoals}</div>
+                            <div class="text-slate-400 text-xs truncate max-w-[120px] md:max-w-[200px]">vs ${match.opponentName}</div>
+                        </div>
+                        <div class="text-right flex flex-col items-end">
+                            <div class="font-bold text-sm ${pointsClass}">${pointsSign}${match.pointsChange} PTS</div>
+                            <div class="text-[10px] text-slate-500">${dateStr}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
 }
 window.closeSubpage = function () { document.querySelectorAll('.subpage-container').forEach(el => el.classList.add('hidden')); }
 
@@ -1176,6 +1310,31 @@ function startMultiplayerSearch(mode) {
         if (rewards.result === 'win') { state.pvpStats.wins++; state.pvpStats.pts += 3; }
         else if (rewards.result === 'draw') { state.pvpStats.draws++; state.pvpStats.pts += 1; }
         else { state.pvpStats.losses++; }
+
+        // --- Ranked Match Logic ---
+        if (currentGameMode === 'multiplayer-ranked') {
+            const ptsChange = calculateRankPoints(state.competitive.rank, state.competitive.subrank, rewards.result);
+            processRankUpdate(state, ptsChange);
+
+            // Add match to history
+            state.competitive.history.unshift({
+                opponentName: data.you === 'home' ? data.awayName : data.homeName,
+                result: rewards.result,
+                myGoals: myGF,
+                oppGoals: myGA,
+                pointsChange: ptsChange,
+                date: new Date().toISOString()
+            });
+
+            // Keep history limited to 20 matches max
+            if (state.competitive.history.length > 20) {
+                state.competitive.history.pop();
+            }
+
+            // Also show points change in rewards text
+            const ptsSign = ptsChange > 0 ? '+' : '';
+            document.getElementById('pvp-rewards-text').innerHTML += ` | RANK: <span class="${ptsChange >= 0 ? 'text-green-400' : 'text-red-400'}">${ptsSign}${ptsChange} PTS</span>`;
+        }
 
         pvpMatchFinished = true;
         saveState();

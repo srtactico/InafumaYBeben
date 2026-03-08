@@ -384,10 +384,12 @@ io.on('connection', (socket) => {
      *   roster: [...],       // array de jugadores
      *   lineup: [...],       // array de 11 IDs
      *   teamOvr: number      // (opcional, se recalcula en servidor)
+     *   mode: string         // 'multiplayer-normal' o 'multiplayer-ranked'
      * }
      */
     socket.on('join_lobby', (data) => {
-        console.log(`🎮 ${data.teamName || 'Equipo desconocido'} busca rival...`);
+        const mode = data.mode || 'multiplayer-normal';
+        console.log(`🎮 ${data.teamName || 'Equipo desconocido'} busca rival en modo: ${mode}...`);
 
         // Calcular OVR del servidor (no confiar en el cliente)
         const teamOvr = data.roster && data.lineup
@@ -402,15 +404,31 @@ io.on('connection', (socket) => {
             roster: data.roster || [],
             lineup: data.lineup || [],
             teamOvr: teamOvr,
-            badge: data.badge || null
+            badge: data.badge || null,
+            mode: mode
         };
 
-        // ¿Hay alguien esperando?
-        if (waitingPlayer && waitingPlayer.socketId !== socket.id) {
+        let opponent = null;
+        let waitingQueue = null;
+
+        if (mode === 'multiplayer-ranked') {
+            waitingQueue = waitingRanked;
+        } else { // Default to normal
+            waitingQueue = waitingNormal;
+        }
+
+        // ¿Hay alguien esperando en la cola correcta?
+        if (waitingQueue && waitingQueue.socketId !== socket.id) {
             // ¡Emparejamiento!
             const roomId = generateRoomId();
-            const opponent = waitingPlayer;
-            waitingPlayer = null;
+            opponent = waitingQueue;
+
+            // Clear the appropriate queue
+            if (mode === 'multiplayer-ranked') {
+                waitingRanked = null;
+            } else {
+                waitingNormal = null;
+            }
 
             // Crear sala
             const room = {
@@ -550,9 +568,14 @@ io.on('connection', (socket) => {
         console.log(`🔴 Jugador desconectado: ${socket.id}`);
 
         // Si estaba en cola de espera, sacarlo
-        if (waitingPlayer && waitingPlayer.socketId === socket.id) {
-            waitingPlayer = null;
-            console.log('   ↳ Eliminado de la cola de espera.');
+        if (waitingNormal && waitingNormal.socketId === socket.id) {
+            waitingNormal = null;
+            console.log('   ↳ Eliminado de la cola de espera Normal.');
+            return;
+        }
+        if (waitingRanked && waitingRanked.socketId === socket.id) {
+            waitingRanked = null;
+            console.log('   ↳ Eliminado de la cola de espera Ranked.');
             return;
         }
 
@@ -598,7 +621,8 @@ app.get('/', (req, res) => {
         status: 'online',
         playersOnline: io.engine.clientsCount,
         activeRooms: rooms.size,
-        waitingInLobby: waitingPlayer ? 1 : 0
+        waitingNormal: waitingNormal ? 1 : 0,
+        waitingRanked: waitingRanked ? 1 : 0
     });
 });
 
@@ -606,7 +630,8 @@ app.get('/status', (req, res) => {
     res.json({
         playersOnline: io.engine.clientsCount,
         activeRooms: rooms.size,
-        waitingInLobby: waitingPlayer ? 1 : 0
+        waitingNormal: waitingNormal ? 1 : 0,
+        waitingRanked: waitingRanked ? 1 : 0
     });
 });
 
