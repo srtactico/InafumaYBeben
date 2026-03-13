@@ -26,6 +26,7 @@ const PORT = process.env.PORT || 3001;
 let waitingNormal = null;        // Jugador esperando en modo Normal
 let waitingRanked = null;        // Jugador esperando en modo Ranked
 const rooms = new Map();          // roomId → { players: [...], matchState }
+const userSockets = new Map();    // uid -> socketId (para amigos y 1vs1)
 
 function generateRoomId() {
     return 'room_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
@@ -376,6 +377,74 @@ function finishMatch(roomId) {
 io.on('connection', (socket) => {
     console.log(`🟢 Jugador conectado: ${socket.id}`);
 
+    // Registro de UID para sistema de amigos y 1vs1 privado
+    socket.on('register_user', (data) => {
+        if (data && data.uid) {
+            userSockets.set(data.uid, socket.id);
+            socket.uid = data.uid; // Guardar en el socket para limpieza
+            console.log(`👤 Usuario registrado: ${data.username} (${data.uid}) -> ${socket.id}`);
+        }
+    });
+
+    // Envío de invitación a un amigo
+    socket.on('invite_friend', (data) => {
+        // data: { targetUid, senderName, senderOvr }
+        const targetSocketId = userSockets.get(data.targetUid);
+        if (targetSocketId) {
+            io.to(targetSocketId).emit('receive_invite', {
+                fromSocketId: socket.id,
+                senderName: data.senderName,
+                senderOvr: data.senderOvr
+            });
+            console.log(`📧 Invitación 1v1 de ${data.senderName} enviada a UID ${data.targetUid}`);
+        } else {
+            socket.emit('invite_response', { accepted: false, message: "El jugador no está online." });
+        }
+    });
+
+    // Respuesta a invitación (aceptar/rechazar)
+    socket.on('respond_invite', (data) => {
+        // data: { accepted, targetSocketId, senderName }
+        if (data.accepted) {
+            const roomId = generateRoomId();
+            const opponentSocket = io.sockets.sockets.get(data.targetSocketId);
+
+            if (opponentSocket) {
+                // Unir a ambos a la sala
+                socket.join(roomId);
+                opponentSocket.join(roomId);
+
+                // Crear el estado del partido (similar a lobby pero privado)
+                // Usaremos datos simplificados para el inicio rápido
+                const room = {
+                    id: roomId,
+                    players: [
+                        { socket: opponentSocket, socketId: opponentSocket.id, teamName: "Rival", roster: [], lineup: [], teamOvr: 80 },
+                        { socket: socket, socketId: socket.id, teamName: data.senderName, roster: [], lineup: [], teamOvr: 80 }
+                    ],
+                    matchState: {
+                        homeGoals: 0,
+                        awayGoals: 0,
+                        min: 0,
+                        homeProb: 0.1,
+                        awayProb: 0.1,
+                        interval: null,
+                        stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 }
+                    }
+                };
+                rooms.set(roomId, room);
+
+                // Notificar inicio
+                opponentSocket.emit('private_match_start', { room: roomId, isPlayer1: true, opponentName: data.senderName });
+                socket.emit('private_match_start', { room: roomId, isPlayer1: false, opponentName: "Míster" });
+
+                console.log(`⚔️ Partido privado iniciado: ${roomId}`);
+            }
+        } else {
+            io.to(data.targetSocketId).emit('invite_response', { accepted: false, message: "El jugador ha rechazado la invitación." });
+        }
+    });
+
     /**
      * join_lobby — El cliente envía sus datos de equipo para entrar al lobby.
      * Payload esperado:
@@ -596,6 +665,12 @@ io.on('connection', (socket) => {
             waitingRanked = null;
             console.log('   ↳ Eliminado de la cola de espera Ranked.');
             return;
+        }
+
+        // Limpiar registro de usuario
+        if (socket.uid) {
+            userSockets.delete(socket.uid);
+            console.log(`👤 Usuario desregistrado: UID ${socket.uid}`);
         }
 
         // Si estaba en un partido, notificar al rival

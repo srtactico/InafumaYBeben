@@ -620,6 +620,8 @@
                 <button id="nav-market" class="nav-btn" onclick="switchTab('market')">Mercado</button>
                 <button id="nav-sobres" class="nav-btn" onclick="switchTab('sobres')">Sobres</button>
                 <button id="nav-bet" class="nav-btn" onclick="switchTab('bet')">Apuestas</button>
+                <button id="nav-tournaments" class="nav-btn text-purple-400 font-bold"
+                    onclick="switchTab('tournaments')">Torneos</button>
             </nav>
 
             <div
@@ -677,6 +679,7 @@
                         <div id="profile-dropdown" class="dropdown-menu hidden">
                             <a class="dropdown-item" onclick="showSubpage('settings')">Ajustes del Juego</a>
                             <a class="dropdown-item" onclick="showSubpage('stats')">Historial Manager</a>
+                            <a class="dropdown-item text-blue-400" onclick="showSubpage('friends')">Mis Amigos</a>
                             <a class="dropdown-item text-red-400" onclick="logout()">Guardar y Salir</a>
                         </div>
                     </div>
@@ -1370,6 +1373,48 @@
                     </div>
                 </div>
 
+                <div id="tab-tournaments" class="fm-tab">
+                    <div
+                        class="max-w-6xl mx-auto glass-panel flex flex-col h-[80vh] overflow-hidden border border-[#313145]">
+                        <div
+                            class="bg-[#1c1c28] p-5 border-b border-[#313145] flex justify-between items-center shrink-0">
+                            <div>
+                                <h2 class="text-2xl font-gaming text-purple-400 uppercase tracking-widest mb-1">Torneos
+                                    Globales</h2>
+                                <p class="text-xs text-slate-400 uppercase tracking-widest">Compite y demuestra tu nivel
+                                    en torneos públicos o privados</p>
+                            </div>
+                            <button onclick="openCreateTournamentModal()"
+                                class="btn-action px-6 py-2 text-xs font-bold uppercase shadow-lg bg-purple-600 hover:bg-purple-500">Crear
+                                Torneo</button>
+                        </div>
+                        <div
+                            class="bg-[#272738] p-3 flex gap-3 border-b border-[#313145] shadow-inner shrink-0 items-center justify-between">
+                            <button class="filter-btn active">Todos los Torneos</button>
+                            <input type="text" id="tournaments-search-input"
+                                class="bg-[#111119] border border-[#313145] text-white text-xs px-3 py-1.5 rounded outline-none w-64"
+                                placeholder="Buscar torneo por nombre..." oninput="renderTournamentsList()">
+                        </div>
+                        <div class="flex-1 overflow-y-auto bg-[#111119]">
+                            <table class="fm-table text-sm w-full">
+                                <thead>
+                                    <tr>
+                                        <th class="text-left pl-4" style="width:30%">Nombre del Torneo</th>
+                                        <th class="text-center" style="width:15%">Creador</th>
+                                        <th class="text-center" style="width:15%">Participantes</th>
+                                        <th class="text-center" style="width:15%">Rango Mín.</th>
+                                        <th class="text-center text-yellow-500" style="width:10%">Privado</th>
+                                        <th class="text-center" style="width:15%">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tournaments-tbody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1709,6 +1754,129 @@
                     </tr>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <div id="page-friends" class="subpage-container hidden">
+        <div
+            class="glass-panel max-w-4xl mx-auto w-full p-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] border-t-4 border-blue-500 relative flex flex-col h-[80vh]">
+            <button onclick="closeSubpage()"
+                class="absolute top-4 right-6 text-slate-500 hover:text-white text-3xl font-bold transition">&times;</button>
+            <h1 class="text-2xl font-bold text-white uppercase tracking-widest mb-6 border-b border-[#313145] pb-4">
+                Centro de Amigos</h1>
+
+            <div class="flex gap-6 flex-1 min-h-0">
+                <!-- Left: Add Friend + Pending Requests -->
+                <div class="w-1/3 flex flex-col gap-6">
+                    <div class="bg-[#111119] p-5 rounded-xl border border-[#313145]">
+                        <h3 class="text-xs text-blue-400 font-bold uppercase mb-3 tracking-widest">Añadir Mánager</h3>
+                        <div class="flex flex-col gap-2">
+                            <input type="text" id="friend-search-input" class="input-fm text-xs"
+                                placeholder="Nombre completo de usuario...">
+                            <button onclick="sendFriendRequest()"
+                                class="btn-action w-full py-2 text-[10px] tracking-widest bg-blue-600 hover:bg-blue-500">ENVIAR
+                                SOLICITUD</button>
+                        </div>
+                    </div>
+                    <div class="bg-[#111119] p-5 rounded-xl border border-[#313145] flex-1 flex flex-col min-h-0">
+                        <h3 class="text-xs text-yellow-400 font-bold uppercase mb-3 tracking-widest">Solicitudes (<span
+                                id="friend-requests-count">0</span>)</h3>
+                        <div id="friend-requests-list" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+                            <!-- Populated by JS -->
+                            <div class="text-[10px] text-slate-500 italic text-center mt-4" id="empty-requests-msg">No
+                                hay solicitudes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Friends List -->
+                <div class="w-2/3 bg-[#111119] p-5 rounded-xl border border-[#313145] flex flex-col min-h-0">
+                    <h3 class="text-xs text-green-400 font-bold uppercase mb-3 tracking-widest">Mis Amigos (<span
+                            id="friends-count">0</span>)</h3>
+                    <div id="friends-list" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                        <!-- Populated by JS -->
+                        <div class="text-[11px] text-slate-500 italic text-center mt-10" id="empty-friends-msg">Añade
+                            amigos para poder invitarles a partidos 1vs1 privados.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Torneo -->
+    <div id="modal-create-tournament"
+        class="fixed inset-0 bg-black/95 z-[9990] hidden flex items-center justify-center backdrop-blur-md p-3">
+        <div
+            class="glass-panel p-6 md:p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-purple-500 shadow-2xl relative">
+            <button onclick="document.getElementById('modal-create-tournament').classList.add('hidden')"
+                class="absolute top-4 right-6 text-slate-500 hover:text-white font-bold text-2xl transition">&times;</button>
+            <h2 class="text-2xl font-gaming text-purple-400 mb-2 uppercase tracking-widest">Crear Torneo</h2>
+            <p class="text-slate-400 mb-6 text-xs uppercase tracking-widest">Configura tu torneo global</p>
+            <form id="create-tournament-form" class="space-y-4 text-left">
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Nombre del Torneo</label>
+                    <input type="text" id="tournament-name" class="input-fm text-xs w-full" required maxlength="30"
+                        placeholder="Ej: Copa Tussi 2024">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Rango Mínimo
+                        Exigido</label>
+                    <select id="tournament-min-rank" class="input-fm text-xs w-full cursor-pointer">
+                        <option value="Novato">Novato</option>
+                        <option value="Principiante">Principiante</option>
+                        <option value="Amateur">Amateur</option>
+                        <option value="Intermedio" selected>Intermedio</option>
+                        <option value="Avanzado">Avanzado</option>
+                        <option value="Pro">Pro</option>
+                        <option value="Maestro">Maestro</option>
+                        <option value="Leyenda">Leyenda</option>
+                        <option value="Top Global">Top Global</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Contraseña (Dejar vacío
+                        para Público)</label>
+                    <input type="password" id="tournament-password" class="input-fm text-xs w-full"
+                        placeholder="Contraseña opcional">
+                </div>
+                <button type="submit"
+                    class="w-full btn-action py-3 rounded font-bold tracking-widest text-sm bg-purple-600 hover:bg-purple-500 mt-2">PUBLICAR
+                    TORNEO</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Unirse a Torneo Privado -->
+    <div id="modal-join-tournament"
+        class="fixed inset-0 bg-black/95 z-[9990] hidden flex items-center justify-center backdrop-blur-md p-3">
+        <div
+            class="glass-panel p-6 rounded-xl max-w-xs w-full text-center border-t-4 border-yellow-500 shadow-2xl relative">
+            <button onclick="document.getElementById('modal-join-tournament').classList.add('hidden')"
+                class="absolute top-4 right-6 text-slate-500 hover:text-white font-bold text-2xl transition">&times;</button>
+            <h2 class="text-xl font-gaming text-yellow-400 mb-2 uppercase tracking-widest">Torneo Privado</h2>
+            <p class="text-slate-400 mb-4 text-[10px] uppercase tracking-widest">Introduce la contraseña de acceso</p>
+            <input type="hidden" id="join-tournament-id">
+            <input type="hidden" id="join-tournament-req-rank">
+            <input type="password" id="join-tournament-password" class="input-fm text-xs w-full mb-4 text-center"
+                placeholder="Contraseña" required>
+            <button onclick="submitJoinPrivateTournament()"
+                class="w-full btn-action py-2 rounded font-bold tracking-widest text-xs">UNIRSE AL TORNEO</button>
+        </div>
+    </div>
+
+    <!-- Modal 1v1 Invite Alert -->
+    <div id="modal-1v1-invite"
+        class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-br from-blue-900 to-indigo-900 border-2 border-blue-400 text-white p-5 rounded-xl shadow-[0_0_40px_rgba(59,130,246,0.6)] z-[9999] hidden w-80 text-center animate-[bounce_1s_infinite]">
+        <div class="text-3xl mb-2">⚔️</div>
+        <h3 class="font-bold uppercase tracking-widest text-sm mb-1 text-yellow-400">¡Reto 1vs1 Recibido!</h3>
+        <p class="text-xs text-sky-200 mb-4 font-mono"><span id="invite-sender-name"
+                class="font-bold text-white text-sm">Amigo</span> te ha retado a un duelo privado.</p>
+        <div class="flex gap-3">
+            <button onclick="reject1v1Invite()"
+                class="flex-1 bg-red-600 hover:bg-red-500 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition shadow-lg">Declinar</button>
+            <button onclick="accept1v1Invite()"
+                class="flex-1 bg-green-600 hover:bg-green-500 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition shadow-[0_0_15px_rgba(34,197,94,0.6)]">Aceptar
+                Duelo</button>
         </div>
     </div>
 
