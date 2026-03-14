@@ -1,0 +1,23 @@
+window.playGoalAnimation = function (scorer, assist, minute, isLocalTeam) {
+    const overlay = document.getElementById('goal-celebration-overlay');
+    const scorerEl = document.getElementById('goal-scorer-display');
+    const assistEl = document.getElementById('goal-assist-display');
+    const minuteEl = document.getElementById('goal-min-display');
+
+    if (!overlay) return;
+
+    // Configurar info
+    scorerEl.textContent = scorer.toUpperCase();
+    assistEl.textContent = assist ? `Asistencia de ${assist}` : 'Jugada Individual';
+    minuteEl.textContent = `${minute}'`;
+
+    // Reset mini-pitch markers
+    const p1 = document.getElementById('goal-pitch-p1');
+    const p2 = document.getElementById('goal-pitch-p2');
+    const ball = document.getElementById('goal-pitch-ball');
+
+    if (p1 && p2 && ball) {
+        p1.style.left = '20%'; p1.style.top = '60%';
+        p2.style.left = '45%'; p2.style.top = '40%';
+        ball.style.left = '20%'; ball.style.top = '60%';
+    }

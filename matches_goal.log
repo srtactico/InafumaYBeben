@@ -1,0 +1,3 @@
+3216: playGoalAnimation(scorer.name, assist ? assist.name : null, matchState.min, matchState.isHome);
+3229: playGoalAnimation(scorer, null, matchState.min, false);
+5265: window.playGoalAnimation = function (scorer, assist, minute, isLocalTeam) {

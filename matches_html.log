@@ -1,0 +1,28 @@
+2198: <div id="goal-celebration-overlay">
+2199: <canvas id="confetti-canvas"></canvas>
+2200: <div class="goal-mini-pitch" id="goal-mini-pitch">
+2201: <div class="goal-pitch-line" style="width: 2px; height: 100%; left: 50%;"></div>
+2202: <div class="goal-pitch-line" style="width: 100%; height: 2px; top: 50%;"></div>
+2203: <div id="goal-pitch-p1" class="goal-pitch-player" style="background: #3b82f6; left: 20%; top: 50%;"></div>
+2204: <div id="goal-pitch-p2" class="goal-pitch-player" style="background: #3b82f6; left: 40%; top: 50%;"></div>
+2205: <div id="goal-pitch-ball" class="goal-pitch-ball" style="left: 20%; top: 50%;"></div>
+2206: </div>
+2207: <div class="goal-title-container">
+2208: <div class="goal-text-glow">¡GOL!</div>
+2209: </div>
+2210: <div class="goal-info-box">
+2211: <div class="goal-minute-badge" id="goal-min-display">42'</div>
+2212: <h2 class="goal-scorer-name" id="goal-scorer-display">JUGADOR</h2>
+2213: <p class="goal-assist-info" id="goal-assist-display">Asistencia de ...</p>
+2214: </div>
+2215: </div>
+2216: 
+2217: <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+2218: 
+2219: <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+2220: <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+2221: <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+2222: <script src="app.js"></script>
+2223: </body>
+2224: 
+2225: </html>

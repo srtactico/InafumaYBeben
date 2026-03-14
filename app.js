@@ -1,4 +1,4 @@
-﻿const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyBvlnwg6VwX-U5yqjiG350ERFtc6cGrNlA",
     authDomain: "inafuma-y-beben-10cfc.firebaseapp.com",
     projectId: "inafuma-y-beben-10cfc",
@@ -3143,47 +3143,22 @@ function launchMatch() {
         renderFormationPanel('fm-formation-away', aiPlayers, aTeam.c1 || '#dc2626');
     } else {
         renderFormationPanel('fm-formation-home', aiPlayers, hTeam.c1 || '#2563eb');
-        renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 || '#dc2626');
-    }
-
-    // Render events (empty)
-    renderMatchEvents('home');
-
-    // Init and animate pitch tokens
-    initPitchTokens();
-    animatePitchTokens();
-
-    // Dugout narrative reset
-    const dugNarr = document.getElementById('fm-dugout-narrative');
-    if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Partido en curso...</div>';
-
-    updateMatchStatsUI();
-    runMatchLoop(45);
-}
-
-function runMatchLoop(targetMinute) {
+        renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 |function runMatchLoop(targetMinute) {
     matchState._targetMinute = targetMinute;
     const logDiv = document.getElementById('match-narrative');
     const commentary = [
         "Controlando el ritmo del partido.", "Pase filtrado peligroso que corta la zaga.",
-        "Falta tÃ¡ctica en la medular.", "Disparo lejano que se va alto.",
-        "Gran intervenciÃ³n del portero.", "Despeje de cabeza en el Ã¡rea.",
-        "Centro desde la banda derecha.", "PosesiÃ³n tranquila en campo propio.",
-        "PresiÃ³n alta del equipo rival.", "RecuperaciÃ³n en la medular.",
+        "Falta táctica en la medular.", "Disparo lejano que se va alto.",
+        "Gran intervención del portero.", "Despeje de cabeza en el área.",
+        "Centro desde la banda derecha.", "Posesión tranquila en campo propio.",
+        "Presión alta del equipo rival.", "Recuperación en la medular.",
         "Lateral largo buscando al extremo.", "Tiro que rechaza la defensa."
     ];
 
     matchState.interval = setInterval(() => {
-        matchState.min += 3;
+        matchState.min++;
         document.getElementById('match-time').textContent = `${matchState.min}'`;
         document.getElementById('match-progress').style.width = `${(matchState.min / 90) * 100}%`;
-
-        // PosesiÃ³n dinÃ¡mica realista
-        const basePoss = 50 + ((matchState.myProb - matchState.oppProb) * 200);
-        matchState.stats.hPoss = Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))));
-        matchState.stats.aPoss = 100 - matchState.stats.hPoss;
-
-        // (Corners now handled below alongside pitch phases)
 
         if (matchState.min === 45 && targetMinute === 45) {
             clearInterval(matchState.interval);
@@ -3191,12 +3166,11 @@ function runMatchLoop(targetMinute) {
             logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Nos vamos al descanso.</strong></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
             document.getElementById('match-halftime').classList.remove('hidden');
-            matchState.events.push({ min: 45, icon: 'â±', text: 'Descanso', side: 'home' });
+            matchState.events.push({ min: 45, icon: '⏱', text: 'Descanso', side: 'home' });
             updateMatchStatsUI();
             renderMatchEvents('home');
-            // Dugout update
             const dugNarr = document.getElementById('fm-dugout-narrative');
-            if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Medio tiempo â€” elige tus acciones en el dugout.</div>';
+            if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Medio tiempo — elige tus acciones en el dugout.</div>';
             return;
         }
 
@@ -3207,155 +3181,208 @@ function runMatchLoop(targetMinute) {
             return;
         }
 
-        let eventText = commentary[Math.floor(Math.random() * commentary.length)];
+        // --- CÁLCULO DE CONDICIÓN (FATIGA) PROGRESIVA ---
+        const xi = getStartingXI().filter(p => !p.suspension);
+        const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
+        
+        // La condición baja ligeramente minuto a minuto (depende del phy de cada jugador)
+        xi.forEach(p => {
+            const stamDrop = 0.05 + ((100 - (p.phy || 70)) * 0.002); 
+            p.con = Math.max(0, p.con - stamDrop);
+        });
+        const myAvgCon = xi.reduce((acc, p) => acc + (p.con || 100), 0) / (xi.length || 1);
+        const oppAvgCon = 100 - (matchState.min * 0.2); // Simulación rápida de fatiga rival
+
+        // --- CÁLCULO DE SECTORES ---
+        // Nuestro equipo
+        const myAtt = xi.filter(p => p.pos === 'DEL').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'DEL').length || 1);
+        const myMid = xi.filter(p => p.pos === 'MED').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'MED').length || 1);
+        const myDef = xi.filter(p => p.pos === 'DEF').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'DEF').length || 1);
+        const myGk = xi.filter(p => p.pos === 'POR').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'POR').length || 1);
+        
+        // Rival (promedio simplificado sobre su OVR general, dando pequeñas variaciones)
+        const oppAtt = currentOpponent.ovr + (Math.random() * 4 - 2);
+        const oppMid = currentOpponent.ovr + (Math.random() * 4 - 2);
+        const oppDef = currentOpponent.ovr + (Math.random() * 4 - 2);
+        const oppGk = currentOpponent.ovr + (Math.random() * 4 - 2);
+
+        // Modificadores de fatiga y charla
+        const myFatigueMod = (0.7 + (myAvgCon / 100) * 0.3);
+        const oppFatigueMod = (0.7 + (oppAvgCon / 100) * 0.3);
+
+        const activeMyMid = (myMid * myFatigueMod) + (matchState.talkMod * 100);
+        const activeOppMid = (oppMid * oppFatigueMod);
+
+        // --- POSESIÓN DINÁMICA ---
+        const totalMid = activeMyMid + activeOppMid;
+        const myPossChance = activeMyMid / totalMid;
+        const basePoss = myPossChance * 100;
+        
+        matchState.stats.hPoss = matchState.isHome 
+            ? Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))))
+            : 100 - Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))));
+        matchState.stats.aPoss = 100 - matchState.stats.hPoss;
+
+        const isMyPossession = Math.random() < myPossChance;
+        let eventText = "";
+
+        // --- GENERACIÓN DE EVENTOS (Probabilidades por minuto) ---
         let rand = Math.random();
+        
+        if (isMyPossession) {
+            // El usuario tiene el balón
+            const attackStrength = (myAtt * myFatigueMod) + (matchState.talkMod * 100);
+            const defenseStrength = (oppDef * oppFatigueMod);
+            const gkStrength = oppGk;
+            
+            // Probabilidad de generar una ocasión (0.05 a 0.15 por minuto aprox)
+            const chanceProb = Math.max(0.02, Math.min(0.18, 0.08 + ((attackStrength - defenseStrength) * 0.003)));
 
-        // Modificadores de probabilidad basados en posesiÃ³n
-        let homePossMod = matchState.stats.hPoss / 50;
-        let awayPossMod = matchState.stats.aPoss / 50;
+            if (rand < chanceProb) {
+                // Hay ocasión
+                let xG = Math.max(0.1, Math.min(0.9, 0.3 + ((attackStrength - defenseStrength) * 0.01)));
+                if (matchState.isHome) { matchState.stats.hShots++; matchState.stats.hXG += xG; }
+                else { matchState.stats.aShots++; matchState.stats.aXG += xG; }
 
-        let activeMyProb = (matchState.myProb + matchState.talkMod) * (matchState.isHome ? homePossMod : awayPossMod);
-        let activeOppProb = matchState.oppProb * (matchState.isHome ? awayPossMod : homePossMod);
-
-        let isMyGoal = rand < (activeMyProb * 0.4);
-        let isOppGoal = !isMyGoal && rand > 1 - (activeOppProb * 0.4);
-
-        if (isMyGoal) {
-            matchState.mG++;
-            let xG = 0.6 + Math.random() * 0.3;
-            // Shot + SOT + xG for our team
-            if (matchState.isHome) {
-                matchState.stats.hShots++; matchState.stats.hSot++;
-                matchState.stats.hXG += xG;
-            } else {
-                matchState.stats.aShots++; matchState.stats.aSot++;
-                matchState.stats.aXG += xG;
+                // Probabilidad de Gol = xG vs Portero
+                const goalProb = xG * (1 - (gkStrength / 150));
+                
+                if (Math.random() < goalProb) {
+                    // ¡GOL NUESTRO!
+                    matchState.mG++;
+                    if (matchState.isHome) matchState.stats.hSot++; else matchState.stats.aSot++;
+                    
+                    const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED' || p.pos === 'DEF');
+                    const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)] : { name: "el jugador", id: 0 };
+                    const assistCands = scorers.filter(p => p.id !== scorer.id && p.pos !== 'POR');
+                    const assist = (assistCands.length > 0 && Math.random() > 0.3) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
+                    
+                    eventText = `<span class="text-green-400 font-bold">¡GOL! Definición perfecta de ${scorer.name}.</span>`;
+                    const goalSide = matchState.isHome ? 'home' : 'away';
+                    
+                    // Asegurar que el objeto de evento contenga los campos solicitados
+                    matchState.events.push({ 
+                        min: matchState.min, 
+                        icon: '⚽', 
+                        text: `GOL — ${scorer.name}`, 
+                        side: goalSide,
+                        goleador: scorer.name,
+                        asistente: assist ? assist.name : null
+                    });
+                    
+                    setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
+                    // Pasamos el objeto completo del scorer para extraer su ID/Imagen si es necesario, o al menos un objeto
+                    playGoalAnimation(scorer, assist, matchState.min, matchState.isHome);
+                } else {
+                    // Parada o Fuera
+                    if (Math.random() < 0.5) {
+                        if (matchState.isHome) matchState.stats.hSot++; else matchState.stats.aSot++;
+                        eventText = `¡Paradón del portero rival a tiro de ${xi.filter(p => p.pos === 'DEL')[0]?.name || 'nuestro delantero'}!`;
+                        setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
+                    } else {
+                        eventText = `Disparo que sale rozando el palo. Buena ocasión.`;
+                        setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
+                    }
+                }
             }
-            const xi = getStartingXI();
-            const scorers = xi.filter(p => !p.suspension && (p.pos === 'DEL' || p.pos === 'MED'));
-            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)].name : "el delantero";
-            eventText = `<span class="text-green-400 font-bold">Â¡GOL! DefiniciÃ³n perfecta de ${scorer}.</span>`;
-            const goalSide = matchState.isHome ? 'home' : 'away';
-            matchState.events.push({ min: matchState.min, icon: 'âš½', text: `GOL â€” ${scorer}`, side: goalSide });
-            // Animate pitch: our goal = attack towards opponent goal
-            setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
-        } else if (isOppGoal) {
-            matchState.oG++;
-            let xG = 0.6 + Math.random() * 0.3;
-            if (matchState.isHome) {
-                matchState.stats.aShots++; matchState.stats.aSot++;
-                matchState.stats.aXG += xG;
-            } else {
-                matchState.stats.hShots++; matchState.stats.hSot++;
-                matchState.stats.hXG += xG;
-            }
-            const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
-            const scorers = aiPlayers.filter(p => p.pos === 'DEL' || p.pos === 'MED');
-            const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)].name : "el delantero";
-            eventText = `<span class="text-red-400 font-bold">Â¡Gol del equipo rival! Grave error en defensa que aprovecha ${scorer}.</span>`;
-            const goalSide = matchState.isHome ? 'away' : 'home';
-            matchState.events.push({ min: matchState.min, icon: 'âš½', text: `GOL â€” ${scorer}`, side: goalSide });
-            // Animate pitch: opponent goal = they attack our goal
-            setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
-        } else if (rand < 0.25) {
-            // Shot home (no goal)
-            matchState.stats.hShots++;
-            let xG = 0.05 + Math.random() * 0.15;
-            matchState.stats.hXG += xG;
-            if (Math.random() < 0.4) {
-                matchState.stats.hSot++;
-                eventText = `Mala definiciÃ³n, el portero visitante detiene sin problemas (xG: ${xG.toFixed(2)}).`;
-            } else {
-                eventText = `Disparo desviado del equipo local que se pierde por la banda (xG: ${xG.toFixed(2)}).`;
-            }
-            setPitchPhase('home-attack', 2);
-        } else if (rand > 0.75) {
-            // Shot away (no goal)
-            matchState.stats.aShots++;
-            let xG = 0.05 + Math.random() * 0.15;
-            matchState.stats.aXG += xG;
-            if (Math.random() < 0.4) {
-                matchState.stats.aSot++;
-                eventText = `Atrapada segura de nuestro guardameta ante el tiro visitante (xG: ${xG.toFixed(2)}).`;
-            } else {
-                eventText = `Tiro lejano sin peligro del rival (xG: ${xG.toFixed(2)}).`;
-            }
-            setPitchPhase('away-attack', 2);
         } else {
-            // Neutral play â€” occasional possession phase shifts
-            if (Math.random() < 0.3) {
-                setPitchPhase(matchState.stats.hPoss > 55 ? 'home-attack' : matchState.stats.aPoss > 55 ? 'away-attack' : 'neutral', 1);
+            // La CPU tiene el balón
+            const attackStrength = (oppAtt * oppFatigueMod);
+            const defenseStrength = (myDef * myFatigueMod) + (matchState.talkMod * 100);
+            const gkStrength = (myGk * myFatigueMod);
+            
+            const chanceProb = Math.max(0.02, Math.min(0.18, 0.08 + ((attackStrength - defenseStrength) * 0.003)));
+
+            if (rand < chanceProb) {
+                // Hay ocasión rival
+                let xG = Math.max(0.1, Math.min(0.9, 0.3 + ((attackStrength - defenseStrength) * 0.01)));
+                if (matchState.isHome) { matchState.stats.aShots++; matchState.stats.aXG += xG; }
+                else { matchState.stats.hShots++; matchState.stats.hXG += xG; }
+
+                const goalProb = xG * (1 - (gkStrength / 150));
+
+                if (Math.random() < goalProb) {
+                    // ¡GOL RIVAL!
+                    matchState.oG++;
+                    if (matchState.isHome) matchState.stats.aSot++; else matchState.stats.hSot++;
+                    
+                    const scorers = aiPlayers.filter(p => p.pos === 'DEL' || p.pos === 'MED');
+                    const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)] : { name: "el delantero", id: 0 };
+                    const assistCands = scorers.filter(p => p.name !== scorer.name);
+                    const assist = (assistCands.length > 0 && Math.random() > 0.3) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
+                    
+                    eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Grave error en defensa que aprovecha ${scorer.name}.</span>`;
+                    const goalSide = matchState.isHome ? 'away' : 'home';
+                    
+                    matchState.events.push({ 
+                        min: matchState.min, 
+                        icon: '⚽', 
+                        text: `GOL — ${scorer.name}`, 
+                        side: goalSide,
+                        goleador: scorer.name,
+                        asistente: assist ? assist.name : null
+                    });
+                    
+                    setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
+                    playGoalAnimation(scorer, assist, matchState.min, !matchState.isHome);
+                } else {
+                    // Parada o Fuera
+                    if (Math.random() < 0.5) {
+                        if (matchState.isHome) matchState.stats.aSot++; else matchState.stats.hSot++;
+                        eventText = `¡Paradón de nuestro portero para salvar al equipo!`;
+                        setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
+                    } else {
+                        eventText = `Aviso del rival, el tiro sale cerca del larguero.`;
+                        setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
+                    }
+                }
             }
         }
 
-        // Random event icons for cards
-        if (Math.random() < 0.05) {
-            const cardSide = Math.random() < (matchState.stats.aPoss / 100) ? 'home' : 'away'; // El equipo sin el balÃ³n hace la falta
-
-            // Elegir jugador sancionado
+        // --- SISTEMA DE TARJETAS (Aleatorio independiente) ---
+        if (Math.random() < 0.012 && !eventText) { // Solo si no ha pasado nada reseñable
+            const cardSide = Math.random() < 0.5 ? 'home' : 'away';
             let sanctionedName = "Jugador";
             let isUserPlayer = false;
             let playerId = null;
-
             if ((cardSide === 'home' && matchState.isHome) || (cardSide === 'away' && !matchState.isHome)) {
-                const xi = getStartingXI().filter(p => !p.suspension);
-                if (xi.length > 0) {
-                    const p = xi[Math.floor(Math.random() * xi.length)];
-                    sanctionedName = p.name;
-                    isUserPlayer = true;
-                    playerId = p.id;
-                }
+                if (xi.length > 0) { const p = xi[Math.floor(Math.random() * xi.length)]; sanctionedName = p.name; isUserPlayer = true; playerId = p.id; }
             } else {
-                const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
                 if (aiPlayers.length > 0) sanctionedName = aiPlayers[Math.floor(Math.random() * aiPlayers.length)].name;
             }
-
-            // Gestionar estado de tarjeta del partido
             const matchPlayerKey = `${cardSide}_${sanctionedName}`;
             if (!matchState.playersCards) matchState.playersCards = {};
-
-            // Si ya tenÃ­a amarilla -> Roja
             if (matchState.playersCards[matchPlayerKey] === 'yellow') {
                 matchState.playersCards[matchPlayerKey] = 'red';
-                eventText = `<span class="text-red-500 font-bold">Â¡SEGUNDA AMARILLA! ExpulsiÃ³n para ${sanctionedName} tras una entrada tardÃ­a.</span>`;
-                matchState.events.push({ min: matchState.min, icon: 'ðŸŸ¥', text: `Roja â€” ${sanctionedName}`, side: cardSide });
-
-                // Aplicar sanciÃ³n al jugador del usuario directamente
-                if (isUserPlayer && state && state.roster) {
-                    const player = state.roster.find(p => p.id === playerId);
-                    if (player) {
-                        player.suspension = 2;
-                        addEmail('ComitÃ© de CompeticiÃ³n', 'SanciÃ³n por doble amarilla', `Tu jugador ${player.name} ha sido expulsado y se perderÃ¡ 2 partidos.`);
-                    }
-                }
+                eventText = `<span class="text-red-500 font-bold">¡ROJA! Expulsión para ${sanctionedName}.</span>`;
+                matchState.events.push({ min: matchState.min, icon: '🟥', text: `Roja — ${sanctionedName}`, side: cardSide });
+                if (isUserPlayer && state && state.roster) { const player = state.roster.find(p => p.id === playerId); if (player) { player.suspension = 2; addEmail('Comité', 'Expulsión', `${player.name} expulsado.`); } }
             } else {
                 matchState.playersCards[matchPlayerKey] = 'yellow';
-                eventText = `Falta dura de ${sanctionedName}. El Ã¡rbitro le muestra amarilla.`;
-                matchState.events.push({ min: matchState.min, icon: 'ðŸŸ¨', text: `Amarilla â€” ${sanctionedName}`, side: cardSide });
-
-                // Acumular amarilla al jugador del usuario
-                if (isUserPlayer && state && state.roster) {
-                    const player = state.roster.find(p => p.id === playerId);
-                    if (player) {
-                        player.yellowCards = (player.yellowCards || 0) + 1;
-                        if (player.yellowCards >= 5) {
-                            player.suspension = 1;
-                            player.yellowCards = 0;
-                            addEmail('ComitÃ© de CompeticiÃ³n', 'SanciÃ³n por acumulaciÃ³n', `Tu jugador ${player.name} ha acumulado 5 tarjetas amarillas y se perderÃ¡ 1 partido.`);
-                        }
-                    }
-                }
+                eventText = `Amarilla para ${sanctionedName} por una falta táctica dura.`;
+                matchState.events.push({ min: matchState.min, icon: '🟨', text: `Amarilla — ${sanctionedName}`, side: cardSide });
+                if (isUserPlayer && state && state.roster) { const player = state.roster.find(p => p.id === playerId); if (player) { player.yellowCards = (player.yellowCards || 0) + 1; if (player.yellowCards >= 5) { player.suspension = 1; player.yellowCards = 0; } } }
             }
         }
+        
+        // Agregar "filler" solo si no ha pasado nada (para que no parezca que en el partido no pasa nada)
+        if (!eventText && Math.random() < 0.2) {
+            eventText = commentary[Math.floor(Math.random() * commentary.length)];
+        }
 
-        // Corners trigger pitch phase
-        if (Math.random() < 0.08) {
-            if (Math.random() < 0.5) {
-                matchState.stats.hCorners++;
-                setPitchPhase('home-corner', 2);
-            } else {
-                matchState.stats.aCorners++;
-                setPitchPhase('away-corner', 2);
+        if (eventText) {
+            logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
+        document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
+        updateMatchStatsUI();
+        renderMatchEvents('home');
+
+    }, simSpeedMs / 3);
+}
+   setPitchPhase('away-corner', 2);
             }
         }
 
@@ -5333,6 +5360,149 @@ function renderSobresTab() {
     } 
  
  
-} 
+}
+
+/* =========================================================================
+   SECUENCIA DE ANIMACIÓN DE GOL (UI / CANVAS / CSS)
+   ========================================================================= */
+window.playGoalAnimation = function (scorerObj, assistObj, minute, isLocalTeam) {
+    const overlay = document.getElementById('goal-celebration-overlay');
+    const scorerEl = document.getElementById('goal-scorer-display');
+    const assistEl = document.getElementById('goal-assist-display');
+    const minuteEl = document.getElementById('goal-min-display');
+    const avatarImg = document.getElementById('goal-scorer-avatar');
+    
+    if (!overlay) return;
+
+    // Support old passing of purely strings just in case
+    const scorerName = (typeof scorerObj === 'string') ? scorerObj : (scorerObj.name || 'JUGADOR');
+    const assistName = (assistObj && typeof assistObj === 'string') ? assistObj : (assistObj ? assistObj.name : null);
+    const scorerImgUrl = (typeof scorerObj === 'object' && scorerObj.img) ? scorerObj.img : getAvatar(scorerName);
+
+    // Configurar info
+    scorerEl.textContent = scorerName.toUpperCase();
+    assistEl.textContent = assistName ? `Asistencia de ${assistName}` : 'Jugada Individual';
+    minuteEl.textContent = `${minute}'`;
+
+    if (avatarImg) {
+        avatarImg.src = scorerImgUrl;
+    }
+
+    // Reset mini-pitch markers
+    const p1 = document.getElementById('goal-pitch-p1');
+    const p2 = document.getElementById('goal-pitch-p2');
+    const ball = document.getElementById('goal-pitch-ball');
+    
+    if (p1 && p2 && ball) {
+        p1.style.left = '20%'; p1.style.top = '60%';
+        p2.style.left = '45%'; p2.style.top = '40%';
+        ball.style.left = '20%'; ball.style.top = '60%';
+    }
+
+    // Mostrar overlay
+    overlay.className = 'goal-celebration-overlay active'; // Reset classes
+    if (isLocalTeam) {
+        overlay.classList.add('theme-local');
+    } else {
+        overlay.classList.add('theme-away');
+    }
+    
+    document.body.classList.add('camera-shake');
+    
+    // Play SFX
+    if (typeof playSFX === 'function') playSFX('win');
+
+    // Iniciar Confeti
+    initConfetti();
+
+    // Secuencia de animación en el mini-pitch (simulando un pase o tiro)
+    if (p2 && ball) {
+        setTimeout(() => {
+            // Pase o movimiento
+            ball.style.transition = 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            ball.style.left = '45%';
+            ball.style.top = '40%';
+            setTimeout(() => {
+                // Disparo potente
+                ball.style.transition = 'all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)';
+                ball.style.left = '95%';
+                ball.style.top = '50%';
+                
+                setTimeout(() => {
+                    // Impacto en red
+                    document.body.classList.remove('camera-shake');
+                    void document.body.offsetWidth; // force reflow
+                    document.body.classList.add('camera-shake');
+                    
+                    if(document.querySelector('.goal-text-glow')) {
+                        document.querySelector('.goal-text-glow').style.transform = 'scale(1.2)';
+                        setTimeout(() => document.querySelector('.goal-text-glow').style.transform = 'scale(1)', 200);
+                    }
+                }, 300);
+            }, 800);
+        }, 500);
+    }
+
+    // Auto-cerrar después de 5.5s (damos un segundo extra para la animación premium)
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        document.body.classList.remove('camera-shake');
+        stopConfetti();
+    }, 5500);
+};
+
+let confettiColors = ['#fde047', '#38bdf8', '#4ade80', '#f87171', '#ffffff'];
+let confettiParticles = [];
+let confettiActive = false;
+
+function initConfetti() {
+    confettiActive = true;
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    confettiParticles = [];
+    for (let i = 0; i < 150; i++) {
+        confettiParticles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 6 + 4,
+            d: Math.random() * 150,
+            color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+            tilt: Math.floor(Math.random() * 10) - 10,
+            tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
+            tiltAngle: 0
+        });
+    }
+
+    function draw() {
+        if (!confettiActive) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettiParticles.forEach((p) => {
+            p.tiltAngle += p.tiltAngleIncremental;
+            p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+            p.tilt = Math.sin(p.tiltAngle) * 15;
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+            ctx.stroke();
+            if (p.y > canvas.height) {
+                p.x = Math.random() * canvas.width;
+                p.y = -20;
+            }
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+function stopConfetti() {
+    confettiActive = false;
+}
+ 
  
  

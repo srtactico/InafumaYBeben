@@ -1,0 +1,97 @@
+443: history: [] // Historial de partidos
+753: if (matchState && matchState.interval) {
+754: clearInterval(matchState.interval);
+755: runMatchLoop(matchState._targetMinute || 90);
+757: if (matchState && matchState.pitchInterval) {
+792: AÃºn no has jugado partidos clasificatorios
+875: // Modo carrera contra IA â€” iniciar partido directamente
+899: // PVP match state (mirrors local matchState structure)
+1727: AÃºn no has jugado partidos clasificatorios
+1992: if (!state.flags.canTalk) return showAlert("Ya has dado la charla pre-partido.");
+2689: let matchState = {
+2772: const filtered = matchState.events.filter(e => filter === 'home' ? e.side === 'home' : e.side === 'away');
+2797: matchState.pitchTokens = [];
+2821: matchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'home' });
+2831: matchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'away' });
+2845: if (matchState.pitchInterval) clearInterval(matchState.pitchInterval);
+2846: matchState.pitchInterval = setInterval(() => {
+2855: const hPoss = matchState.stats.hPoss || 50;
+2907: matchState.pitchTokens.forEach((t, idx) => {
+2978: if (matchState.pitchInterval) {
+2979: clearInterval(matchState.pitchInterval);
+2980: matchState.pitchInterval = null;
+2986: const s = matchState.stats;
+3110: matchState = {
+3136: document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>Â¡El Ã¡rbitro seÃ±ala el inicio del partido!</div>";
+3146: renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 |function runMatchLoop(targetMinute) {
+3147: matchState._targetMinute = targetMinute;
+3150: "Controlando el ritmo del partido.", "Pase filtrado peligroso que corta la zaga.",
+3158: matchState.interval = setInterval(() => {
+3159: matchState.min++;
+3160: document.getElementById('match-time').textContent = `${matchState.min}'`;
+3161: document.getElementById('match-progress').style.width = `${(matchState.min / 90) * 100}%`;
+3164: const basePoss = 50 + ((matchState.myProb - matchState.oppProb) * 200);
+3165: matchState.stats.hPoss = Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))));
+3166: matchState.stats.aPoss = 100 - matchState.stats.hPoss;
+3168: if (matchState.min === 45 && targetMinute === 45) {
+3169: clearInterval(matchState.interval);
+3174: matchState.events.push({ min: 45, icon: 'â ±', text: 'Descanso', side: 'home' });
+3182: if (matchState.min >= 90) {
+3183: clearInterval(matchState.interval);
+3185: finishMatch(matchState.mG, matchState.oG);
+3190: let homePossMod = matchState.stats.hPoss / 50;
+3191: let awayPossMod = matchState.stats.aPoss / 50;
+3192: let activeMyProb = (matchState.myProb + matchState.talkMod) * (matchState.isHome ? homePossMod : awayPossMod);
+3193: let activeOppProb = matchState.oppProb * (matchState.isHome ? awayPossMod : homePossMod);
+3205: matchState.mG++;
+3207: if (matchState.isHome) { matchState.stats.hShots++; matchState.stats.hSot++; matchState.stats.hXG += xG; }
+3208: else { matchState.stats.aShots++; matchState.stats.aSot++; matchState.stats.aXG += xG; }
+3213: const goalSide = matchState.isHome ? 'home' : 'away';
+3214: matchState.events.push({ min: matchState.min, icon: 'âš½', text: `GOL â€” ${scorer.name}`, side: goalSide });
+3215: setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
+3216: playGoalAnimation(scorer.name, assist ? assist.name : null, matchState.min, matchState.isHome);
+3218: matchState.oG++;
+3220: if (matchState.isHome) { matchState.stats.aShots++; matchState.stats.aSot++; matchState.stats.aXG += xG; }
+3221: else { matchState.stats.hShots++; matchState.stats.hSot++; matchState.stats.hXG += xG; }
+3226: const goalSide = matchState.isHome ? 'away' : 'home';
+3227: matchState.events.push({ min: matchState.min, icon: 'âš½', text: `GOL â€” ${scorer}`, side: goalSide });
+3228: setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
+3229: playGoalAnimation(scorer, null, matchState.min, false);
+3232: if (matchState.isHome) { matchState.stats.hShots++; matchState.stats.hXG += 0.1; if (Math.random() < 0.4) matchState.stats.hSot++; }
+3233: else { matchState.stats.aShots++; matchState.stats.aXG += 0.1; if (Math.random() < 0.4) matchState.stats.aSot++; }
+3235: setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
+3238: if (matchState.isHome) { matchState.stats.aShots++; matchState.stats.aXG += 0.1; if (Math.random() < 0.4) matchState.stats.aSot++; }
+3239: else { matchState.stats.hShots++; matchState.stats.hXG += 0.1; if (Math.random() < 0.4) matchState.stats.hSot++; }
+3241: setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
+3248: if ((cardSide === 'home' && matchState.isHome) || (cardSide === 'away' && !matchState.isHome)) {
+3256: if (!matchState.playersCards) matchState.playersCards = {};
+3257: if (matchState.playersCards[matchPlayerKey] === 'yellow') {
+3258: matchState.playersCards[matchPlayerKey] = 'red';
+3260: matchState.events.push({ min: matchState.min, icon: 'ðŸŸ¥', text: `Roja â€” ${sanctionedName}`, side: cardSide });
+3263: matchState.playersCards[matchPlayerKey] = 'yellow';
+3265: matchState.events.push({ min: matchState.min, icon: 'ðŸŸ¨', text: `Amarilla â€” ${sanctionedName}`, side: cardSide });
+3271: logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
+3275: document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
+3276: document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
+3286: logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
+3288: document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
+3289: document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
+3298: if (matchState.talkDone) return;
+3299: matchState.talkDone = true;
+3303: matchState.talkMod = 0.01;
+3305: matchState.events.push({ min: 45, icon: 'ðŸ“£', text: 'Charla motivacional', side: matchState.isHome ? 'home' : 'away' });
+3308: matchState.talkMod = 0.02;
+3311: matchState.talkMod = -0.01;
+3314: matchState.events.push({ min: 45, icon: 'ðŸ˜¤', text: 'Bronca al equipo', side: matchState.isHome ? 'home' : 'away' });
+3320: const oppSide = matchState.isHome ? 'away' : 'home';
+3322: matchState.events.push({ min: 45, icon: 'ðŸ“£', text: 'Charla motivacional (rival)', side: oppSide });
+3325: matchState.events.push({ min: 45, icon: 'ðŸ˜¤', text: 'Bronca al equipo (rival)', side: oppSide });
+3327: matchState.oppProb += (Math.random() < 0.6 ? 0.01 : -0.005);
+3374: matchState.myProb = 0.08 + ((newOvr - currentOpponent.ovr) * 0.003);
+3387: const hTeamBadge = matchState.isHome ? state.team : currentOpponent.badge;
+3388: const aTeamBadge = matchState.isHome ? currentOpponent.badge : state.team;
+3389: if (matchState.isHome) {
+3398: runMatchLoop(90);
+3421: // Resolver todos los partidos de la jornada
+3426: hG = matchState.isHome ? mG : oG;
+3427: aG = matchState.isHome ? oG : mG;

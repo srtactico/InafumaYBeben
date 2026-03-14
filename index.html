@@ -169,7 +169,7 @@
             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
             <source src="video/sexo.mp4" type="video/mp4">
         </video>
-        <div style="position:absolute;inset:0;background:rgba(11,22,40,0.82);z-index:1;"></div>
+        <div style="position:absolute;inset:0;background:rgba(11,22,40,0.82);z-index:1;pointer-events:none;"></div>
 
         <!-- Gear icon for settings on login -->
         <button onclick="showSubpage('settings')" class="settings-gear-float" title="Ajustes" style="z-index:15;">
@@ -182,28 +182,28 @@
         </button>
 
         <div class="relative z-10 glass-panel p-6 md:p-10 rounded-2xl max-w-md w-full mx-3 md:mx-auto shadow-[0_0_50px_rgba(250,204,21,0.15)] border-t-4 border-yellow-400"
-            style="max-height:90vh;overflow-y:auto;">
+            style="max-height:90vh;overflow-y:auto;pointer-events:auto;">
             <img src="images/logo2.png" alt="Inafuma & Beben" class="login-logo-big">
             <p class="text-center text-sky-300 mb-8 text-xs font-mono uppercase tracking-widest">Football Manager Engine
             </p>
 
             <div class="flex mb-6 border-b border-sky-800">
-                <button id="tab-login" onclick="toggleAuth('login')"
-                    class="flex-1 pb-2 text-white border-b-2 border-yellow-400 font-bold text-xs uppercase transition">Iniciar
+                <button type="button" id="tab-login" onclick="toggleAuth('login')"
+                    class="flex-1 pb-2 text-white border-b-2 border-yellow-400 font-bold text-xs uppercase transition cursor-pointer">Iniciar
                     Sesión</button>
-                <button id="tab-register" onclick="toggleAuth('register')"
-                    class="flex-1 pb-2 text-sky-400 hover:text-white font-bold text-xs uppercase transition">Crear
+                <button type="button" id="tab-register" onclick="toggleAuth('register')"
+                    class="flex-1 pb-2 text-sky-400 hover:text-white font-bold text-xs uppercase transition cursor-pointer">Crear
                     Perfil</button>
             </div>
 
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-4" onsubmit="return false;">
                 <input type="text" id="log-user" class="input-fm" placeholder="Nombre de Mánager" required>
                 <input type="password" id="log-pass" class="input-fm" placeholder="Contraseña de Seguridad" required>
                 <button type="submit" class="w-full btn-action py-4 mt-2 text-sm tracking-widest">ENTRAR AL
                     JUEGO</button>
             </form>
 
-            <form id="register-form" class="space-y-4 hidden">
+            <form id="register-form" class="space-y-4 hidden" onsubmit="return false;">
                 <input type="text" id="reg-user" class="input-fm" placeholder="Nuevo Mánager (Usuario)" required>
                 <input type="password" id="reg-pass" class="input-fm" placeholder="Contraseña Segura" required>
                 <button type="submit"
@@ -2194,7 +2194,49 @@
         </div>
     </div>
 
+    <!-- Overlays de Celebración de GOL -->
+    <div id="goal-celebration-overlay">
+        <!-- Partículas de fondo (Canvas) -->
+        <canvas id="confetti-canvas"></canvas>
+        
+        <!-- Elementos 3D abstractos (Cajas, aros) creados via CSS -->
+        <div class="goal-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+
+        <!-- Mini-pitch (Mantenemos la lógica JS, mejoramos CSS) -->
+        <div class="goal-mini-pitch" id="goal-mini-pitch">
+            <div class="goal-pitch-line" style="width: 2px; height: 100%; left: 50%;"></div>
+            <div class="goal-pitch-line" style="width: 100%; height: 2px; top: 50%;"></div>
+            <div id="goal-pitch-p1" class="goal-pitch-player" style="background: #3b82f6; left: 20%; top: 50%;"></div>
+            <div id="goal-pitch-p2" class="goal-pitch-player" style="background: #3b82f6; left: 40%; top: 50%;"></div>
+            <div id="goal-pitch-ball" class="goal-pitch-ball" style="left: 20%; top: 50%;"></div>
+        </div>
+
+        <div class="goal-content-wrapper">
+            <!-- Título GOLazo -->
+            <div class="goal-title-container">
+                <div class="goal-text-glow">GOL</div>
+            </div>
+
+            <!-- Panel de información del jugador -->
+            <div class="goal-info-box glass-panel">
+                <div class="goal-player-image-container">
+                    <img id="goal-scorer-avatar" src="images/players/default.jpg" alt="Jugador" class="goal-player-img">
+                </div>
+                <div class="goal-text-details">
+                    <div class="goal-minute-badge" id="goal-min-display">42'</div>
+                    <h2 class="goal-scorer-name" id="goal-scorer-display">JUGADOR</h2>
+                    <p class="goal-assist-info" id="goal-assist-display">Asistencia de ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
