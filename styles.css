@@ -160,6 +160,12 @@ h4 {
     box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
 }
 
+.btn-action:active:not(:disabled) {
+    transform: scale(0.97);
+    box-shadow: 0 2px 5px rgba(14, 165, 233, 0.6);
+    filter: brightness(0.9);
+}
+
 .btn-action:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -185,6 +191,10 @@ h4 {
     transform: scale(1.03);
 }
 
+.btn-continue:active {
+    transform: scale(0.98);
+}
+
 .btn-sell {
     background-color: transparent;
     color: #f87171;
@@ -202,6 +212,10 @@ h4 {
     background-color: #f87171;
     color: white;
     transform: scale(1.05);
+}
+
+.btn-sell:active {
+    transform: scale(0.95);
 }
 
 .btn-buy {
@@ -239,6 +253,10 @@ h4 {
     box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
 }
 
+.btn-buy.premium:active {
+    transform: scale(0.95);
+}
+
 /* Tablas Estilo FM */
 .fm-table {
     width: 100%;
@@ -250,15 +268,17 @@ h4 {
 .fm-table th {
     color: var(--theme-blue);
     text-transform: uppercase;
-    padding: 10px 12px;
+    padding: 12px 14px;
     position: sticky;
     top: 0;
-    background: var(--fm-header);
-    font-weight: 700;
+    background: linear-gradient(180deg, var(--fm-header) 0%, rgba(15, 31, 58, 0.95) 100%);
+    font-weight: 800;
     font-size: 10px;
+    letter-spacing: 0.05em;
     border-bottom: 2px solid var(--theme-yellow);
     z-index: 10;
     cursor: default;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
 .fm-table td {
@@ -268,8 +288,17 @@ h4 {
     vertical-align: middle;
 }
 
+.fm-table tr {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .fm-table tr:hover td {
-    background: rgba(56, 189, 248, 0.06);
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.fm-table tbody tr:hover {
+    transform: scale(1.005) translateX(2px);
+    box-shadow: -2px 0 0 inset var(--theme-blue);
 }
 
 /* Squad table: sin bordes inferiores en celdas, separación por color alterno */
@@ -4079,6 +4108,17 @@ h4 {
     pointer-events: none;
 }
 
+/* --- TEXTO DE GOL --- */
+.goal-text-animate {
+    transform: scale(1) !important;
+    animation: pulseGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from { filter: drop-shadow(0 0 20px rgba(250,204,21,0.6)); }
+    to { filter: drop-shadow(0 0 50px rgba(250,204,21,1)); }
+}
+
 /* Mini Pitch en Celebración */
 .goal-mini-pitch {
     width: 320px;
@@ -4133,4 +4173,6 @@ h4 {
     transform: translate(-50%, -50%);
     box-shadow: 0 0 15px #fff, 0 4px 8px rgba(0,0,0,0.5);
     z-index: 5;
-}
+}
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.9) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }

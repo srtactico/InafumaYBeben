@@ -17,23 +17,23 @@
 
     <div id="custom-alert"
         class="fixed inset-0 bg-black/90 z-[9999] hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="glass-panel p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-blue-500 shadow-2xl">
+        <div class="glass-panel p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-blue-500 shadow-2xl modal-pop">
             <h3 class="text-xl font-gaming mb-4 text-white uppercase tracking-widest" id="alert-title">Aviso del Sistema
             </h3>
             <p class="text-slate-300 mb-6 text-sm" id="alert-message"></p>
-            <button class="btn-action w-full py-3 text-sm" onclick="closeAlert()">ACEPTAR</button>
+            <button class="btn-action w-full py-3 text-sm transition-transform hover:scale-105 active:scale-95" onclick="closeAlert()">ACEPTAR</button>
         </div>
     </div>
 
     <div id="custom-confirm"
         class="fixed inset-0 bg-black/90 z-[9999] hidden flex items-center justify-center backdrop-blur-sm">
-        <div class="glass-panel p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-yellow-500 shadow-2xl">
+        <div class="glass-panel p-8 rounded-xl max-w-sm w-full text-center border-t-4 border-yellow-500 shadow-2xl modal-pop">
             <h3 class="text-xl font-gaming mb-4 text-white uppercase tracking-widest">Confirmación Requerida</h3>
             <p class="text-slate-300 mb-6 text-sm" id="confirm-message"></p>
             <div class="flex gap-4">
-                <button class="btn-action flex-1 py-3 text-sm bg-slate-600"
+                <button class="btn-action flex-1 py-3 text-sm bg-slate-600 transition-transform hover:scale-105 active:scale-95 hover:bg-slate-500"
                     onclick="closeConfirm(false)">CANCELAR</button>
-                <button class="btn-action flex-1 py-3 text-sm"
+                <button class="btn-action flex-1 py-3 text-sm transition-transform hover:scale-105 active:scale-95"
                     style="background:linear-gradient(135deg, #15803d, #22c55e);"
                     onclick="closeConfirm(true)">CONFIRMAR</button>
             </div>
@@ -583,6 +583,42 @@
 
     <!-- Tirador vertical móvil -->
     <div class="mobile-left-handle" onclick="toggleSidebar()"></div>
+
+    <!-- ============== OVERLAY DE GOL (ANIMACIÓN 2D) ============== -->
+    <div id="goal-overlay" class="fixed inset-0 bg-black/95 z-[99999] hidden flex-col items-center justify-center backdrop-blur-xl overflow-hidden transition-opacity duration-500 opacity-0">
+        <!-- Confetti Canvas -->
+        <canvas id="confetti-canvas" class="absolute inset-0 z-0 pointer-events-none"></canvas>
+        
+        <!-- Contenedor 2D del campo -->
+        <div id="goal-2d-pitch" class="relative w-full max-w-2xl h-64 md:h-96 bg-[#1a472a] border-[6px] border-white/20 shadow-[0_0_50px_rgba(34,197,94,0.3)] mb-8 overflow-hidden z-10 mx-4" style="perspective: 1000px; transform: rotateX(15deg);">
+            <!-- Lineas del campo abstracto -->
+            <div class="absolute inset-x-0 top-1/2 h-[3px] bg-white/40 -translate-y-1/2"></div>
+            <div class="absolute left-1/2 top-1/2 w-32 h-32 border-[3px] border-white/40 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute top-0 bottom-0 left-0 w-1/6 border-r-[3px] border-white/40 bg-white/5"></div>
+            <div class="absolute top-0 bottom-0 right-0 w-1/6 border-l-[3px] border-white/40 bg-white/5"></div>
+            <div class="absolute top-1/4 bottom-1/4 left-0 w-[8%] border-r-[3px] border-y-[3px] border-white/40 bg-white/10"></div>
+            <div class="absolute top-1/4 bottom-1/4 right-0 w-[8%] border-l-[3px] border-y-[3px] border-white/40 bg-white/10"></div>
+            <div class="absolute left-1/2 top-1/2 w-[6px] h-[6px] rounded-full bg-white/60 -translate-x-1/2 -translate-y-1/2"></div>
+            
+            <!-- Elementos animados por JS (asistente, goleador, balon) -->
+            <div id="anim-assister" class="absolute w-5 h-5 md:w-6 md:h-6 rounded-full bg-blue-500 shadow-[0_0_15px_blue] hidden transition-all duration-700 ease-in-out z-20 border-[2px] border-white"></div>
+            <div id="anim-scorer" class="absolute w-6 h-6 md:w-7 md:h-7 rounded-full bg-green-500 shadow-[0_0_20px_green] hidden transition-all duration-700 ease-in-out z-20 border-[2px] border-white"></div>
+            <div id="anim-ball" class="absolute w-4 h-4 rounded-full bg-white shadow-[0_0_15px_white] hidden transition-all duration-300 ease-linear z-30"></div>
+        </div>
+
+        <!-- Texto ¡GOL! y datos -->
+        <div class="relative z-20 text-center flex flex-col items-center justify-center">
+            <h1 id="goal-text-giant" class="text-7xl md:text-9xl font-gaming text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 uppercase tracking-widest drop-shadow-[0_0_40px_rgba(250,204,21,0.8)] scale-0 transition-transform duration-500 ease-out" style="line-height: 1;">¡GOL!</h1>
+            
+            <div id="goal-scorer-info" class="mt-6 opacity-0 transition-opacity duration-500 delay-500 flex flex-col items-center">
+                <div class="text-4xl md:text-6xl font-bold text-white uppercase tracking-widest drop-shadow-2xl" id="goal-scorer-name">Nombre</div>
+                <div class="text-yellow-400 font-mono text-2xl md:text-3xl mt-4 font-bold bg-black/60 px-6 py-2 rounded-lg w-max mx-auto border-2 border-yellow-500/30 shadow-[0_0_20px_rgba(250,204,21,0.2)]">MINUTO <span id="goal-minute-text">90</span>'</div>
+                <div id="goal-assist-info" class="text-slate-300 text-sm md:text-xl mt-4 uppercase tracking-widest hidden font-medium">
+                    Asistencia de <span id="goal-assist-name" class="text-blue-400 font-bold drop-shadow-[0_0_5px_blue]">Asistente</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="app-layout" class="hidden flex h-screen w-full bg-[#0b1628]"
         style="background-image: radial-gradient(rgba(56,189,248,0.03) 1px, transparent 1px); background-size: 20px 20px;">
@@ -1399,10 +1435,11 @@
                             <table class="fm-table text-sm w-full">
                                 <thead>
                                     <tr>
-                                        <th class="text-left pl-4" style="width:30%">Nombre del Torneo</th>
+                                        <th class="text-left pl-4" style="width:25%">Nombre del Torneo</th>
+                                        <th class="text-center text-green-400" style="width:10%">Bote</th>
                                         <th class="text-center" style="width:15%">Creador</th>
                                         <th class="text-center" style="width:15%">Participantes</th>
-                                        <th class="text-center" style="width:15%">Rango Mín.</th>
+                                        <th class="text-center" style="width:10%">Rango Mín.</th>
                                         <th class="text-center text-yellow-500" style="width:10%">Privado</th>
                                         <th class="text-center" style="width:15%">Acción</th>
                                     </tr>
@@ -1832,6 +1869,19 @@
                         <option value="Leyenda">Leyenda</option>
                         <option value="Top Global">Top Global</option>
                     </select>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-2/3">
+                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Apuesta de Entrada</label>
+                        <input type="number" id="tournament-entry-fee" class="input-fm text-xs w-full" min="0" value="0" placeholder="0 = Gratis">
+                    </div>
+                    <div class="w-1/3">
+                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Moneda</label>
+                        <select id="tournament-currency" class="input-fm text-xs w-full cursor-pointer">
+                            <option value="coins">Monedas</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
                     <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Contraseña (Dejar vacío

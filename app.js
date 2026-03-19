@@ -20,31 +20,31 @@ function getAvatar(name) { return `https://ui-avatars.com/api/?name=${encodeURIC
 const PLAYERS_DB = [
     { id: 101, name: "Lionel Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: "https://us-tuna-sounds-images.voicemod.net/f0a3dd8a-eea8-4f46-9e4b-26637d97899c-1682820619597.jpeg" },
     { id: 102, name: "Cristiano Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: "https://i.pinimg.com/236x/fc/16/9c/fc169c4de125f69c56bf67c9ef03d931.jpg" },
-    { id: 103, name: "Kylian MbappÃ©", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://pbs.twimg.com/media/FUMiCSJXEAAHdvH.jpg" },
+    { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://pbs.twimg.com/media/FUMiCSJXEAAHdvH.jpg" },
     { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: "https://i.redd.it/ekbnqb2za2y51.jpg" },
     { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGWdbul4YolKhJhyNFg6s3G57zUScIbryrtw&s" },
     { id: 401, name: "Thibaut Courtois", pos: "POR", sal: 87, par: 93, saq: 84, ref: 92, vel: 84, posi: 94, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: "https://www.clarin.com/2022/05/28/-h5dvaCni_360x240__1.jpg" },
     { id: 104, name: "Vini", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt8XM1bPlLnxJiwtXA-dRI0m2_JFiF06AOCw&s" },
     { id: 202, name: "Jude Bellingham", pos: "MED", pac: 82, sho: 85, pas: 88, def: 78, phy: 85, rep: 4500, priceBasic: 105000000, pricePrem: 8500, img: "https://img.asmedia.epimg.net/resizer/v2/A43ZCIYQ45GOPD6RSU4BMQDJKA.jpg?auth=28955647f8c2746ddacbcaef794724da6461afeb5818292923b1c8266be15a5e&width=360" },
-    { id: 302, name: "Antonio RÃ¼diger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: "https://images7.memedroid.com/images/UPLOADED575/652d60841d73b.jpeg" },
+    { id: 302, name: "Antonio Rüdiger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: "https://images7.memedroid.com/images/UPLOADED575/652d60841d73b.jpeg" },
     { id: 402, name: "Alisson Becker", pos: "POR", sal: 90, par: 91, saq: 88, ref: 90, vel: 85, posi: 90, rep: 3000, priceBasic: 65000000, pricePrem: 5000, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUODxT9kUGcLFOAQG-xYCweQphUsebWt7whg&s" },
     { id: 105, name: "A. Griezmann", pos: "DEL", pac: 80, sho: 85, pas: 88, def: 50, phy: 70, rep: 2000, priceBasic: 55000000, pricePrem: 4500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6Xl8wrodmxAQjKIMaHo8yXTA_1r23KaTsuw&s" },
-    { id: 203, name: "Pedri GonzÃ¡lez", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: "https://esportbase.valenciaplaza.com/wp-content/uploads/2021/08/E8MPi_LWUAY2YvY.jpg" },
+    { id: 203, name: "Pedri González", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: "https://esportbase.valenciaplaza.com/wp-content/uploads/2021/08/E8MPi_LWUAY2YvY.jpg" },
     { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://pbs.twimg.com/media/GSeKCF4XMAAILjg.jpg" },
-    { id: 403, name: "Unai SimÃ³n", pos: "POR", sal: 82, par: 84, saq: 85, ref: 83, vel: 80, posi: 84, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://assets.goal.com/images/v3/blt58f6b3a15aac644b/0b605ad106ff7459d79745dd71267d9de5783cb3.png?auto=webp&format=pjpg&width=3840&quality=60" },
+    { id: 403, name: "Unai Simón", pos: "POR", sal: 82, par: 84, saq: 85, ref: 83, vel: 80, posi: 84, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://assets.goal.com/images/v3/blt58f6b3a15aac644b/0b605ad106ff7459d79745dd71267d9de5783cb3.png?auto=webp&format=pjpg&width=3840&quality=60" },
     { id: 506, name: "Neymar", pos: "DEL", pac: 88, sho: 90, pas: 90, def: 40, phy: 80, rep: 5000, priceBasic: 135000000, pricePrem: 10500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTaVXm4MJpY-0VUq-dOIU0Bhqa8kXb_0489Q&s" },
     { id: 507, name: "Luis Suarez", pos: "DEL", pac: 85, sho: 88, pas: 85, def: 50, phy: 85, rep: 5000, priceBasic: 130000000, pricePrem: 10000, img: "https://i.pinimg.com/736x/37/04/b0/3704b045926c5754515afcb51bc5cb37.jpg" },
     { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 800, priceBasic: 5000000, pricePrem: 400, img: "https://estaticos-cdn.prensaiberica.es/clip/916e8357-aa8e-450f-95d7-0fd46b11ccf1_source-aspect-ratio_default_0.jpg" },
     { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 500, priceBasic: 4000000, pricePrem: 300, img: "https://static.eldiario.es/clip/dc7c24bc-4e9b-46fa-b0d7-bd9080e2986a_16-9-discover-aspect-ratio_default_1134172.jpg" },
     { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 500, priceBasic: 3000000, pricePrem: 200, img: "https://image.ondacero.es/clipping/cmsimages02/2024/01/23/BA3CE66A-7976-4522-95D4-3B094E6A5BCB/hugo-duro_103.jpg?crop=600,450,x137,y0&width=1200&height=900&optimize=low&format=webply" },
     { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 600, priceBasic: 4000000, pricePrem: 300, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEyOd-ScVKgWFmy4Uwuf5Q20jDrEOFvmHi4w&s" },
-    { id: 205, name: "Isco AlarcÃ³n", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 700, priceBasic: 5000000, pricePrem: 400, img: "https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/01/20/60e70648d9fe5.jpeg" },
+    { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 700, priceBasic: 5000000, pricePrem: 400, img: "https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/01/20/60e70648d9fe5.jpeg" },
     { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 600, priceBasic: 2500000, pricePrem: 150, img: "https://www.valenciacf.com/public/Image/2023/12/nr30b5l0gsuquemyeyxbqsuc2g74drmjrmwvgont4jasseos8edirodhdhuwssn8.jpg" },
-    { id: 207, name: "Ã“scar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 500, priceBasic: 1500000, pricePrem: 100, img: "https://killerasturias.com/sites/default/files/2021-12/trejo.jpeg" },
-    { id: 305, name: "Pau CubarsÃ­", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 800, priceBasic: 8000000, pricePrem: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJk1Gw8cjNu4w5mlv3kCZFNJi3wZhCeMj8g&s" },
-    { id: 306, name: "David GarcÃ­a", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 400, priceBasic: 4500000, pricePrem: 350, img: "https://img.a.transfermarkt.technology/portrait/big/298589-1740664950.jpg?lm=1" },
+    { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 500, priceBasic: 1500000, pricePrem: 100, img: "https://killerasturias.com/sites/default/files/2021-12/trejo.jpeg" },
+    { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 800, priceBasic: 8000000, pricePrem: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJk1Gw8cjNu4w5mlv3kCZFNJi3wZhCeMj8g&s" },
+    { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 400, priceBasic: 4500000, pricePrem: 350, img: "https://img.a.transfermarkt.technology/portrait/big/298589-1740664950.jpg?lm=1" },
     { id: 307, name: "Pablo Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 550, priceBasic: 2500000, pricePrem: 200, img: "https://i.pinimg.com/474x/16/3c/ff/163cffab021629302f8314665c2c1582.jpg" },
-    { id: 308, name: "JesÃºs Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 600, priceBasic: 1500000, pricePrem: 100, img: "https://pbs.twimg.com/media/Fwgt6PSXwAEvYWv.jpg" },
+    { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 600, priceBasic: 1500000, pricePrem: 100, img: "https://pbs.twimg.com/media/Fwgt6PSXwAEvYWv.jpg" },
     { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-13/fd5957a5268b45d4b5b0640c78980701.webp" },
     { id: 404, name: "David Soria", pos: "POR", sal: 78, par: 82, saq: 76, ref: 81, vel: 79, posi: 84, rep: 650, priceBasic: 3000000, pricePrem: 200, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRE2H0vymmNHD9tmRyLPodRo7GwSRBne7pUg&s" },
     { id: 405, name: "P. Gazzaniga", pos: "POR", sal: 80, par: 83, saq: 78, ref: 82, vel: 79, posi: 84, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/97/b5/a397b5f830894abb925a36ae74652e35.jpg" },
@@ -77,14 +77,14 @@ const PLAYERS_DB = [
     { id: 627, name: "E. Haaland", pos: "DEL", pac: 88, sho: 92, pas: 70, def: 45, phy: 88, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/36/0f/24/360f24adf34c1bedcf2a29e8e85788e7.jpg" },
     { id: 628, name: "Lautaro", pos: "DEL", pac: 83, sho: 89, pas: 78, def: 50, phy: 85, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-PXpk7GSC6rXrdXJDrPpMqQhhu4o1GtQGCQ&s" },
     { id: 629, name: "K. Kvaratskhelia", pos: "DEL", pac: 89, sho: 84, pas: 82, def: 45, phy: 72, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://witty-images.s3.amazonaws.com/Z/G/K/703ef693-1f62-4f29-b6da-4da53fb29981-board.jpg" },
-    { id: 630, name: "DÃ©sirÃ© DouÃ©", pos: "DEL", pac: 88, sho: 80, pas: 78, def: 50, phy: 74, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/tSFkSorTlbUAAAAe/dou%C3%A9-d%C3%A9sir%C3%A9.png" },
+    { id: 630, name: "Désiré Doué", pos: "DEL", pac: 88, sho: 80, pas: 78, def: 50, phy: 74, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/tSFkSorTlbUAAAAe/dou%C3%A9-d%C3%A9sir%C3%A9.png" },
     { id: 631, name: "Falcao", pos: "DEL", pac: 82, sho: 94, pas: 72, def: 40, phy: 86, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F57dq38WMAAEmcj.jpg" },
     { id: 632, name: "Benzema", pos: "DEL", pac: 82, sho: 92, pas: 87, def: 45, phy: 82, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tycsports.com/files/2022/03/09/400134/benzema-meme-residente-_862x485.jpg?v=1" },
     { id: 633, name: "G. Bale", pos: "DEL", pac: 95, sho: 91, pas: 85, def: 62, phy: 86, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/e9/ff/49/e9ff49d248ac43b973451802b01093c0.jpg" },
     { id: 634, name: "Lewandowski", pos: "DEL", pac: 75, sho: 88, pas: 79, def: 44, phy: 84, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/3f/74/d0/3f74d078c7086bddeba9780da7ed550a.jpg" },
     { id: 635, name: "SzczÄ™sny", pos: "POR", sal: 86, par: 89, saq: 83, ref: 88, vel: 84, posi: 92, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.diez.hn/binrepository/465x444/0c0/0d0/none/3014757/VVNE/screenshot-20250305-152209_10084737_20250305165700.jpg" },
     { id: 636, name: "Rodri", pos: "MED", pac: 66, sho: 80, pas: 86, def: 87, phy: 85, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://s1.abcstatics.com/abc/www/multimedia/gente/2024/06/15/rodri-espana-kYNG-U603206132602BCB-1024x512@diario_abc.jpg" },
-    { id: 637, name: "O. DembÃ©lÃ©", pos: "DEL", pac: 92, sho: 84, pas: 80, def: 45, phy: 65, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://i.ytimg.com/vi/JFp4iIMjnXk/oardefault.jpg?sqp=-oaymwEiCJwEENAFSFqQAgHyq4qpAxEIARUAAAAAJQAAyEI9AICiQw==&rs=AOn4CLCCQbFaofMRWdfxkdBUpu4KCDzNRA&usqp=CCk" },
+    { id: 637, name: "O. Dembélé", pos: "DEL", pac: 92, sho: 84, pas: 80, def: 45, phy: 65, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://i.ytimg.com/vi/JFp4iIMjnXk/oardefault.jpg?sqp=-oaymwEiCJwEENAFSFqQAgHyq4qpAxEIARUAAAAAJQAAyEI9AICiQw==&rs=AOn4CLCCQbFaofMRWdfxkdBUpu4KCDzNRA&usqp=CCk" },
     { id: 638, name: "Kepa", pos: "POR", sal: 82, par: 83, saq: 80, ref: 82, vel: 81, posi: 84, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/09/6a/b1/096ab18fd2ee6cd6b22dadb3a067d9ae.jpg" },
     { id: 639, name: "J. Musiala", pos: "MED", pac: 88, sho: 83, pas: 86, def: 62, phy: 70, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-19/999ca101a2a64d088ca1cbef7e92a44b.webp" },
     { id: 640, name: "A. Mac Allister", pos: "MED", pac: 74, sho: 80, pas: 86, def: 72, phy: 78, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/yWz8WZejSBD6u6YZwEB4srTKIXB.jpg" },
@@ -97,7 +97,7 @@ const PLAYERS_DB = [
     { id: 647, name: "G. Rodrygo", pos: "DEL", pac: 91, sho: 83, pas: 81, def: 40, phy: 68, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/d907b94d69c2ab52af28b044525c2111.jpg" },
     { id: 648, name: "N. Williams", pos: "DEL", pac: 94, sho: 79, pas: 77, def: 40, phy: 65, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5YAsrMJ6pG4jOObFRxvCkqMXDKVpNmH5hSA&s" },
     { id: 649, name: "I. Williams", pos: "DEL", pac: 93, sho: 82, pas: 72, def: 45, phy: 80, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FFjNDgrXwAUaFsi.jpg" },
-    { id: 650, name: "R. LeÃ£o", pos: "DEL", pac: 94, sho: 85, pas: 78, def: 35, phy: 78, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F3LB8dmXIAAfxwg.jpg" },
+    { id: 650, name: "R. Leão", pos: "DEL", pac: 94, sho: 85, pas: 78, def: 35, phy: 78, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F3LB8dmXIAAfxwg.jpg" },
     { id: 651, name: "Mamardashvili", pos: "POR", sal: 83, par: 90, saq: 78, ref: 91, vel: 84, posi: 90, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzZ_d0xvOOYRimgMMepoOivPoYEmSCQ7dFDg&s" },
     { id: 652, name: "F. de Jong", pos: "MED", pac: 82, sho: 72, pas: 88, def: 80, phy: 78, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2022/09/23/16639478284639.jpg" },
     { id: 653, name: "Sergio Ramos", pos: "DEF", pac: 78, sho: 70, pas: 75, def: 90, phy: 88, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2n297NFs8qOJeCSars9pa81ZkOrHc-pniKg&s" },
@@ -117,7 +117,7 @@ const PLAYERS_DB = [
     { id: 667, name: "Mascherano", pos: "DEF", pac: 72, sho: 64, pas: 78, def: 89, phy: 86, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg/330px-Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg" },
     { id: 668, name: "Dybala", pos: "DEL", pac: 82, sho: 84, pas: 85, def: 45, phy: 65, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn0mgIG9lOBdjb2v_MNS3Wsl1HtUI_YXZrYQ&s" },
     { id: 669, name: "Jordi Alba", pos: "DEF", pac: 90, sho: 69, pas: 82, def: 84, phy: 75, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUzYS01Drh0XErHlv_yaYphbhO22aW2th2nw&s-" },
-    { id: 670, name: "Kun AgÃ¼ero", pos: "DEL", pac: 88, sho: 92, pas: 85, def: 40, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb9WAhXRvqZsH3Z9OXXS4kZxu5Jg09MB13qw&s" },
+    { id: 670, name: "Kun Agüero", pos: "DEL", pac: 88, sho: 92, pas: 85, def: 40, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb9WAhXRvqZsH3Z9OXXS4kZxu5Jg09MB13qw&s" },
     { id: 671, name: "Ter Stegen", pos: "POR", sal: 91, par: 88, saq: 94, ref: 87, vel: 84, posi: 90, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://barcauniversal.com/wp-content/uploads/2025/08/fc-barcelona-v-ssc-napoli-round-of-16-second-leg-uefa-champions-league-2023-24-scaled.jpg" },
     { id: 672, name: "Joan Garcia", pos: "POR", sal: 79, par: 81, saq: 77, ref: 80, vel: 80, posi: 83, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfzQMiGiz4Wo3cnv-1PB4oIHgSOg_GNwDIzw&s" },
     { id: 673, name: "Godin", pos: "DEF", pac: 64, sho: 52, pas: 65, def: 90, phy: 87, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/gE5FVq48t1SIwOIwPtXwPWBCbBU.jpg" },
@@ -147,7 +147,7 @@ const PLAYERS_DB = [
     { id: 697, name: "Thierry Henry", pos: "DEL", pac: 94, sho: 93, pas: 86, def: 50, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/a9/e8/44a9e8e9984c0938dc703c9aa06b8967.jpg" },
     { id: 698, name: "Ronaldinho", pos: "MED", pac: 91, sho: 93, pas: 95, def: 50, phy: 80, rep: 6000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCWZ8pH70yhFCCrH20IQhdx-522HpgLVxW5w&s" },
     { id: 699, name: "F. Puskas", pos: "DEL", pac: 90, sho: 96, pas: 88, def: 40, phy: 78, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/ad/48/44ad4874969ef11e7ecd1024f30a7699.jpg" },
-    { id: 700, name: "KakÃ¡", pos: "MED", pac: 89, sho: 90, pas: 91, def: 60, phy: 75, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.printler.com/media/photo/145625-1.jpg?rmode=crop&width=638&height=900" },
+    { id: 700, name: "Kaká", pos: "MED", pac: 89, sho: 90, pas: 91, def: 60, phy: 75, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.printler.com/media/photo/145625-1.jpg?rmode=crop&width=638&height=900" },
     { id: 701, name: "Ibrahimovic", pos: "DEL", pac: 78, sho: 94, pas: 86, def: 40, phy: 90, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/236x/d1/84/83/d18483dbf5325f469aa715d7d5242afb.jpg" },
     { id: 702, name: "F. Totti", pos: "DEL", pac: 75, sho: 91, pas: 92, def: 45, phy: 78, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/YXZXGY25YFLJXGLIPSQZMJYZAI.jpg?auth=b6a1ee2164a31bbaf7a7f31029bee76a62f93d1b735978cac1f0c657f9e947f9&width=1472&height=1104&smart=true" },
     { id: 703, name: "Gundogan", pos: "MED", pac: 69, sho: 80, pas: 88, def: 73, phy: 71, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/i2ury833z4me1.jpeg" },
@@ -156,7 +156,7 @@ const PLAYERS_DB = [
     { id: 706, name: "Endrick", pos: "DEL", pac: 88, sho: 83, pas: 70, def: 30, phy: 72, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB9gFTaAXauJ8L4rpJtwbpSg5UC4y4-8S-Nw&s" },
     { id: 707, name: "Guti", pos: "MED", pac: 70, sho: 84, pas: 91, def: 60, phy: 69, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.shutterstock.com/editorial/image-editorial/N1zeQe41NaTfgez9NzI3MA==/jose-maria-guti--real-madrid-captain-440nw-7436431bh.jpg" },
     { id: 708, name: "M. Soriano", pos: "MED", pac: 75, sho: 70, pas: 76, def: 55, phy: 60, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/NZW5M7PSTNGHFDX3XVAOJ3VJZM.jpg?auth=46b53182d8d8c4f71e873ec2e7514488c43b1fc4072f0b11eaea7d705885fbd5&width=1200&height=1200&smart=true" },
-    { id: 709, name: "JosÃ© Ãngel", pos: "MED", pac: 72, sho: 60, pas: 68, def: 74, phy: 72, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://www.bdfutbol.com/i/j/401089h.jpg?v=1717578381" },
+    { id: 709, name: "José Ángel", pos: "MED", pac: 72, sho: 60, pas: 68, def: 74, phy: 72, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://www.bdfutbol.com/i/j/401089h.jpg?v=1717578381" },
     { id: 710, name: "Mella", pos: "DEL", pac: 85, sho: 65, pas: 65, def: 40, phy: 60, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://assets.laliga.com/squad/2025/t180/p554651/2048x2225/p554651_t180_2025_1_001_000.png" },
     { id: 711, name: "Luismi Cruz", pos: "DEL", pac: 82, sho: 68, pas: 66, def: 38, phy: 62, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/610461-1647594517.jpg?lm=1" },
 ];
@@ -265,7 +265,7 @@ function calcPlayerOVR(p) {
     return Math.max(50, Math.min(99, ovr)); // Limitar entre 50 y 99
 }
 
-// Calcular precios dinÃ¡micamente en base a su OVR (calidad) y reputaciÃ³n
+// Calcular precios dinámicamente en base a su OVR (calidad) y reputación
 PLAYERS_DB.forEach(p => {
     const ovr = calcPlayerOVR(p);
     let basePrice, premPrice;
@@ -279,7 +279,7 @@ PLAYERS_DB.forEach(p => {
     else if (ovr >= 70) { basePrice = 1500000 + (ovr - 70) * 500000; premPrice = 150 + (ovr - 70) * 70; }
     else { basePrice = 500000 + Math.max(0, ovr - 60) * 100000; premPrice = 50 + Math.max(0, ovr - 60) * 10; }
 
-    // Multiplicador de reputaciÃ³n
+    // Multiplicador de reputación
     let repMultiplier = 1.0;
     if (p.rep >= 5000) repMultiplier = 2.5;
     else if (p.rep >= 4000) repMultiplier = 2.0;
@@ -399,7 +399,7 @@ function generateRandomInitialRoster() {
 function cleanState(s) {
     if (!s) return null;
 
-    // Convertir todo a nÃºmeros seguros para borrar los NaNs
+    // Convertir todo a números seguros para borrar los NaNs
     if (!s.stats) s.stats = {};
     s.stats.wins = isNaN(parseInt(s.stats.wins)) ? 0 : parseInt(s.stats.wins);
     s.stats.draws = isNaN(parseInt(s.stats.draws)) ? 0 : parseInt(s.stats.draws);
@@ -410,14 +410,14 @@ function cleanState(s) {
     s.stats.goals = isNaN(parseInt(s.stats.goals)) ? 0 : parseInt(s.stats.goals);
     s.stats.trophies = isNaN(parseInt(s.stats.trophies)) ? 0 : parseInt(s.stats.trophies);
 
-    // EconomÃ­a
+    // Economía
     if (!s.economy) s.economy = { coins: 50000000, premium: 0 };
     if (isNaN(parseInt(s.economy.coins))) s.economy.coins = 50000000;
     if (isNaN(parseInt(s.economy.premium))) s.economy.premium = 0;
 
     // Liga y Equipos IA
     if (!s.league || s.league.length < 20) {
-        s.league = [{ name: s.team ? s.team.name : "TÃº", isUser: true, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 }];
+        s.league = [{ name: s.team ? s.team.name : "Tú", isUser: true, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 }];
         AI_TEAMS.forEach(ai => s.league.push({ name: ai.name, isUser: false, ovr: ai.ovr, pld: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, badge: ai }));
     } else {
         s.league.forEach(t => { if (!t.isUser && !t.badge) t.badge = AI_TEAMS.find(a => a.name === t.name) || AI_TEAMS[0]; });
@@ -468,7 +468,7 @@ function cleanState(s) {
         s.team.pattern = "diagonal";
     }
 
-    // Forzar creaciÃ³n de calendario si no lo hay
+    // Forzar creación de calendario si no lo hay
     if (s.team && s.nextFixtures.length === 0) {
         generateFixtures(s);
     }
@@ -485,7 +485,7 @@ window.onload = () => {
         initBgMusic();
     }
 
-    // Escuchar cambios de autenticaciÃ³n de Firebase
+    // Escuchar cambios de autenticación de Firebase
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             try {
@@ -561,7 +561,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
         })
         .catch((err) => {
             if (err.code === 'auth/email-already-in-use') showAlert("El usuario ya existe.");
-            else if (err.code === 'auth/weak-password') showAlert("La contraseÃ±a debe tener al menos 6 caracteres.");
+            else if (err.code === 'auth/weak-password') showAlert("La contraseña debe tener al menos 6 caracteres.");
             else showAlert("Error al registrar: " + err.message);
         });
 });
@@ -594,8 +594,8 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
         })
         .catch((err) => {
             if (err.code === 'auth/user-not-found') showAlert("No existe ninguna cuenta con este usuario.");
-            else if (err.code === 'auth/wrong-password') showAlert("ContraseÃ±a incorrecta.");
-            else showAlert("Error al iniciar sesiÃ³n: " + err.message);
+            else if (err.code === 'auth/wrong-password') showAlert("Contraseña incorrecta.");
+            else showAlert("Error al iniciar sesión: " + err.message);
         });
 });
 
@@ -656,7 +656,7 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     generateFixtures(state);
 
     if (!state.inbox) state.inbox = [];
-    addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `MÃ­ster ${state.team.manager}, la temporada consta de 38 jornadas (Ida y Vuelta). Abre tu sobre inicial para conocer a tu plantilla.`);
+    addEmail('Directiva', 'Bienvenido a LaLiga Tussi', `Míster ${state.team.manager}, la temporada consta de 38 jornadas (Ida y Vuelta). Abre tu sobre inicial para conocer a tu plantilla.`);
     initBgMusic();
     saveState();
 
@@ -693,7 +693,7 @@ document.getElementById('setup-form').addEventListener('submit', (e) => {
     });
 });
 
-window.logout = function () { auth.signOut().then(() => { state = null; location.reload(); }).catch(err => console.error('Error al cerrar sesiÃ³n:', err)); }
+window.logout = function () { auth.signOut().then(() => { state = null; location.reload(); }).catch(err => console.error('Error al cerrar sesión:', err)); }
 
 // Abrir Ajustes
 window.openSettings = function () {
@@ -789,7 +789,7 @@ window.showSubpage = function (id) {
             historyContainer.innerHTML = `
             <div>
                 <div class="text-3xl mb-2 opacity-50">âš½</div>
-                AÃºn no has jugado partidos clasificatorios
+                Aún no has jugado partidos clasificatorios
             </div>`;
         } else {
             // Render actual history
@@ -847,7 +847,7 @@ function routeView() {
 }
 
 /* =========================================================================
-   SELECCIÃ“N DE MODO DE JUEGO (LOCAL / MULTIJUGADOR)
+   SELECCIÓN DE MODO DE JUEGO (LOCAL / MULTIJUGADOR)
    ========================================================================= */
 let currentGameMode = null;
 let pvpSocket = null;
@@ -856,13 +856,13 @@ let pvpSide = null; // 'home' o 'away'
 let pvpMatchFinished = false;
 
 window.showPlayModeSelect = function () {
-    // Mostrar la pantalla de selecciÃ³n de modo al pulsar JUGAR
+    // Mostrar la pantalla de selección de modo al pulsar JUGAR
     document.getElementById('app-layout').classList.add('hidden');
     document.getElementById('view-mode-select').classList.remove('hidden');
 }
 
 window.closeModeSelect = function () {
-    // Volver al dashboard desde la selecciÃ³n de modo
+    // Volver al dashboard desde la selección de modo
     document.getElementById('view-mode-select').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
 }
@@ -1070,7 +1070,7 @@ function startMultiplayerSearch(mode) {
         if (!list) return;
         const filtered = pvpMatchState.events.filter(e => filter === 'home' ? e.side === 'home' : e.side === 'away');
         if (filtered.length === 0) {
-            list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aÃºn</div>';
+            list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
             return;
         }
         list.innerHTML = filtered.map(e => `
@@ -1084,7 +1084,7 @@ function startMultiplayerSearch(mode) {
         window._pvpEvents = pvpMatchState.events;
     }
 
-    // Conectar al servidor PvP (usar existente si ya estÃ¡ conectado)
+    // Conectar al servidor PvP (usar existente si ya está conectado)
     if (!pvpSocket || !pvpSocket.connected) {
         pvpSocket = io(PVP_SERVER_URL, { transports: ['websocket', 'polling'] });
     }
@@ -1178,7 +1178,7 @@ function startMultiplayerSearch(mode) {
             });
         }
 
-        // Hook inicial por si ya estÃ¡ conectado
+        // Hook inicial por si ya está conectado
         if (pvpSocket && pvpSocket.connected) {
             setupPrivateMatchSocketEvents(pvpSocket);
         }
@@ -1379,12 +1379,12 @@ function startMultiplayerSearch(mode) {
 
         const rewards = data.yourRewards;
         let resultText = '';
-        if (rewards.result === 'win') resultText = 'ðŸ† Â¡VICTORIA!';
+        if (rewards.result === 'win') resultText = 'ðŸ† ¡VICTORIA!';
         else if (rewards.result === 'draw') resultText = 'ðŸ¤ EMPATE';
         else resultText = 'ðŸ’” DERROTA';
 
         document.getElementById('pvp-result-text').textContent = resultText;
-        document.getElementById('pvp-rewards-text').innerHTML = `+â‚¬${(rewards.coins / 1000000).toFixed(1)}M | +${rewards.pts} PTS | REP: ${rewards.rep > 0 ? '+' : ''}${rewards.rep}`;
+        document.getElementById('pvp-rewards-text').innerHTML = `+€${(rewards.coins / 1000000).toFixed(1)}M | +${rewards.pts} PTS | REP: ${rewards.rep > 0 ? '+' : ''}${rewards.rep}`;
 
         const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
         if (dugNarr) dugNarr.innerHTML = '<div class="text-amber-400 text-[10px] font-bold">Partido finalizado.</div>';
@@ -1397,7 +1397,7 @@ function startMultiplayerSearch(mode) {
         state.economy.coins += rewards.coins;
         state.stats.rep = Math.max(0, state.stats.rep + rewards.rep);
 
-        // --- Actualizar estadÃ­sticas PVP online ---
+        // --- Actualizar estadísticas PVP online ---
         const myGF = (data.you === 'home') ? data.homeGoals : data.awayGoals;
         const myGA = (data.you === 'home') ? data.awayGoals : data.homeGoals;
         if (!state.pvpStats) state.pvpStats = { matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0 };
@@ -1433,7 +1433,7 @@ function startMultiplayerSearch(mode) {
             document.getElementById('pvp-rewards-text').innerHTML += ` | RANK: <span class="${ptsChange >= 0 ? 'text-green-400' : 'text-red-400'}">${ptsSign}${ptsChange} PTS</span>`;
         }
 
-        // --- CondiciÃ³n FÃ­sica y Lesiones Post-Partido (PvP) ---
+        // --- Condición Física y Lesiones Post-Partido (PvP) ---
         state.lineup.forEach(id => {
             if (!id) return;
             const p = state.roster.find(x => x.id === id);
@@ -1442,7 +1442,7 @@ function startMultiplayerSearch(mode) {
         state.roster.forEach(p => {
             if (p.injuryMatches && p.injuryMatches > 0) {
                 p.injuryMatches--;
-                if (p.injuryMatches <= 0) p.con = 80; // Sale de lesiÃ³n con 80%  
+                if (p.injuryMatches <= 0) p.con = 80; // Sale de lesión con 80%  
             }
         });
 
@@ -1458,7 +1458,7 @@ function startMultiplayerSearch(mode) {
         document.getElementById('pvp-searching-overlay').classList.add('hidden');
         document.getElementById('pvp-halftime-actions').classList.add('hidden');
         document.getElementById('pvp-post-match').classList.remove('hidden');
-        document.getElementById('pvp-result-text').textContent = 'ðŸ† Â¡VICTORIA POR ABANDONO!';
+        document.getElementById('pvp-result-text').textContent = 'ðŸ† ¡VICTORIA POR ABANDONO!';
         document.getElementById('pvp-rewards-text').textContent = data.message;
     });
 }
@@ -1471,7 +1471,7 @@ window.pvpFmEvtTab = function (team) {
     if (!list) return;
     const filtered = (window._pvpEvents || []).filter(e => team === 'home' ? e.side === 'home' : e.side === 'away');
     if (filtered.length === 0) {
-        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aÃºn</div>';
+        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
         return;
     }
     list.innerHTML = filtered.map(e => `
@@ -1503,7 +1503,7 @@ window.pvpHalftimeAction = function (action) {
         btn.onclick = null;
     });
     const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
-    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2Âª PARTE" para continuar.</div>';
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2ª PARTE" para continuar.</div>';
 }
 
 window.pvpGoToTactics = function () {
@@ -1554,7 +1554,7 @@ window.exitPvpMatch = function () {
 }
 
 /* =========================================================================
-   UI GLOBAL, TABS Y BUZÃ“N
+   UI GLOBAL, TABS Y BUZÓN
    ========================================================================= */
 window.switchTab = function (tabId) {
     document.querySelectorAll('.fm-tab').forEach(t => { t.classList.remove('active'); t.style.display = 'none'; });
@@ -1566,7 +1566,7 @@ window.switchTab = function (tabId) {
     const targetBtn = document.getElementById('nav-' + tabId);
     if (targetBtn) targetBtn.classList.add('active');
 
-    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'TÃ¡cticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'ClasificaciÃ³n', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'sobres': 'Sobres de Jugadores', 'bet': 'Apuestas', 'comp': 'CompeticiÃ³n' };
+    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'sobres': 'Sobres de Jugadores', 'bet': 'Apuestas', 'comp': 'Competición' };
     const pTitle = document.getElementById('page-title');
     if (pTitle) pTitle.textContent = titles[tabId] || 'Panel';
 
@@ -1656,8 +1656,8 @@ function updateUI() {
     if (!state || !state.team) return;
     const formatM = (num) => num >= 1000000 ? (num / 1000000).toFixed(1) + 'M' : num.toLocaleString();
 
-    document.getElementById('ui-rep').textContent = "â˜… " + state.stats.rep;
-    document.getElementById('ui-coins').textContent = "â‚¬" + formatM(state.economy.coins);
+    document.getElementById('ui-rep').textContent = "★ " + state.stats.rep;
+    document.getElementById('ui-coins').textContent = "€" + formatM(state.economy.coins);
     document.getElementById('ui-prem').textContent = state.economy.premium;
     document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
     document.getElementById('dash-jornada').textContent = state.stats.matchday || 1;
@@ -1672,7 +1672,7 @@ function updateUI() {
     document.getElementById('top-shield').innerHTML = badgeHTML;
     document.getElementById('sidebar-shield').innerHTML = badgeHTML;
 
-    // PrÃ³ximo Partido en UI
+    // Próximo Partido en UI
     let myNextFix = state.nextFixtures ? state.nextFixtures.find(f => f.isUserMatch) : null;
     if (myNextFix) {
         let isHome = myNextFix.home === state.team.name;
@@ -1724,11 +1724,11 @@ function updateUI() {
                 histContainer.innerHTML = `
                     <div>
                         <div class="text-3xl mb-2 opacity-50">âš½</div>
-                        AÃºn no has jugado partidos clasificatorios
+                        Aún no has jugado partidos clasificatorios
                     </div>
                 `;
             } else {
-                // En el futuro, renderizar historial aquÃ­
+                // En el futuro, renderizar historial aquí
                 histContainer.innerHTML = '';
                 state.competitive.history.slice(-5).reverse().forEach(match => {
                     let resultClass = match.result === 'win' ? 'text-green-500' : (match.result === 'loss' ? 'text-red-500' : 'text-gray-400');
@@ -1840,7 +1840,7 @@ window.renderBetTab = function () {
     // Show resolved bet history
     if (state.betHistory && state.betHistory.length > 0) {
         state.betHistory.slice(-10).reverse().forEach(bet => {
-            let currText = bet.currency === 'coins' ? 'â‚¬ Club' : 'Premium';
+            let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
             let resultIcon = bet.result === 'exact' ? 'âœ… EXACTO' : bet.result === 'winner' ? 'âœ… GANADOR' : 'âŒ FALLO';
             let resultColor = bet.result === 'fail' ? 'red' : 'green';
             listBets.innerHTML += `
@@ -1848,7 +1848,7 @@ window.renderBetTab = function () {
                 <div>
                     <div class="text-[10px] text-${resultColor}-400 font-bold mb-1 uppercase">${resultIcon}</div>
                     <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
-                    <div class="text-[10px] text-slate-400 mt-1">PronÃ³stico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span> | Real: <span class="text-white font-bold">${bet.realHG}-${bet.realAG}</span></div>
+                    <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span> | Real: <span class="text-white font-bold">${bet.realHG}-${bet.realAG}</span></div>
                 </div>
                 <div class="text-right">
                     <div class="text-lg font-mono font-bold text-${bet.result === 'fail' ? 'red' : 'green'}-400">${bet.result === 'fail' ? '-' : '+'}${bet.winnings || bet.amount}</div>
@@ -1867,16 +1867,16 @@ window.renderBetTab = function () {
     }
 
     state.activeBets.forEach(bet => {
-        let currText = bet.currency === 'coins' ? 'â‚¬ Club' : 'Premium';
+        let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
         listBets.innerHTML = `
         <div class="bg-[#111119] border border-yellow-500/50 p-3 rounded flex justify-between items-center">
             <div>
                 <div class="text-[10px] text-yellow-400 font-bold mb-1 uppercase">â³ Boleto en Curso</div>
                 <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
-                <div class="text-[10px] text-slate-400 mt-1">PronÃ³stico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span></div>
+                <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span></div>
             </div>
             <div class="text-right">
-                <div class="text-[9px] font-bold text-slate-300 uppercase">InversiÃ³n</div>
+                <div class="text-[9px] font-bold text-slate-300 uppercase">Inversión</div>
                 <div class="text-lg font-mono font-bold text-${bet.currency === 'coins' ? 'green' : 'yellow'}-400">${bet.amount}</div>
                 <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
             </div>
@@ -1891,7 +1891,7 @@ window.placeBet = function () {
     const amount = parseInt(document.getElementById('bet-amount').value);
     const currency = document.getElementById('bet-currency').value;
 
-    if (isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos vÃ¡lidos. MÃ­nimo 10 de apuesta.");
+    if (isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos válidos. Mínimo 10 de apuesta.");
     if (currency === 'coins' && state.economy.coins < amount) return showAlert("No hay fondos suficientes en el club.");
     if (currency === 'premium' && state.economy.premium < amount) return showAlert("No tienes suficientes Monedas Premium.");
 
@@ -1907,7 +1907,7 @@ window.placeBet = function () {
 }
 
 /* =========================================================================
-   LIGA Y TABLA DE CLASIFICACIÃ“N
+   LIGA Y TABLA DE CLASIFICACIÓN
    ========================================================================= */
 function renderLeague() {
     const tbody = document.getElementById('league-tbody');
@@ -1950,11 +1950,11 @@ function updateTeamStats(team, gf, ga) {
    ========================================================================= */
 function renderTrainStatus() {
     const st = document.getElementById('train-status');
-    if (st) st.textContent = state.flags.canTrain ? "PROGRAMACIÃ“N DISPONIBLE" : "SESIÃ“N COMPLETADA. JUEGA PARA AVANZAR.";
+    if (st) st.textContent = state.flags.canTrain ? "PROGRAMACIÓN DISPONIBLE" : "SESIÓN COMPLETADA. JUEGA PARA AVANZAR.";
 }
 
 window.executeWeeklyTraining = function () {
-    if (!state.flags.canTrain) return showAlert("Los jugadores estÃ¡n agotados. Juega la jornada de liga para avanzar de semana.");
+    if (!state.flags.canTrain) return showAlert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
     if (state.roster.length === 0) return showAlert("No tienes jugadores.");
 
     const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
@@ -1980,7 +1980,7 @@ window.executeWeeklyTraining = function () {
     });
 
     state.flags.canTrain = false; saveState(); renderTrainStatus(); updateUI();
-    showAlert("Programa completado. Atributos y CondiciÃ³n FÃ­sica actualizados.");
+    showAlert("Programa completado. Atributos y Condición Física actualizados.");
 }
 
 function renderTalkStatus() {
@@ -1999,10 +1999,10 @@ window.executeTalk = function (tone) {
     } else if (tone === 'aggressive') {
         if (Math.random() < 0.7) {
             state.roster.forEach(p => p.morale = Math.min(100, p.morale + 20));
-            showAlert("Â¡La bronca ha funcionado! (+20 Moral).");
+            showAlert("¡La bronca ha funcionado! (+20 Moral).");
         } else {
             state.roster.forEach(p => p.morale = Math.max(0, p.morale - 15));
-            showAlert("Te has pasado. El equipo estÃ¡ presionado (-15 Moral).");
+            showAlert("Te has pasado. El equipo está presionado (-15 Moral).");
         }
     } else if (tone === 'passionate') {
         state.roster.forEach(p => { if (Math.random() < 0.5) p.morale = Math.min(100, p.morale + 15); });
@@ -2017,7 +2017,7 @@ window.executeTalk = function (tone) {
 }
 
 /* =========================================================================
-   PLANTILLA Y TÃCTICAS (ARRASTRAR Y SOLTAR)
+   PLANTILLA Y TÁCTICAS (ARRASTRAR Y SOLTAR)
    ========================================================================= */
 function getAttrClass(val) {
     if (val >= 85) return 'bg-[#10b981] text-white';
@@ -2053,9 +2053,9 @@ window.executeTraining = function () {
     renderTactics();
 
     if (injuredCount > 0) {
-        showConfirm(`Entrenamiento finalizado. Â¡CUIDADO! ${injuredCount} jugador(es) se han lesionado por sobrecarga fÃ­sica. Revisa la EnfermerÃ­a.`, () => { });
+        showConfirm(`Entrenamiento finalizado. ¡CUIDADO! ${injuredCount} jugador(es) se han lesionado por sobrecarga física. Revisa la Enfermería.`, () => { });
     } else {
-        showAlert("Entrenamiento completado. La plantilla ha recuperado condiciÃ³n fÃ­sica.");
+        showAlert("Entrenamiento completado. La plantilla ha recuperado condición física.");
     }
 };
 
@@ -2068,7 +2068,7 @@ window.showInjuries = function () {
     const injured = state.roster.filter(p => p.injuryMatches && p.injuryMatches > 0);
 
     if (injured.length === 0) {
-        listEl.innerHTML = '<div class="text-center text-slate-400 py-6 text-sm">No hay jugadores en la enfermerÃ­a. Â¡Plantilla sana! ðŸ</div>';
+        listEl.innerHTML = '<div class="text-center text-slate-400 py-6 text-sm">No hay jugadores en la enfermería. ¡Plantilla sana! ðŸ</div>';
     } else {
         injured.forEach(p => {
             listEl.innerHTML += `
@@ -2099,23 +2099,23 @@ function renderSquad() {
     const posOrder = { 'POR': 1, 'DEF': 2, 'MED': 3, 'DEL': 4 };
     const sorted = [...state.roster].sort((a, b) => posOrder[a.pos] - posOrder[b.pos] || b.ovr - a.ovr);
 
-    sorted.forEach(p => {
+    const htmlRows = sorted.map(p => {
         let pClass = `pos-${p.pos.toLowerCase()}`;
-        let conIcon = p.con >= 85 ? 'ðŸŸ¢' : p.con >= 60 ? 'ðŸŸ¡' : 'ðŸ”´';
+        let conIcon = p.con >= 85 ? '🟢' : p.con >= 60 ? '🟡' : '🔴';
         let moralColor = p.morale >= 80 ? '#10b981' : p.morale >= 40 ? '#f59e0b' : '#ef4444';
 
         let conDisplay = `${conIcon} ${p.con}%`;
         let nameDisplay = p.name;
         if (p.injuryMatches && p.injuryMatches > 0) {
-            conDisplay = `<span class="text-red-500 text-xs">ðŸ¤• ${p.injuryMatches}P</span>`;
+            conDisplay = `<span class="text-red-500 text-xs">🤕 ${p.injuryMatches}P</span>`;
             nameDisplay = `<span class="text-red-400">${p.name}</span>`;
         }
 
-        tbody.innerHTML += `
+        return `
         <tr>
             <td class="text-center" title="${p.pos === 'POR' ? 'Portero' : p.pos === 'DEF' ? 'Defensa' : p.pos === 'MED' ? 'Mediocampista' : 'Delantero'}"><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
-            <td class="font-bold text-[10px] text-center" title="CondiciÃ³n FÃ­sica: ${p.con}%">${conDisplay}</td>
+            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="hidden sm:block w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
+            <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conDisplay}</td>
             <td title="Moral: ${p.morale}%">
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
             </td>
@@ -2124,9 +2124,10 @@ function renderSquad() {
             <td class="text-center" title="${p.pos === 'POR' ? 'Paradas' : 'Tiro'}: ${p.pos === 'POR' ? p.par : p.sho}">${p.pos === 'POR' ? p.par : p.sho}</td>
             <td class="text-center" title="${p.pos === 'POR' ? 'Saque' : 'Pase'}: ${p.pos === 'POR' ? p.saq : p.pas}">${p.pos === 'POR' ? p.saq : p.pas}</td>
             <td class="text-center" title="${p.pos === 'POR' ? 'Reflejos' : 'Defensa'}: ${p.pos === 'POR' ? p.ref : p.def}">${p.pos === 'POR' ? p.ref : p.def}</td>
-            <td class="text-center" title="${p.pos === 'POR' ? 'Posicionamiento' : 'FÃ­sico'}: ${p.pos === 'POR' ? p.posi : p.phy}">${p.pos === 'POR' ? p.posi : p.phy}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Posicionamiento' : 'Físico'}: ${p.pos === 'POR' ? p.posi : p.phy}">${p.pos === 'POR' ? p.posi : p.phy}</td>
         </tr>`;
     });
+    tbody.innerHTML = htmlRows.join('');
     const ovrTag = document.getElementById('squad-ovr');
     if (ovrTag) ovrTag.textContent = getTeamOvr();
 }
@@ -2144,7 +2145,7 @@ window.dragStart = function (e, pId, slotIndex) {
     }
     document.body.appendChild(ghost);
     e.dataTransfer.setDragImage(ghost, 22, 22);
-    // Limpiar ghost despuÃ©s de que el navegador lo capture
+    // Limpiar ghost después de que el navegador lo capture
     setTimeout(() => { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 100);
 
     setTimeout(() => e.target.classList.add('opacity-50'), 0);
@@ -2161,9 +2162,18 @@ window.dropOnPitch = function (e, targetSlotIndex) {
         return;
     }
 
+    // Prevención de clonado en UI si se arrastra muy rápido:
+    let originSlot = dragSrc.slot;
+    if (originSlot === null) {
+        const existingIdx = state.lineup.findIndex(id => id === dragSrc.id);
+        if (existingIdx !== -1) originSlot = existingIdx;
+    }
+
+    if (originSlot === targetSlotIndex) return; // Mismo slot, nada que hacer
+
     const targetPlayerId = state.lineup[targetSlotIndex];
-    if (dragSrc.slot !== null) {
-        state.lineup[dragSrc.slot] = targetPlayerId;
+    if (originSlot !== null) {
+        state.lineup[originSlot] = targetPlayerId;
         state.lineup[targetSlotIndex] = dragSrc.id;
     } else {
         state.lineup[targetSlotIndex] = dragSrc.id;
@@ -2349,17 +2359,35 @@ function handleTouchEnd(e) {
     const pitchSlot = dropTarget.closest('.pitch-player');
     if (pitchSlot) {
         const targetSlot = parseInt(pitchSlot.dataset.slot);
+        
+        // Prevención de clonado en UI si se arrastra muy rápido:
+        let originSlot = touchDragData.slot;
+        if (originSlot === null) {
+            const existingIdx = state.lineup.findIndex(id => id === touchDragData.id);
+            if (existingIdx !== -1) originSlot = existingIdx;
+        }
+
+        if (originSlot === targetSlot) {
+            touchDragData = { id: null, slot: null, ghost: null };
+            return;
+        }
+
         const targetPlayerId = state.lineup[targetSlot];
-        if (touchDragData.slot !== null) {
-            state.lineup[touchDragData.slot] = targetPlayerId;
+        if (originSlot !== null) {
+            state.lineup[originSlot] = targetPlayerId;
             state.lineup[targetSlot] = touchDragData.id;
         } else {
             state.lineup[targetSlot] = touchDragData.id;
         }
         saveState(); renderTactics();
     } else if (dropTarget.closest('#bench-list') || dropTarget.closest('#tactics-bench')) {
-        if (touchDragData.slot !== null) {
-            state.lineup[touchDragData.slot] = null;
+        let originSlot = touchDragData.slot;
+        if (originSlot === null) {
+            const existingIdx = state.lineup.findIndex(id => id === touchDragData.id);
+            if (existingIdx !== -1) originSlot = existingIdx;
+        }
+        if (originSlot !== null) {
+            state.lineup[originSlot] = null;
             saveState(); renderTactics();
         }
     }
@@ -2421,8 +2449,8 @@ window.filterMarket = function (pos) {
     if (btn) btn.classList.add('active');
 
     const formatM = (num) => (num / 1000000).toFixed(1) + 'M';
-    document.getElementById('market-funds').textContent = `â‚¬${formatM(state.economy.coins)}`;
-    document.getElementById('market-prem').textContent = `â—ˆ${state.economy.premium.toLocaleString()}`;
+    document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
+    document.getElementById('market-prem').textContent = `◈${state.economy.premium.toLocaleString()}`;
 
     const searchInput = document.getElementById('market-search');
     const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
@@ -2436,7 +2464,7 @@ window.filterMarket = function (pos) {
 
     const colSpan = marketMode === 'buy' ? 7 : 5;
     if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center text-slate-500 py-6 text-xs">Sin resultados de bÃºsqueda.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center text-slate-500 py-6 text-xs">Sin resultados de búsqueda.</td></tr>`;
         return;
     }
 
@@ -2444,15 +2472,21 @@ window.filterMarket = function (pos) {
         let pClass = `pos-${p.pos.toLowerCase()}`;
         if (marketMode === 'buy') {
             const canRep = state.stats.rep >= p.rep;
+            const canBuyBasic = canRep && state.economy.coins >= p.priceBasic;
+            const canBuyPrem = state.economy.premium >= p.pricePrem;
+            
+            const btnBasicAttr = canBuyBasic ? `class="btn-action px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')"` : `class="bg-slate-700 text-slate-400 font-bold border border-slate-600 rounded px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')"`;
+            const btnPremAttr = canBuyPrem ? `class="btn-buy premium px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')"` : `class="bg-slate-700 text-slate-400 font-bold border border-slate-600 rounded px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')"`;
+            
             tbody.innerHTML += `
             <tr>
                 <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">â˜… ${p.rep}</td>
-                <td class="font-mono text-green-400 text-right pr-4">â‚¬${formatM(p.priceBasic)}</td>
-                <td class="font-mono text-yellow-400 text-right pr-4">â—ˆ${p.pricePrem.toLocaleString()}</td>
-                <td class="text-center"><div class="flex gap-1 justify-center"><button class="btn-action px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')">FICHAR</button><button class="btn-buy premium px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')">PREMIUM</button><button class="text-xs bg-slate-700 px-1.5 py-1 rounded hover:bg-slate-600 text-white cursor-pointer" onclick="showPlayerInfo(${p.id})">â„¹</button></div></td>
+                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
+                <td class="font-mono text-green-400 text-right pr-4">€${formatM(p.priceBasic)}</td>
+                <td class="font-mono text-yellow-400 text-right pr-4">◈${p.pricePrem.toLocaleString()}</td>
+                <td class="text-center"><div class="flex gap-1 justify-center"><button ${btnBasicAttr}>FICHAR</button><button ${btnPremAttr}>PREMIUM</button><button class="text-xs bg-slate-700 px-1.5 py-1 rounded hover:bg-slate-600 text-white cursor-pointer" onclick="showPlayerInfo(${p.id})">ℹ</button></div></td>
             </tr>`;
         } else {
             const sellValue = Math.floor(p.priceBasic * 0.6);
@@ -2461,8 +2495,8 @@ window.filterMarket = function (pos) {
                 <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
-                <td class="font-mono text-green-400 text-right pr-4 font-bold">+ â‚¬${formatM(sellValue)}</td>
-                <td class="text-center"><div class="flex gap-2 justify-center"><button class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg transition" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button><button class="text-xs bg-slate-700 px-2 py-1.5 rounded hover:bg-slate-600 text-white cursor-pointer transition" onclick="showPlayerInfo(${p.id})">â„¹ INFO</button></div></td>
+                <td class="font-mono text-green-400 text-right pr-4 font-bold">+ €${formatM(sellValue)}</td>
+                <td class="text-center"><div class="flex gap-2 justify-center"><button class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg transition" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button><button class="text-xs bg-slate-700 px-2 py-1.5 rounded hover:bg-slate-600 text-white cursor-pointer transition" onclick="showPlayerInfo(${p.id})">ℹ INFO</button></div></td>
             </tr>`;
         }
     });
@@ -2473,7 +2507,7 @@ window.buyPlayer = function (id, curr) {
 
     // Only verify reputation for 'basic' purchases. Premium skips reputation block!
     if (curr === 'basic' && state.stats.rep < p.rep) {
-        return showAlert(`ReputaciÃ³n Insuficiente para Fichaje EstÃ¡ndar (Req: â˜… ${p.rep}).`);
+        return showAlert(`Reputación Insuficiente para Fichaje Estándar (Req: ★ ${p.rep}).`);
     }
 
     if (curr === 'basic') {
@@ -2497,7 +2531,7 @@ window.buyPlayer = function (id, curr) {
 }
 
 window.sellPlayer = function (id, sellValue) {
-    showConfirm(`Â¿Vender al jugador y aÃ±adir â‚¬${(sellValue / 1000000).toFixed(1)}M al club?`, () => {
+    showConfirm(`¿Vender al jugador y añadir €${(sellValue / 1000000).toFixed(1)}M al club?`, () => {
         state.economy.coins += sellValue;
         state.roster = state.roster.filter(p => p.id !== id);
         for (let i = 0; i < state.lineup.length; i++) { if (state.lineup[i] === id) state.lineup[i] = null; }
@@ -2513,7 +2547,7 @@ window.buyIAP = function () { document.getElementById('modal-store').classList.r
 let selectedPack = null; // { amount: number, price: number } o null
 
 window.selectPack = function (amount, price) {
-    // Solo un paquete a la vez: si ya estÃ¡ seleccionado el mismo, deseleccionar
+    // Solo un paquete a la vez: si ya está seleccionado el mismo, deseleccionar
     if (selectedPack && selectedPack.amount === amount) {
         selectedPack = null;
     } else {
@@ -2558,7 +2592,7 @@ function showMatchPost(isHome, myMatch, hG, aG, hXG, aXG) {
     if (isWin) {
         titleEl.textContent = "VICTORIA";
         titleEl.className = "text-5xl font-gaming text-green-400 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]";
-        msgEl.innerHTML = "Excelente planteamiento tÃ¡ctico.<br>Sumamos 3 puntos clave.";
+        msgEl.innerHTML = "Excelente planteamiento táctico.<br>Sumamos 3 puntos clave.";
         bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-green-500 shadow-[0_0_80px_rgba(74,222,128,0.2)]";
         playSFX('win');
     } else if (isDraw) {
@@ -2569,7 +2603,7 @@ function showMatchPost(isHome, myMatch, hG, aG, hXG, aXG) {
     } else {
         titleEl.textContent = "DERROTA";
         titleEl.className = "text-5xl font-gaming text-red-500 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]";
-        msgEl.innerHTML = "El equipo no estuvo a la altura.<br>Toca revisar la tÃ¡ctica.";
+        msgEl.innerHTML = "El equipo no estuvo a la altura.<br>Toca revisar la táctica.";
         bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-red-500 shadow-[0_0_80px_rgba(239,68,68,0.2)]";
         playSFX('lose');
     }
@@ -2582,7 +2616,7 @@ function renderCart() {
     const btnPayAmount = document.getElementById('btn-pay-amount');
     if (!listEl || !totalEl) return;
 
-    // Actualizar selecciÃ³n visual de packs
+    // Actualizar selección visual de packs
     document.querySelectorAll('.store-pack').forEach(el => {
         el.classList.remove('selected');
         if (selectedPack && el.dataset.pack == selectedPack.amount) {
@@ -2591,10 +2625,10 @@ function renderCart() {
     });
 
     if (!selectedPack) {
-        listEl.innerHTML = '<div class="text-sky-500 text-xs text-center italic">NingÃºn paquete seleccionado</div>';
+        listEl.innerHTML = '<div class="text-sky-500 text-xs text-center italic">Ningún paquete seleccionado</div>';
         totalEl.textContent = '0';
-        if (totalEurEl) totalEurEl.textContent = '0,00 â‚¬';
-        if (btnPayAmount) btnPayAmount.textContent = '0,00 â‚¬';
+        if (totalEurEl) totalEurEl.textContent = '0,00 €';
+        if (btnPayAmount) btnPayAmount.textContent = '0,00 €';
         updatePaymentButton();
         return;
     }
@@ -2606,14 +2640,14 @@ function renderCart() {
             <span class="text-sm text-yellow-400 font-mono font-bold">${selectedPack.amount.toLocaleString()} Monedas</span>
         </div>
         <div class="flex items-center gap-3">
-            <span class="text-green-400 font-bold text-sm font-mono">${priceStr} â‚¬</span>
+            <span class="text-green-400 font-bold text-sm font-mono">${priceStr} €</span>
             <button onclick="removeFromCart()" class="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer px-2">âœ•</button>
         </div>
     </div>`;
 
     totalEl.textContent = selectedPack.amount.toLocaleString();
-    if (totalEurEl) totalEurEl.textContent = priceStr + ' â‚¬';
-    if (btnPayAmount) btnPayAmount.textContent = priceStr + ' â‚¬';
+    if (totalEurEl) totalEurEl.textContent = priceStr + ' €';
+    if (btnPayAmount) btnPayAmount.textContent = priceStr + ' €';
     updatePaymentButton();
 }
 
@@ -2659,13 +2693,13 @@ window.processPayment = function () {
             return showAlert("Completa todos los datos de la tarjeta.");
         }
         if (cardNum.length !== 16 || !/^\d{16}$/.test(cardNum)) {
-            return showAlert("El nÃºmero de tarjeta debe tener 16 dÃ­gitos.");
+            return showAlert("El número de tarjeta debe tener 16 dígitos.");
         }
         if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
             return showAlert("El formato de caducidad debe ser MM/AA.");
         }
         if (!/^\d{3}$/.test(cardCvv)) {
-            return showAlert("El CVV debe tener 3 dÃ­gitos.");
+            return showAlert("El CVV debe tener 3 dígitos.");
         }
     }
 
@@ -2675,7 +2709,7 @@ window.processPayment = function () {
     selectedPack = null;
     saveState();
     closeStore();
-    showAlert(`Pago de ${priceStr} â‚¬ procesado correctamente. +${amount.toLocaleString()} Monedas Premium aÃ±adidas.`);
+    showAlert(`Pago de ${priceStr} € procesado correctamente. +${amount.toLocaleString()} Monedas Premium añadidas.`);
 }
 
 window.confirmIAP = function () {
@@ -2771,7 +2805,7 @@ function renderMatchEvents(filter) {
     if (!list) return;
     const filtered = matchState.events.filter(e => filter === 'home' ? e.side === 'home' : e.side === 'away');
     if (filtered.length === 0) {
-        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aÃºn</div>';
+        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
         return;
     }
     list.innerHTML = filtered.map(e => `
@@ -3042,7 +3076,7 @@ function updateMatchStatsUI() {
 
 window.startMatch = function () {
     const xi = getStartingXI();
-    if (xi.length < 11) return showAlert(`Plantilla incompleta. Asigna a 11 titulares en TÃ¡cticas.`);
+    if (xi.length < 11) return showAlert(`Plantilla incompleta. Asigna a 11 titulares en Tácticas.`);
 
     if (!state.nextFixtures || state.nextFixtures.length === 0) generateFixtures(state);
 
@@ -3133,7 +3167,7 @@ function launchMatch() {
     document.getElementById('sim-away-score').textContent = "0";
     document.getElementById('match-progress').style.width = "0%";
     document.getElementById('match-time').textContent = "0'";
-    document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>Â¡El Ã¡rbitro seÃ±ala el inicio del partido!</div>";
+    document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>¡El árbitro señala el inicio del partido!</div>";
 
     // Render FM formation panels
     const myPlayers = xi.map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
@@ -3143,16 +3177,211 @@ function launchMatch() {
         renderFormationPanel('fm-formation-away', aiPlayers, aTeam.c1 || '#dc2626');
     } else {
         renderFormationPanel('fm-formation-home', aiPlayers, hTeam.c1 || '#2563eb');
-        renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 |function runMatchLoop(targetMinute) {
+        renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 || '#dc2626');
+    }
+
+    animatePitchTokens();
+    runMatchLoop(45);
+}
+
+// ==========================================
+// ANIMACIÓN DE GOL (2D + EFFECTS)
+// ==========================================
+function playGoalAnimation(scorer, assist, minute, isLocalTeam) {
+    const overlay = document.getElementById('goal-overlay');
+    const giantText = document.getElementById('goal-text-giant');
+    const scorerInfo = document.getElementById('goal-scorer-info');
+    const assistInfo = document.getElementById('goal-assist-info');
+    
+    // Nombres y Minuto
+    document.getElementById('goal-scorer-name').textContent = typeof scorer === 'object' ? (scorer.name || 'Jugador') : scorer;
+    document.getElementById('goal-minute-text').textContent = minute;
+    
+    if (assist) {
+        document.getElementById('goal-assist-name').textContent = typeof assist === 'object' ? (assist.name || 'Asistente') : assist;
+        assistInfo.classList.remove('hidden');
+    } else {
+        assistInfo.classList.add('hidden');
+    }
+    
+    // Elementos del pitch 2D
+    const assisterDot = document.getElementById('anim-assister');
+    const scorerDot = document.getElementById('anim-scorer');
+    const ballDot = document.getElementById('anim-ball');
+    
+    // Resetear posiciones y display
+    assisterDot.style.cssText = 'left: 20%; top: 50%; display: none;';
+    scorerDot.style.cssText = 'left: 60%; top: 50%; display: none;';
+    ballDot.style.cssText = 'left: 20%; top: 50%; display: none;';
+    
+    // Clases del equipo (Color)
+    const teamColorClass = isLocalTeam ? 'bg-blue-500 shadow-[0_0_15px_blue]' : 'bg-red-500 shadow-[0_0_15px_red]';
+    assisterDot.className = `absolute w-5 h-5 md:w-6 md:h-6 rounded-full z-20 transition-all duration-700 border-[2px] border-white ${teamColorClass}`;
+    scorerDot.className = `absolute w-6 h-6 md:w-7 md:h-7 rounded-full z-20 transition-all duration-700 border-[2px] border-white ${teamColorClass}`;
+    ballDot.className = 'absolute w-4 h-4 rounded-full bg-white shadow-[0_0_15px_white] z-30 transition-all duration-300';
+    
+    // Removemos hidden y ponemos opacidad 0
+    overlay.classList.remove('hidden');
+    
+    // Delay de 50ms para que transicione opacity
+    setTimeout(() => {
+        overlay.classList.remove('opacity-0');
+        overlay.classList.add('opacity-100');
+        
+        // PASO 1: POSICIONAMIENTO INICIAL
+        if (assist) {
+            assisterDot.style.display = 'block';
+            assisterDot.style.left = '30%';
+            assisterDot.style.top = '70%';
+        }
+        
+        scorerDot.style.display = 'block';
+        scorerDot.style.left = '60%';
+        scorerDot.style.top = '40%';
+        
+        ballDot.style.display = 'block';
+        if (assist) {
+            ballDot.style.left = '30%';
+            ballDot.style.top = '70%';
+        } else {
+            // Si no hay asistencia, el balón empieza con el goleador
+            ballDot.style.left = '50%';
+            ballDot.style.top = '50%';
+        }
+        
+        // PASO 2: EL PASE (si hay) y CARRERA
+        setTimeout(() => {
+            if (assist) {
+                // El balón va hacia el goleador
+                ballDot.style.transitionDuration = '450ms';
+                ballDot.style.left = '60%';
+                ballDot.style.top = '40%';
+                
+                // El goleador avanza un poco al área
+                scorerDot.style.left = '70%';
+                scorerDot.style.top = '45%';
+            } else {
+                // El goleador avanza
+                scorerDot.style.left = '70%';
+                scorerDot.style.top = '45%';
+                
+                ballDot.style.transitionDuration = '400ms';
+                ballDot.style.left = '70%';
+                ballDot.style.top = '45%';
+            }
+            
+            // PASO 3: EL TIRO
+            setTimeout(() => {
+                // Animación de impulso del goleador
+                scorerDot.style.transform = 'scale(1.4)';
+                setTimeout(() => {
+                    scorerDot.style.transform = 'scale(1)';
+                    // El balón sale disparado
+                    ballDot.style.transitionDuration = '200ms';
+                    ballDot.style.left = '98%'; 
+                    ballDot.style.top = '50%';
+                    
+                    // PASO 4: EL IMPACTO Y CELEBRACIÓN
+                    setTimeout(() => {
+                        // Shake the screen
+                        document.body.classList.add('camera-shake');
+                        setTimeout(() => document.body.classList.remove('camera-shake'), 500);
+                        
+                        // Text and UI
+                        giantText.classList.remove('scale-0');
+                        giantText.classList.add('goal-text-animate');
+                        scorerInfo.classList.remove('opacity-0');
+                        scorerInfo.classList.add('opacity-100');
+                        
+                        // Confetti
+                        fireConfetti();
+                        
+                        // Cierre Automático
+                        setTimeout(() => {
+                            overlay.classList.remove('opacity-100');
+                            overlay.classList.add('opacity-0');
+                            setTimeout(() => {
+                                overlay.classList.add('hidden');
+                                giantText.classList.remove('goal-text-animate');
+                                giantText.classList.add('scale-0');
+                                scorerInfo.classList.remove('opacity-100');
+                                scorerInfo.classList.add('opacity-0');
+                            }, 500);
+                        }, 4000);
+                        
+                    }, 200); // Ms que tarda el tiro
+                }, 150); // Scale recovery
+                
+            }, assist ? 450 : 400); // Tiempo del pase / carrera
+        }, 300); // Pause antes de empezar la jugada
+    }, 50);
+}
+
+// Confetti Engine (Canvas)
+function fireConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    for(let i = 0; i < 150; i++) {
+        particles.push({
+            x: canvas.width / 2,
+            y: canvas.height,
+            r: Math.random() * 8 + 3,
+            dx: Math.random() * 12 - 6,
+            dy: Math.random() * -20 - 10,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            tilt: Math.floor(Math.random() * 10) - 10,
+            tiltAngleInc: (Math.random() * 0.07) + 0.05,
+            tiltAngle: 0
+        });
+    }
+    
+    function animate() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+            p.tiltAngle += p.tiltAngleInc;
+            p.y += (Math.cos(p.tiltAngle) + p.dy + p.r / 2) / 2;
+            p.x += Math.sin(p.tiltAngle) * 2 + p.dx;
+            p.dy += 0.3; // Gravedad
+            
+            if (p.y <= canvas.height) active = true;
+            
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+            ctx.stroke();
+        });
+        if (active) requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+// ==========================================
+// ADVANCED MATCH ENGINE (MINUTO A MINUTO)
+// ==========================================
+function runMatchLoop(targetMinute) {
     matchState._targetMinute = targetMinute;
     const logDiv = document.getElementById('match-narrative');
     const commentary = [
-        "Controlando el ritmo del partido.", "Pase filtrado peligroso que corta la zaga.",
-        "Falta táctica en la medular.", "Disparo lejano que se va alto.",
-        "Gran intervención del portero.", "Despeje de cabeza en el área.",
-        "Centro desde la banda derecha.", "Posesión tranquila en campo propio.",
-        "Presión alta del equipo rival.", "Recuperación en la medular.",
-        "Lateral largo buscando al extremo.", "Tiro que rechaza la defensa."
+        "Control del balón en el centro del campo.",
+        "Cambio de orientación buscando la banda.",
+        "Falta táctica dura para evitar el contraataque.",
+        "Disparo lejano que se marcha por encima del travesaño.",
+        "Intervención espectacular del guardameta enviando a córner.",
+        "Corte providencial de la defensa en el último momento.",
+        "Centro peligroso al área que no encuentra rematador.",
+        "Posesión larga, durmiendo el partido.",
+        "Presión muy intensa del equipo rival, forzando el error.",
+        "Robo crucial en la medular.",
+        "Pase al hueco excelente, pero el delantero estaba en fuera de juego.",
+        "El tiro rebota en la barrera defensiva."
     ];
 
     matchState.interval = setInterval(() => {
@@ -3160,20 +3389,22 @@ function launchMatch() {
         document.getElementById('match-time').textContent = `${matchState.min}'`;
         document.getElementById('match-progress').style.width = `${(matchState.min / 90) * 100}%`;
 
+        // Descanso / Medio Tiempo
         if (matchState.min === 45 && targetMinute === 45) {
             clearInterval(matchState.interval);
             stopPitchAnimation();
-            logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Nos vamos al descanso.</strong></div>`;
+            logDiv.innerHTML += `<div class="mt-4 border-t border-slate-700 pt-2"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Nos vamos al vestuario.</strong></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
             document.getElementById('match-halftime').classList.remove('hidden');
             matchState.events.push({ min: 45, icon: '⏱', text: 'Descanso', side: 'home' });
             updateMatchStatsUI();
             renderMatchEvents('home');
             const dugNarr = document.getElementById('fm-dugout-narrative');
-            if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Medio tiempo — elige tus acciones en el dugout.</div>';
+            if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Descanso: Tiempo para ajustes.</div>';
             return;
         }
 
+        // Final del Partido
         if (matchState.min >= 90) {
             clearInterval(matchState.interval);
             stopPitchAnimation();
@@ -3181,219 +3412,204 @@ function launchMatch() {
             return;
         }
 
-        // --- CÁLCULO DE CONDICIÓN (FATIGA) PROGRESIVA ---
+        // -- 1. EVALUAR JUGADORES Y CONDICIÓN (FATIGA PROGRESIVA) --
         const xi = getStartingXI().filter(p => !p.suspension);
         const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
         
-        // La condición baja ligeramente minuto a minuto (depende del phy de cada jugador)
+        // El jugador pierde condición a medida que avanza el partido (Modificado por Stamina/Físico)
         xi.forEach(p => {
-            const stamDrop = 0.05 + ((100 - (p.phy || 70)) * 0.002); 
-            p.con = Math.max(0, p.con - stamDrop);
+            const staminaDrop = 0.05 + ((100 - (p.phy || 70)) * 0.002); 
+            p.con = Math.max(5, (p.con || 100) - staminaDrop);
         });
-        const myAvgCon = xi.reduce((acc, p) => acc + (p.con || 100), 0) / (xi.length || 1);
-        const oppAvgCon = 100 - (matchState.min * 0.2); // Simulación rápida de fatiga rival
 
-        // --- CÁLCULO DE SECTORES ---
-        // Nuestro equipo
+        // Promedios por sectores (Ataque, Medio, Defensa, Portero)
         const myAtt = xi.filter(p => p.pos === 'DEL').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'DEL').length || 1);
         const myMid = xi.filter(p => p.pos === 'MED').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'MED').length || 1);
         const myDef = xi.filter(p => p.pos === 'DEF').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'DEF').length || 1);
         const myGk = xi.filter(p => p.pos === 'POR').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'POR').length || 1);
         
-        // Rival (promedio simplificado sobre su OVR general, dando pequeñas variaciones)
+        const myAvgCon = xi.reduce((acc, p) => acc + (p.con || 100), 0) / (xi.length || 1);
+        const myFatigueMod = (0.6 + (myAvgCon / 100) * 0.4);
+
+        // Rival promedios
         const oppAtt = currentOpponent.ovr + (Math.random() * 4 - 2);
         const oppMid = currentOpponent.ovr + (Math.random() * 4 - 2);
         const oppDef = currentOpponent.ovr + (Math.random() * 4 - 2);
         const oppGk = currentOpponent.ovr + (Math.random() * 4 - 2);
+        
+        const oppAvgCon = Math.max(20, 100 - (matchState.min * 0.25));
+        const oppFatigueMod = (0.6 + (oppAvgCon / 100) * 0.4);
 
-        // Modificadores de fatiga y charla
-        const myFatigueMod = (0.7 + (myAvgCon / 100) * 0.3);
-        const oppFatigueMod = (0.7 + (oppAvgCon / 100) * 0.3);
+        // Charla en el descanso afecta rendimiento
+        const matchTalkBonus = (matchState.talkMod || 0) * 50;
 
-        const activeMyMid = (myMid * myFatigueMod) + (matchState.talkMod * 100);
+        const activeMyMid = (myMid * myFatigueMod) + matchTalkBonus;
         const activeOppMid = (oppMid * oppFatigueMod);
 
-        // --- POSESIÓN DINÁMICA ---
-        const totalMid = activeMyMid + activeOppMid;
-        const myPossChance = activeMyMid / totalMid;
-        const basePoss = myPossChance * 100;
+        // -- 2. CÁLCULO DE POSESIÓN ESTE MINUTO --
+        const totalMidControl = activeMyMid + activeOppMid;
+        const myControlProb = activeMyMid / totalMidControl;
         
+        const basePoss = myControlProb * 100;
         matchState.stats.hPoss = matchState.isHome 
-            ? Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))))
-            : 100 - Math.max(20, Math.min(80, Math.floor(basePoss + (Math.random() * 10 - 5))));
+            ? Math.max(30, Math.min(70, Math.floor(basePoss + (Math.random() * 10 - 5))))
+            : 100 - Math.max(30, Math.min(70, Math.floor(basePoss + (Math.random() * 10 - 5))));
         matchState.stats.aPoss = 100 - matchState.stats.hPoss;
 
-        const isMyPossession = Math.random() < myPossChance;
+        const miPosesionActual = Math.random() < myControlProb;
         let eventText = "";
 
-        // --- GENERACIÓN DE EVENTOS (Probabilidades por minuto) ---
-        let rand = Math.random();
-        
-        if (isMyPossession) {
-            // El usuario tiene el balón
-            const attackStrength = (myAtt * myFatigueMod) + (matchState.talkMod * 100);
-            const defenseStrength = (oppDef * oppFatigueMod);
-            const gkStrength = oppGk;
+        // -- 3. RESOLUCIÓN DE ACCIONES OFENSIVAS --
+        if (miPosesionActual) {
+            const attackForce = (myAtt * myFatigueMod) + matchTalkBonus;
+            const defenseForce = (oppDef * oppFatigueMod);
             
-            // Probabilidad de generar una ocasión (0.05 a 0.15 por minuto aprox)
-            const chanceProb = Math.max(0.02, Math.min(0.18, 0.08 + ((attackStrength - defenseStrength) * 0.003)));
+            // Probabilidad de ocasión (entre 5% y 15% por minuto que haya posesión aprox)
+            const chanceProb = Math.max(0.04, Math.min(0.20, 0.08 + ((attackForce - defenseForce) * 0.003)));
 
-            if (rand < chanceProb) {
-                // Hay ocasión
-                let xG = Math.max(0.1, Math.min(0.9, 0.3 + ((attackStrength - defenseStrength) * 0.01)));
+            if (Math.random() < chanceProb) {
+                // Existe Remate
+                let xG = Math.max(0.1, Math.min(0.8, 0.3 + ((attackForce - defenseForce) * 0.01)));
                 if (matchState.isHome) { matchState.stats.hShots++; matchState.stats.hXG += xG; }
                 else { matchState.stats.aShots++; matchState.stats.aXG += xG; }
 
-                // Probabilidad de Gol = xG vs Portero
-                const goalProb = xG * (1 - (gkStrength / 150));
+                // Supera al Portero?
+                const goalProb = xG * (1 - (oppGk / 150));
                 
                 if (Math.random() < goalProb) {
                     // ¡GOL NUESTRO!
                     matchState.mG++;
                     if (matchState.isHome) matchState.stats.hSot++; else matchState.stats.aSot++;
                     
-                    const scorers = xi.filter(p => p.pos === 'DEL' || p.pos === 'MED' || p.pos === 'DEF');
-                    const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)] : { name: "el jugador", id: 0 };
-                    const assistCands = scorers.filter(p => p.id !== scorer.id && p.pos !== 'POR');
-                    const assist = (assistCands.length > 0 && Math.random() > 0.3) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
+                    const attackers = xi.filter(p => ['DEL', 'MED'].includes(p.pos));
+                    const scorer = attackers.length > 0 ? attackers[Math.floor(Math.random() * attackers.length)] : { name: "el jugador", id: 0 };
+                    const assistCands = xi.filter(p => p.id !== scorer.id && p.pos !== 'POR');
+                    const assist = (assistCands.length > 0 && Math.random() > 0.4) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
                     
-                    eventText = `<span class="text-green-400 font-bold">¡GOL! Definición perfecta de ${scorer.name}.</span>`;
+                    eventText = `<span class="text-green-400 font-bold">¡GOL! Excelente finalización de ${scorer.name}.</span>`;
                     const goalSide = matchState.isHome ? 'home' : 'away';
                     
-                    // Asegurar que el objeto de evento contenga los campos solicitados
-                    matchState.events.push({ 
-                        min: matchState.min, 
-                        icon: '⚽', 
-                        text: `GOL — ${scorer.name}`, 
-                        side: goalSide,
-                        goleador: scorer.name,
-                        asistente: assist ? assist.name : null
-                    });
-                    
+                    matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer.name}`, side: goalSide });
                     setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
-                    // Pasamos el objeto completo del scorer para extraer su ID/Imagen si es necesario, o al menos un objeto
+                    
+                    // Disparar animación en pantalla
                     playGoalAnimation(scorer, assist, matchState.min, matchState.isHome);
                 } else {
-                    // Parada o Fuera
+                    // Paradón o Fallo
                     if (Math.random() < 0.5) {
                         if (matchState.isHome) matchState.stats.hSot++; else matchState.stats.aSot++;
-                        eventText = `¡Paradón del portero rival a tiro de ${xi.filter(p => p.pos === 'DEL')[0]?.name || 'nuestro delantero'}!`;
+                        eventText = `Remate espectacular de ${xi.filter(p => p.pos === 'DEL')[0]?.name || 'nuestro punta'}, pero el portero hace un paradón.`;
                         setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
                     } else {
-                        eventText = `Disparo que sale rozando el palo. Buena ocasión.`;
+                        eventText = `Disparo potente que se va desviado por centímetros.`;
                         setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
                     }
                 }
             }
         } else {
-            // La CPU tiene el balón
-            const attackStrength = (oppAtt * oppFatigueMod);
-            const defenseStrength = (myDef * myFatigueMod) + (matchState.talkMod * 100);
-            const gkStrength = (myGk * myFatigueMod);
+            // Posesión Rival
+            const attackForce = (oppAtt * oppFatigueMod);
+            const defenseForce = (myDef * myFatigueMod) + matchTalkBonus;
             
-            const chanceProb = Math.max(0.02, Math.min(0.18, 0.08 + ((attackStrength - defenseStrength) * 0.003)));
+            const chanceProb = Math.max(0.04, Math.min(0.20, 0.08 + ((attackForce - defenseForce) * 0.003)));
 
-            if (rand < chanceProb) {
-                // Hay ocasión rival
-                let xG = Math.max(0.1, Math.min(0.9, 0.3 + ((attackStrength - defenseStrength) * 0.01)));
+            if (Math.random() < chanceProb) {
+                // Ocasión Rival
+                let xG = Math.max(0.1, Math.min(0.8, 0.3 + ((attackForce - defenseForce) * 0.01)));
                 if (matchState.isHome) { matchState.stats.aShots++; matchState.stats.aXG += xG; }
                 else { matchState.stats.hShots++; matchState.stats.hXG += xG; }
 
-                const goalProb = xG * (1 - (gkStrength / 150));
+                const goalProb = xG * (1 - (myGk / 150 * myFatigueMod));
 
                 if (Math.random() < goalProb) {
                     // ¡GOL RIVAL!
                     matchState.oG++;
                     if (matchState.isHome) matchState.stats.aSot++; else matchState.stats.hSot++;
                     
-                    const scorers = aiPlayers.filter(p => p.pos === 'DEL' || p.pos === 'MED');
-                    const scorer = scorers.length > 0 ? scorers[Math.floor(Math.random() * scorers.length)] : { name: "el delantero", id: 0 };
-                    const assistCands = scorers.filter(p => p.name !== scorer.name);
-                    const assist = (assistCands.length > 0 && Math.random() > 0.3) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
+                    const attackers = aiPlayers.filter(p => ['DEL', 'MED'].includes(p.pos));
+                    const scorer = attackers.length > 0 ? attackers[Math.floor(Math.random() * attackers.length)] : { name: "el delantero", id: 0 };
+                    const assistCands = aiPlayers.filter(p => p.name !== scorer.name);
+                    const assist = (assistCands.length > 0 && Math.random() > 0.4) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
                     
-                    eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Grave error en defensa que aprovecha ${scorer.name}.</span>`;
+                    eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Error defensivo letal que culmina ${scorer.name}.</span>`;
                     const goalSide = matchState.isHome ? 'away' : 'home';
                     
-                    matchState.events.push({ 
-                        min: matchState.min, 
-                        icon: '⚽', 
-                        text: `GOL — ${scorer.name}`, 
-                        side: goalSide,
-                        goleador: scorer.name,
-                        asistente: assist ? assist.name : null
-                    });
-                    
+                    matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer.name}`, side: goalSide });
                     setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
+                    
                     playGoalAnimation(scorer, assist, matchState.min, !matchState.isHome);
                 } else {
-                    // Parada o Fuera
+                    // Parada de nuestro portero o fuera
                     if (Math.random() < 0.5) {
                         if (matchState.isHome) matchState.stats.aSot++; else matchState.stats.hSot++;
-                        eventText = `¡Paradón de nuestro portero para salvar al equipo!`;
+                        eventText = `¡Extraordinaria parada de nuestro portero para evitar el gol rival!`;
                         setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
                     } else {
-                        eventText = `Aviso del rival, el tiro sale cerca del larguero.`;
+                        eventText = `Susto en nuestra área. El rebote sale fuera por suerte.`;
                         setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
                     }
                 }
             }
         }
 
-        // --- SISTEMA DE TARJETAS (Aleatorio independiente) ---
-        if (Math.random() < 0.012 && !eventText) { // Solo si no ha pasado nada reseñable
+        // -- 4. TARJETAS Y FALTAS (1.5% chance) --
+        if (Math.random() < 0.015 && !eventText) {
             const cardSide = Math.random() < 0.5 ? 'home' : 'away';
-            let sanctionedName = "Jugador";
-            let isUserPlayer = false;
-            let playerId = null;
+            let sancionado = "Jugador";
+            let isMiJugador = false;
+            let pId = null;
+
             if ((cardSide === 'home' && matchState.isHome) || (cardSide === 'away' && !matchState.isHome)) {
-                if (xi.length > 0) { const p = xi[Math.floor(Math.random() * xi.length)]; sanctionedName = p.name; isUserPlayer = true; playerId = p.id; }
+                if (xi.length > 0) {
+                    const pj = xi[Math.floor(Math.random() * xi.length)];
+                    sancionado = pj.name; pId = pj.id; isMiJugador = true;
+                }
             } else {
-                if (aiPlayers.length > 0) sanctionedName = aiPlayers[Math.floor(Math.random() * aiPlayers.length)].name;
+                if (aiPlayers.length > 0) sancionado = aiPlayers[Math.floor(Math.random() * aiPlayers.length)].name;
             }
-            const matchPlayerKey = `${cardSide}_${sanctionedName}`;
+
+            const keyCard = `${cardSide}_${sancionado}`;
             if (!matchState.playersCards) matchState.playersCards = {};
-            if (matchState.playersCards[matchPlayerKey] === 'yellow') {
-                matchState.playersCards[matchPlayerKey] = 'red';
-                eventText = `<span class="text-red-500 font-bold">¡ROJA! Expulsión para ${sanctionedName}.</span>`;
-                matchState.events.push({ min: matchState.min, icon: '🟥', text: `Roja — ${sanctionedName}`, side: cardSide });
-                if (isUserPlayer && state && state.roster) { const player = state.roster.find(p => p.id === playerId); if (player) { player.suspension = 2; addEmail('Comité', 'Expulsión', `${player.name} expulsado.`); } }
+
+            if (matchState.playersCards[keyCard] === 'yellow') {
+                matchState.playersCards[keyCard] = 'red';
+                eventText = `<span class="text-red-500 font-bold">¡ROJA DIRECTA! Expulsión por doble amarilla de ${sancionado}.</span>`;
+                matchState.events.push({ min: matchState.min, icon: '🟥', text: `Roja — ${sancionado}`, side: cardSide });
+                if (isMiJugador && state.roster) {
+                    const p = state.roster.find(x => x.id === pId);
+                    if (p) { p.suspension = 2; addEmail('Comité Competición', 'Sanción', `Tu jugador ${p.name} ha sido sancionado con 2 partidos.`); }
+                }
             } else {
-                matchState.playersCards[matchPlayerKey] = 'yellow';
-                eventText = `Amarilla para ${sanctionedName} por una falta táctica dura.`;
-                matchState.events.push({ min: matchState.min, icon: '🟨', text: `Amarilla — ${sanctionedName}`, side: cardSide });
-                if (isUserPlayer && state && state.roster) { const player = state.roster.find(p => p.id === playerId); if (player) { player.yellowCards = (player.yellowCards || 0) + 1; if (player.yellowCards >= 5) { player.suspension = 1; player.yellowCards = 0; } } }
+                matchState.playersCards[keyCard] = 'yellow';
+                eventText = `Tarjeta Amarilla para ${sancionado} por reiteración de faltas.`;
+                matchState.events.push({ min: matchState.min, icon: '🟨', text: `Amarilla — ${sancionado}`, side: cardSide });
+                if (isMiJugador && state.roster) {
+                    const p = state.roster.find(x => x.id === pId);
+                    if (p) {
+                        p.yellowCards = (p.yellowCards || 0) + 1;
+                        if (p.yellowCards >= 5) { p.suspension = 1; p.yellowCards = 0; }
+                    }
+                }
             }
         }
-        
-        // Agregar "filler" solo si no ha pasado nada (para que no parezca que en el partido no pasa nada)
-        if (!eventText && Math.random() < 0.2) {
+
+        // Textos aleatorios relleno de partido (narrativa)
+        if (!eventText && Math.random() < 0.15) {
             eventText = commentary[Math.floor(Math.random() * commentary.length)];
         }
 
         if (eventText) {
-            logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
+            logDiv.innerHTML += `<div><span class="text-slate-500 font-mono text-xs">${matchState.min}'</span> <span class="text-white">${eventText}</span></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
         }
 
+        // Update score and stats
         document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
         document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
         updateMatchStatsUI();
         renderMatchEvents('home');
 
     }, simSpeedMs / 3);
-}
-   setPitchPhase('away-corner', 2);
-            }
-        }
-
-        logDiv.innerHTML += `<div><span class="text-slate-500">${matchState.min}'</span> - ${eventText}</div>`;
-        logDiv.scrollTop = logDiv.scrollHeight;
-        document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
-        document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
-        updateMatchStatsUI();
-        renderMatchEvents('home');
-
-    }, simSpeedMs);
 }
 
 window.matchTalk = function (type) {
@@ -3404,7 +3620,7 @@ window.matchTalk = function (type) {
     const logDiv = document.getElementById('match-narrative');
     if (type === 'animar') {
         matchState.talkMod = 0.01;
-        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">El equipo sale motivado para la 2Âª parte.</div>`;
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">El equipo sale motivado para la 2ª parte.</div>`;
         matchState.events.push({ min: 45, icon: 'ðŸ“£', text: 'Charla motivacional', side: matchState.isHome ? 'home' : 'away' });
     } else {
         if (Math.random() < 0.6) {
@@ -3423,10 +3639,10 @@ window.matchTalk = function (type) {
     const oppSide = matchState.isHome ? 'away' : 'home';
     if (oppTalkRand < 0.5) {
         matchState.events.push({ min: 45, icon: 'ðŸ“£', text: 'Charla motivacional (rival)', side: oppSide });
-        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El tÃ©cnico rival motiva a su equipo.</div>`;
+        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El técnico rival motiva a su equipo.</div>`;
     } else {
         matchState.events.push({ min: 45, icon: 'ðŸ˜¤', text: 'Bronca al equipo (rival)', side: oppSide });
-        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El tÃ©cnico rival reprende a sus jugadores.</div>`;
+        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El técnico rival reprende a sus jugadores.</div>`;
         matchState.oppProb += (Math.random() < 0.6 ? 0.01 : -0.005);
     }
     logDiv.scrollTop = logDiv.scrollHeight;
@@ -3444,7 +3660,7 @@ window.matchTalk = function (type) {
 
     // Dugout update
     const dugNarr = document.getElementById('fm-dugout-narrative');
-    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2Âª PARTE" para continuar.</div>';
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2ª PARTE" para continuar.</div>';
 }
 
 window.goToTacticsFromMatch = function () {
@@ -3583,7 +3799,7 @@ function finishMatch(mG, oG) {
     state.flags.canTrain = true;
     state.flags.canTalk = true;
 
-    // --- CondiciÃ³n FÃ­sica y Lesiones Post-Partido (Local) ---
+    // --- Condición Física y Lesiones Post-Partido (Local) ---
     state.lineup.forEach(id => {
         if (!id) return;
         const p = state.roster.find(x => x.id === id);
@@ -3600,14 +3816,16 @@ function finishMatch(mG, oG) {
         });
     }
 
-    generateFixtures(state); // Crear siguiente jornada (Para verla en apuestas y demÃ¡s)
+    generateFixtures(state); // Crear siguiente jornada (Para verla en apuestas y demás)
     saveState();
 
-    document.getElementById('match-coins').textContent = `+â‚¬${(coins / 1000000).toFixed(1)}M`;
+    document.getElementById('match-coins').textContent = `+€${(coins / 1000000).toFixed(1)}M`;
     document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-[10px] ${rep > 0 ? 'text-blue-400' : 'text-red-400'}">REP: ${rep > 0 ? '+' : ''}${rep}</span>`;
 }
 
 window.endMatchAndReturn = function () {
+    if (matchState.interval) clearInterval(matchState.interval);
+    if (matchState.pitchInterval) clearInterval(matchState.pitchInterval);
     document.getElementById('match-modal').classList.add('hidden');
     document.getElementById('app-layout').classList.remove('hidden');
     setNowPlayingVisibility();
@@ -3636,12 +3854,12 @@ function endSeason() {
         document.getElementById('season-trophy').classList.remove('hidden');
         document.getElementById('season-no-trophy').classList.add('hidden');
         state.stats.trophies++;
-        addEmail('Directiva', 'Â¡CAMPEONES DE LIGA!', 'El club hace historia ganando LaLiga Tussi.');
+        addEmail('Directiva', '¡CAMPEONES DE LIGA!', 'El club hace historia ganando LaLiga Tussi.');
     } else {
         document.getElementById('season-trophy').classList.add('hidden');
         document.getElementById('season-no-trophy').classList.remove('hidden');
-        document.getElementById('season-pos').textContent = userPos + "Âº";
-        addEmail('Directiva', 'RevisiÃ³n de Temporada', `Hemos finalizado en la posiciÃ³n ${userPos}. Debemos mejorar.`);
+        document.getElementById('season-pos').textContent = userPos + "º";
+        addEmail('Directiva', 'Revisión de Temporada', `Hemos finalizado en la posición ${userPos}. Debemos mejorar.`);
     }
     saveState();
 }
@@ -3662,7 +3880,7 @@ window.startNewSeason = function () {
     saveState();
     document.getElementById('modal-season-end').classList.add('hidden');
     switchTab('dash');
-    showAlert("Â¡Arranca una nueva ediciÃ³n de LaLiga Tussi! Dinero y plantilla se conservan.");
+    showAlert("¡Arranca una nueva edición de LaLiga Tussi! Dinero y plantilla se conservan.");
 }
 
 /* =========================================================================
@@ -3732,7 +3950,7 @@ window.showPlayerInfo = function (id) {
             `}
         </div>
         <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
-            <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">CondiciÃ³n</span><br><span class="text-white font-bold">${p.con || 100}%</span></div>
+            <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">Condición</span><br><span class="text-white font-bold">${p.con || 100}%</span></div>
             <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">Moral</span><br><span class="text-white font-bold">${p.morale || 100}%</span></div>
         </div>`;
     document.getElementById('modal-player-info').classList.remove('hidden');
@@ -3778,27 +3996,27 @@ window.showLegalModal = function (type) {
     const title = document.getElementById('legal-modal-title');
     const body = document.getElementById('legal-modal-body');
     if (type === 'cookies') {
-        title.textContent = 'PolÃ­tica de Cookies';
+        title.textContent = 'Política de Cookies';
         body.innerHTML = `
-            <p><strong>Â¿QuÃ© son las cookies?</strong></p>
-            <p>Las cookies son pequeÃ±os archivos de texto que se almacenan en tu navegador cuando visitas un sitio web.</p>
+            <p><strong>¿Qué son las cookies?</strong></p>
+            <p>Las cookies son pequeños archivos de texto que se almacenan en tu navegador cuando visitas un sitio web.</p>
             <p><strong>Cookies que utilizamos:</strong></p>
             <ul class="list-disc ml-5 space-y-1">
-                <li><strong>Cookies esenciales:</strong> Necesarias para el funcionamiento de la autenticaciÃ³n y guardado de partida.</li>
-                <li><strong>Cookies de rendimiento:</strong> Nos ayudan a entender cÃ³mo interactÃºas con la aplicaciÃ³n.</li>
+                <li><strong>Cookies esenciales:</strong> Necesarias para el funcionamiento de la autenticación y guardado de partida.</li>
+                <li><strong>Cookies de rendimiento:</strong> Nos ayudan a entender cómo interactúas con la aplicación.</li>
                 <li><strong>Cookies de funcionalidad:</strong> Permiten recordar tus preferencias (volumen, idioma, tema).</li>
             </ul>
-            <p><strong>Control de cookies:</strong> Puedes gestionar las cookies desde la configuraciÃ³n de tu navegador. Si desactivas las cookies esenciales, es posible que algunas funcionalidades no estÃ©n disponibles.</p>
-            <p class="text-slate-500 text-[10px] mt-4">Ãšltima actualizaciÃ³n: Marzo 2026</p>`;
+            <p><strong>Control de cookies:</strong> Puedes gestionar las cookies desde la configuración de tu navegador. Si desactivas las cookies esenciales, es posible que algunas funcionalidades no estén disponibles.</p>
+            <p class="text-slate-500 text-[10px] mt-4">Última actualización: Marzo 2026</p>`;
     } else if (type === 'aviso') {
         title.textContent = 'Aviso Legal';
         body.innerHTML = `
-            <p><strong>Titular:</strong> Inafuma & Beben S.L. â€” Simulador de GestiÃ³n Deportiva.</p>
-            <p><strong>Objeto:</strong> Esta aplicaciÃ³n web es un simulador de gestiÃ³n de club de fÃºtbol con fines de entretenimiento. No involucra dinero real ni apuestas reales.</p>
-            <p><strong>Propiedad Intelectual:</strong> Todos los diseÃ±os, cÃ³digo y contenido multimedia de esta aplicaciÃ³n son propiedad del equipo de desarrollo.</p>
-            <p><strong>LimitaciÃ³n de Responsabilidad:</strong> El uso de la aplicaciÃ³n se realiza bajo la exclusiva responsabilidad del usuario. No nos hacemos responsables de interrupciones del servicio o pÃ©rdida de datos.</p>
-            <p><strong>Datos Personales:</strong> Solo se recopilan datos estrictamente necesarios (nombre de usuario y contraseÃ±a cifrada) para la funcionalidad del juego a travÃ©s de Firebase.</p>
-            <p class="text-slate-500 text-[10px] mt-4">Ãšltima actualizaciÃ³n: Marzo 2026</p>`;
+            <p><strong>Titular:</strong> Inafuma & Beben S.L. â€” Simulador de Gestión Deportiva.</p>
+            <p><strong>Objeto:</strong> Esta aplicación web es un simulador de gestión de club de fútbol con fines de entretenimiento. No involucra dinero real ni apuestas reales.</p>
+            <p><strong>Propiedad Intelectual:</strong> Todos los diseños, código y contenido multimedia de esta aplicación son propiedad del equipo de desarrollo.</p>
+            <p><strong>Limitación de Responsabilidad:</strong> El uso de la aplicación se realiza bajo la exclusiva responsabilidad del usuario. No nos hacemos responsables de interrupciones del servicio o pérdida de datos.</p>
+            <p><strong>Datos Personales:</strong> Solo se recopilan datos estrictamente necesarios (nombre de usuario y contraseña cifrada) para la funcionalidad del juego a través de Firebase.</p>
+            <p class="text-slate-500 text-[10px] mt-4">Última actualización: Marzo 2026</p>`;
     }
     document.getElementById('modal-legal').classList.remove('hidden');
 }
@@ -3816,12 +4034,12 @@ window.switchLeagueTab = function (tab) {
 window.loadMultiplayerLeaderboard = function () {
     const tbody = document.getElementById('league-multi-tbody');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">Cargando clasificaciÃ³n multijugador...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">Cargando clasificación multijugador...</td></tr>';
 
     db.collection('users').get().then(snap => {
         tbody.innerHTML = '';
         if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">No hay jugadores registrados aÃºn.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">No hay jugadores registrados aún.</td></tr>';
             return;
         }
         // Build array, sort by pvpStats.pts desc, then goal difference
@@ -3843,27 +4061,28 @@ window.loadMultiplayerLeaderboard = function () {
             });
         });
         rows.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
-        rows.forEach((r, i) => {
+        const htmlRows = rows.map((r, i) => {
             const isMe = auth.currentUser && r.uid === auth.currentUser.uid;
             const rowClass = isMe ? 'user-row' : '';
             const dg = r.gf - r.ga;
-            tbody.innerHTML += `
+            return `
             <tr class="${rowClass}">
                 <td class="text-center font-bold">${i + 1}</td>
                 <td class="text-white font-bold">${r.manager}</td>
                 <td class="text-slate-300">${r.club}</td>
-                <td>${r.pj}</td>
-                <td>${r.w}</td>
-                <td>${r.e}</td>
-                <td>${r.l}</td>
-                <td>${r.gf}</td>
-                <td>${r.ga}</td>
-                <td>${dg}</td>
+                <td class="text-center">${r.pj}</td>
+                <td class="text-center">${r.w}</td>
+                <td class="text-center">${r.e}</td>
+                <td class="text-center">${r.l}</td>
+                <td class="text-center">${r.gf}</td>
+                <td class="text-center">${r.ga}</td>
+                <td class="text-center">${dg}</td>
                 <td class="text-white font-bold text-sm bg-slate-800/50 text-center">${r.pts}</td>
             </tr>`;
         });
+        tbody.innerHTML = htmlRows.join('');
     }).catch(() => {
-        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-red-400 py-6 text-xs">Error al cargar. IntÃ©ntalo de nuevo.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-red-400 py-6 text-xs">Error al cargar. Inténtalo de nuevo.</td></tr>';
     });
 }
 
@@ -3894,7 +4113,7 @@ let shuffledQueue = [];
 
 function pickRandomTrack(excludeIndex) {
     if (MUSIC_PLAYLIST.length <= 1) return 0;
-    // Bag-shuffle: no se repite ninguna canciÃ³n hasta que se hayan escuchado todas
+    // Bag-shuffle: no se repite ninguna canción hasta que se hayan escuchado todas
     if (shuffledQueue.length === 0) {
         shuffledQueue = Array.from({ length: MUSIC_PLAYLIST.length }, (_, i) => i)
             .filter(i => i !== excludeIndex);
@@ -3935,7 +4154,7 @@ window.skipToNextTrack = function () {
     updateNowPlaying();
     audio.play().catch(() => { });
 }
-
+let bgMusicInterval = null;
 window.initBgMusic = function () {
     const audio = document.getElementById('bg-music');
     if (!audio) return;
@@ -3964,7 +4183,8 @@ window.initBgMusic = function () {
     setNowPlayingVisibility();
 
     // Save position periodically so music resumes after reload
-    setInterval(() => {
+    if (bgMusicInterval) clearInterval(bgMusicInterval);
+    bgMusicInterval = setInterval(() => {
         if (!audio.paused) {
             localStorage.setItem('inafuma_music_time', String(audio.currentTime));
             localStorage.setItem('inafuma_music_playing', 'true');
@@ -4243,7 +4463,7 @@ function buildCardHTML(card, index) {
                         <div class="pack-stat-row"><span class="pack-stat-val">${p.posi}</span><span class="pack-stat-lbl">POS</span></div>
                         ` : `
                         <div class="pack-stat-row"><span class="pack-stat-val">${p.def}</span><span class="pack-stat-lbl">DEF</span></div>
-                        <div class="pack-stat-row"><span class="pack-stat-val">${p.phy}</span><span class="pack-stat-lbl">FÃS</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.phy}</span><span class="pack-stat-lbl">FÍS</span></div>
                         `}
                     </div>
                 </div>
@@ -4313,9 +4533,9 @@ function showSobreCompleteActions() {
         let bonusHTML = '';
         bonuses.forEach(b => {
             if (b.type === 'premium') {
-                bonusHTML += `<div class="pack-bonus-premium text-xl">Â¡BONUS! +${b.amount.toLocaleString()} Monedas Premium â—ˆ</div>`;
+                bonusHTML += `<div class="pack-bonus-premium text-xl">¡BONUS! +${b.amount.toLocaleString()} Monedas Premium ◈</div>`;
             } else {
-                bonusHTML += `<div class="pack-bonus-coins text-xl">Â¡BONUS! +â‚¬${(b.amount / 1000000).toFixed(1)}M</div>`;
+                bonusHTML += `<div class="pack-bonus-coins text-xl">¡BONUS! +€${(b.amount / 1000000).toFixed(1)}M</div>`;
             }
         });
         document.getElementById('pack-bonus-text').innerHTML = bonusHTML;
@@ -4497,7 +4717,7 @@ window.buyPack = function (packType) {
     if (!config) return;
 
     if (state.economy.premium < config.cost) {
-        return showAlert(`No tienes suficientes monedas premium. Necesitas â—ˆ${config.cost.toLocaleString()} y tienes â—ˆ${state.economy.premium.toLocaleString()}.`);
+        return showAlert(`No tienes suficientes monedas premium. Necesitas ◈${config.cost.toLocaleString()} y tienes ◈${state.economy.premium.toLocaleString()}.`);
     }
 
     // Deduct premium
@@ -4527,839 +4747,887 @@ function renderSobresTab() {
 }
 
 
-/ *   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
- 
-       S I S T E M A   D E   A M I G O S   Y   1 V S 1   P R I V A D O 
- 
-       = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =   * / 
- 
- 
- 
- w i n d o w . s e n d F r i e n d R e q u e s t   =   a s y n c   f u n c t i o n   ( )   { 
- 
-         i f   ( ! s t a t e   | |   ! a u t h . c u r r e n t U s e r )   r e t u r n ; 
- 
-         c o n s t   s e a r c h N a m e   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f r i e n d - s e a r c h - i n p u t ' ) . v a l u e . t r i m ( ) ; 
- 
-         i f   ( ! s e a r c h N a m e )   r e t u r n   s h o w A l e r t ( " I n t r o d u c e   u n   n o m b r e   d e   u s u a r i o . " ) ; 
- 
-         i f   ( s e a r c h N a m e . t o L o w e r C a s e ( )   = = =   s t a t e . a u t h . u s e r . t o L o w e r C a s e ( ) )   r e t u r n   s h o w A l e r t ( " N o   p u e d e s   e n v i a r t e   u n a   s o l i c i t u d   a   t i   m i s m o . " ) ; 
- 
- 
- 
-         t r y   { 
- 
-                 c o n s t   u s e r s R e f   =   d b . c o l l e c t i o n ( ' u s e r s ' ) ; 
- 
-                 c o n s t   s n a p s h o t   =   a w a i t   u s e r s R e f . w h e r e ( ' a u t h . u s e r ' ,   ' = = ' ,   s e a r c h N a m e ) . g e t ( ) ; 
- 
-                 i f   ( s n a p s h o t . e m p t y )   r e t u r n   s h o w A l e r t ( " U s u a r i o   n o   e n c o n t r a d o . " ) ; 
- 
- 
- 
-                 c o n s t   t a r g e t D o c   =   s n a p s h o t . d o c s [ 0 ] ; 
- 
-                 c o n s t   t a r g e t D a t a   =   t a r g e t D o c . d a t a ( ) ; 
- 
-                 c o n s t   t a r g e t I d   =   t a r g e t D o c . i d ; 
- 
- 
- 
-                 i f   ( t a r g e t D a t a . f r i e n d s   & &   t a r g e t D a t a . f r i e n d s . s o m e ( f   = >   f . u i d   = = =   a u t h . c u r r e n t U s e r . u i d ) )   { 
- 
-                         r e t u r n   s h o w A l e r t ( " Y a   s o i s   a m i g o s . " ) ; 
- 
-                 
-        } 
- 
-                 i f   ( t a r g e t D a t a . f r i e n d R e q u e s t s   & &   t a r g e t D a t a . f r i e n d R e q u e s t s . s o m e ( r   = >   r . u i d   = = =   a u t h . c u r r e n t U s e r . u i d ) )   { 
- 
-                         r e t u r n   s h o w A l e r t ( " Y a   l e   h a s   e n v i a d o   u n a   s o l i c i t u d   p e n d i e n t e . " ) ; 
- 
-                 
-        } 
- 
- 
- 
-                 c o n s t   n e w R e q   =   {   u i d :   a u t h . c u r r e n t U s e r . u i d ,   u s e r n a m e :   s t a t e . a u t h . u s e r ,   t i m e s t a m p :   D a t e . n o w ( )    } ; 
- 
-                 a w a i t   d b . c o l l e c t i o n ( ' u s e r s ' ) . d o c ( t a r g e t I d ) . u p d a t e ( { 
- 
-                         f r i e n d R e q u e s t s :   f i r e b a s e . f i r e s t o r e . F i e l d V a l u e . a r r a y U n i o n ( n e w R e q ) 
- 
-                 
-        } ) ; 
- 
- 
- 
-                 s h o w A l e r t ( " S o l i c i t u d   d e   a m i s t a d   e n v i a d a   c o n   Ã © x i t o . " ) ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' f r i e n d - s e a r c h - i n p u t ' ) . v a l u e   =   " " ; 
- 
-         
-    }   c a t c h   ( e r r )   { 
- 
-                 c o n s o l e . e r r o r ( " E r r o r   e n v i a n d o   s o l i c i t u d : " ,   e r r ) ; 
- 
-                 s h o w A l e r t ( " E r r o r   a l   e n v i a r   s o l i c i t u d :   "   +   e r r . m e s s a g e ) ; 
- 
-         
-    } 
- 
- 
-} 
- 
- 
- 
- w i n d o w . a c c e p t F r i e n d R e q u e s t   =   a s y n c   f u n c t i o n   ( r e q U i d ,   r e q U s e r n a m e )   { 
- 
-         i f   ( ! s t a t e   | |   ! a u t h . c u r r e n t U s e r )   r e t u r n ; 
- 
-         t r y   { 
- 
-                 s t a t e . f r i e n d R e q u e s t s   =   s t a t e . f r i e n d R e q u e s t s . f i l t e r ( r   = >   r . u i d   ! = =   r e q U i d ) ; 
- 
-                 c o n s t   m y N e w F r i e n d   =   {   u i d :   r e q U i d ,   u s e r n a m e :   r e q U s e r n a m e ,   a d d e d A t :   D a t e . n o w ( )    } ; 
- 
-                 s t a t e . f r i e n d s . p u s h ( m y N e w F r i e n d ) ; 
- 
- 
- 
-                 a w a i t   d b . c o l l e c t i o n ( ' u s e r s ' ) . d o c ( a u t h . c u r r e n t U s e r . u i d ) . u p d a t e ( { 
- 
-                         f r i e n d R e q u e s t s :   s t a t e . f r i e n d R e q u e s t s , 
- 
-                         f r i e n d s :   s t a t e . f r i e n d s 
- 
-                 
-        } ) ; 
- 
- 
- 
-                 c o n s t   t h e i r N e w F r i e n d   =   {   u i d :   a u t h . c u r r e n t U s e r . u i d ,   u s e r n a m e :   s t a t e . a u t h . u s e r ,   a d d e d A t :   D a t e . n o w ( )    } ; 
- 
-                 a w a i t   d b . c o l l e c t i o n ( ' u s e r s ' ) . d o c ( r e q U i d ) . u p d a t e ( { 
- 
-                         f r i e n d s :   f i r e b a s e . f i r e s t o r e . F i e l d V a l u e . a r r a y U n i o n ( t h e i r N e w F r i e n d ) 
- 
-                 
-        } ) ; 
- 
- 
- 
-                 s h o w A l e r t ( ` H a s   a c e p t a d o   a   $ { r e q U s e r n a m e }   c o m o   a m i g o . ` ) ; 
- 
-                 r e n d e r F r i e n d s T a b ( ) ; 
- 
-         
-    }   c a t c h   ( e r r )   { 
- 
-                 c o n s o l e . e r r o r ( " E r r o r   a c e p t a n d o : " ,   e r r ) ; 
- 
-                 s h o w A l e r t ( " E r r o r   a c e p t a n d o   a m i g o . " ) ; 
- 
-         
-    } 
- 
- 
-} 
- 
- 
- 
- w i n d o w . r e j e c t F r i e n d R e q u e s t   =   a s y n c   f u n c t i o n   ( r e q U i d )   { 
- 
-         i f   ( ! s t a t e   | |   ! a u t h . c u r r e n t U s e r )   r e t u r n ; 
- 
-         s t a t e . f r i e n d R e q u e s t s   =   s t a t e . f r i e n d R e q u e s t s . f i l t e r ( r   = >   r . u i d   ! = =   r e q U i d ) ; 
- 
-         t r y   { 
- 
-                 a w a i t   d b . c o l l e c t i o n ( ' u s e r s ' ) . d o c ( a u t h . c u r r e n t U s e r . u i d ) . u p d a t e ( { 
- 
-                         f r i e n d R e q u e s t s :   s t a t e . f r i e n d R e q u e s t s 
- 
-                 
-        } ) ; 
- 
-                 r e n d e r F r i e n d s T a b ( ) ; 
- 
-         
-    }   c a t c h   ( e r r )   { 
- 
-                 c o n s o l e . e r r o r ( " E r r o r   d e n e g a n d o : " ,   e r r ) ; 
- 
-         
-    } 
- 
- 
-} 
- 
- 
- 
- c o n s t   o r i g i n a l S h o w S u b p a g e F r i e n d s   =   w i n d o w . s h o w S u b p a g e ; 
- 
- w i n d o w . s h o w S u b p a g e   =   a s y n c   f u n c t i o n   ( p a g e I d )   { 
- 
-         i f   ( p a g e I d   = = =   ' f r i e n d s ' )   { 
- 
-                 i f   ( a u t h . c u r r e n t U s e r )   { 
- 
-                         c o n s t   d o c   =   a w a i t   d b . c o l l e c t i o n ( ' u s e r s ' ) . d o c ( a u t h . c u r r e n t U s e r . u i d ) . g e t ( ) ; 
- 
-                         i f   ( d o c . e x i s t s )   { 
- 
-                                 c o n s t   d a t a   =   d o c . d a t a ( ) ; 
- 
-                                 i f   ( d a t a . f r i e n d R e q u e s t s )   s t a t e . f r i e n d R e q u e s t s   =   d a t a . f r i e n d R e q u e s t s ; 
- 
-                                 i f   ( d a t a . f r i e n d s )   s t a t e . f r i e n d s   =   d a t a . f r i e n d s ; 
- 
-                                 r e n d e r F r i e n d s T a b ( ) ; 
- 
-                         
-            } 
- 
-                 
-        } 
- 
-         
-    } 
- 
-         i f   ( o r i g i n a l S h o w S u b p a g e F r i e n d s )   o r i g i n a l S h o w S u b p a g e F r i e n d s ( p a g e I d ) ; 
- 
- 
-} 
- 
- 
- 
- f u n c t i o n   r e n d e r F r i e n d s T a b ( )   { 
- 
-         c o n s t   c o u n t s E l   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f r i e n d - r e q u e s t s - c o u n t ' ) ; 
- 
-         c o n s t   f r i e n d s C o u n t E l   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f r i e n d s - c o u n t ' ) ; 
- 
-         i f   ( c o u n t s E l )   c o u n t s E l . t e x t C o n t e n t   =   s t a t e . f r i e n d R e q u e s t s   ?   s t a t e . f r i e n d R e q u e s t s . l e n g t h   :   0 ; 
- 
-         i f   ( f r i e n d s C o u n t E l )   f r i e n d s C o u n t E l . t e x t C o n t e n t   =   s t a t e . f r i e n d s   ?   s t a t e . f r i e n d s . l e n g t h   :   0 ; 
- 
- 
- 
-         c o n s t   r e q L i s t   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f r i e n d - r e q u e s t s - l i s t ' ) ; 
- 
-         i f   ( r e q L i s t )   { 
- 
-                 r e q L i s t . i n n e r H T M L   =   ' ' ; 
- 
-                 i f   ( ! s t a t e . f r i e n d R e q u e s t s   | |   s t a t e . f r i e n d R e q u e s t s . l e n g t h   = = =   0 )   { 
- 
-                         r e q L i s t . i n n e r H T M L   =   ' < d i v   c l a s s = " t e x t - [ 1 0 p x ]   t e x t - s l a t e - 5 0 0   i t a l i c   t e x t - c e n t e r   m t - 4 "   i d = " e m p t y - r e q u e s t s - m s g " > N o   h a y   s o l i c i t u d e s < / d i v > ' ; 
- 
-                 
-        }   e l s e   { 
- 
-                         s t a t e . f r i e n d R e q u e s t s . f o r E a c h ( r e q   = >   { 
- 
-                                 c o n s t   d i v   =   d o c u m e n t . c r e a t e E l e m e n t ( ' d i v ' ) ; 
- 
-                                 d i v . c l a s s N a m e   =   " f l e x   j u s t i f y - b e t w e e n   i t e m s - c e n t e r   b g - [ # 2 7 2 7 3 8 ]   p - 3   r o u n d e d   b o r d e r   b o r d e r - [ # 3 1 3 1 4 5 ] " ; 
- 
-                                 d i v . i n n e r H T M L   =   ` 
- 
-                                         < d i v   c l a s s = " t e x t - x s   f o n t - b o l d   t e x t - w h i t e   u p p e r c a s e   t r a c k i n g - w i d e s t " > $ { r e q . u s e r n a m e } < / d i v > 
- 
-                                         < d i v   c l a s s = " f l e x   g a p - 2 " > 
- 
-                                                 < b u t t o n   o n c l i c k = " a c c e p t F r i e n d R e q u e s t ( ' $ { r e q . u i d } ' ,   ' $ { r e q . u s e r n a m e } ' ) "   c l a s s = " b g - g r e e n - 6 0 0   h o v e r : b g - g r e e n - 5 0 0   t e x t - w h i t e   p - 1   r o u n d e d   t r a n s i t i o n   t e x t - x s " > â S < / b u t t o n > 
- 
-                                                 < b u t t o n   o n c l i c k = " r e j e c t F r i e n d R e q u e s t ( ' $ { r e q . u i d } ' ) "   c l a s s = " b g - r e d - 6 0 0   h o v e r : b g - r e d - 5 0 0   t e x t - w h i t e   p - 1   r o u n d e d   t r a n s i t i o n   t e x t - x s " > â S < / b u t t o n > 
- 
-                                         < / d i v > 
- 
-                                 ` ; 
- 
-                                 r e q L i s t . a p p e n d C h i l d ( d i v ) ; 
- 
-                         
-            } ) ; 
- 
-                 
-        } 
- 
-         
-    } 
- 
- 
- 
-         c o n s t   f r i e n d L i s t   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' f r i e n d s - l i s t ' ) ; 
- 
-         i f   ( f r i e n d L i s t )   { 
- 
-                 f r i e n d L i s t . i n n e r H T M L   =   ' ' ; 
- 
-                 i f   ( ! s t a t e . f r i e n d s   | |   s t a t e . f r i e n d s . l e n g t h   = = =   0 )   { 
- 
-                         f r i e n d L i s t . i n n e r H T M L   =   ' < d i v   c l a s s = " t e x t - [ 1 1 p x ]   t e x t - s l a t e - 5 0 0   i t a l i c   t e x t - c e n t e r   m t - 1 0 "   i d = " e m p t y - f r i e n d s - m s g " > A g r e g a   a m i g o s   p a r a   j u g a r   p a r t i d o s   1 v s 1   p r i v a d o s . < / d i v > ' ; 
- 
-                 
-        }   e l s e   { 
- 
-                         s t a t e . f r i e n d s . f o r E a c h ( f   = >   { 
- 
-                                 c o n s t   d i v   =   d o c u m e n t . c r e a t e E l e m e n t ( ' d i v ' ) ; 
- 
-                                 d i v . c l a s s N a m e   =   " f l e x   j u s t i f y - b e t w e e n   i t e m s - c e n t e r   b g - [ # 2 7 2 7 3 8 ]   p - 3   r o u n d e d - x l   b o r d e r   b o r d e r - [ # 3 1 3 1 4 5 ] " ; 
- 
-                                 d i v . i n n e r H T M L   =   ` 
- 
-                                         < d i v   c l a s s = " f l e x   i t e m s - c e n t e r   g a p - 3 " > 
- 
-                                                 < i m g   s r c = " $ { g e t A v a t a r ( f . u s e r n a m e ) } "   c l a s s = " w - 8   h - 8   r o u n d e d - f u l l   b o r d e r   b o r d e r - [ # 3 1 3 1 4 5 ] " > 
- 
-                                                 < d i v   c l a s s = " t e x t - x s   f o n t - b o l d   t e x t - w h i t e   u p p e r c a s e   t r a c k i n g - w i d e s t " > $ { f . u s e r n a m e } < / d i v > 
- 
-                                         < / d i v > 
- 
-                                         < b u t t o n   o n c l i c k = " i n v i t e F r i e n d 1 v 1 ( ' $ { f . u i d } ' ) "   c l a s s = " b t n - a c t i o n   p y - 1   p x - 4   t e x t - [ 1 0 p x ]   t r a c k i n g - w i d e s t   s h a d o w - m d   f l e x   i t e m s - c e n t e r   g a p - 2 " > < s p a n > â a ï ¸  < / s p a n >   I N V I T A R < / b u t t o n > 
- 
-                                 ` ; 
- 
-                                 f r i e n d L i s t . a p p e n d C h i l d ( d i v ) ; 
- 
-                         
-            } ) ; 
- 
-                 
-        } 
- 
-         
-    } 
- 
- 
-} 
- 
- 
- 
- / /   - - -   1 V 1   I N V I T A T I O N   L O G I C   ( S o c k e t )   - - - 
- 
- l e t   p e n d i n g 1 v 1 I n v i t e   =   n u l l ; 
- 
- 
- 
- w i n d o w . i n v i t e F r i e n d 1 v 1   =   f u n c t i o n   ( t a r g e t U i d )   { 
- 
-         i f   ( ! w i n d o w . s o c k e t   | |   ! w i n d o w . s o c k e t . c o n n e c t e d )   r e t u r n   s h o w A l e r t ( " N o   e s t Ã ¡ s   c o n e c t a d o   a l   s e r v i d o r   m u l t i p l a y e r . " ) ; 
- 
-         w i n d o w . s o c k e t . e m i t ( ' i n v i t e _ f r i e n d ' ,   {   t a r g e t U i d :   t a r g e t U i d ,   s e n d e r N a m e :   s t a t e . a u t h . u s e r ,   s e n d e r O v r :   s t a t e . s q u a d O v r   | |   5 0    } ) ; 
- 
-         s h o w A l e r t ( " I n v i t a c i Ã ³ n   e n v i a d a .   E s p e r a n d o   r e s p u e s t a   d e l   j u g a d o r . . . " ) ; 
- 
- 
-} 
- 
- 
- 
- f u n c t i o n   s e t u p P r i v a t e M a t c h S o c k e t E v e n t s ( s o c k )   { 
- 
-         s o c k . o n ( ' r e c e i v e _ i n v i t e ' ,   ( d a t a )   = >   { 
- 
-                 p e n d i n g 1 v 1 I n v i t e   =   d a t a ; 
- 
-                 c o n s t   m o d a l   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - 1 v 1 - i n v i t e ' ) ; 
- 
-                 i f   ( m o d a l )   { 
- 
-                         d o c u m e n t . g e t E l e m e n t B y I d ( ' i n v i t e - s e n d e r - n a m e ' ) . t e x t C o n t e n t   =   d a t a . s e n d e r N a m e ; 
- 
-                         m o d a l . c l a s s L i s t . r e m o v e ( ' h i d d e n ' ) ; 
- 
-                 
-        } 
- 
-         
-    } ) ; 
- 
- 
- 
-         s o c k . o n ( ' i n v i t e _ r e s p o n s e ' ,   ( d a t a )   = >   { 
- 
-                 i f   ( ! d a t a . a c c e p t e d )   { 
- 
-                         s h o w A l e r t ( d a t a . m e s s a g e   | |   " I n v i t a c i Ã ³ n   r e c h a z a d a   o   f a l l i d a . " ) ; 
- 
-                 
-        } 
- 
-         
-    } ) ; 
- 
- 
- 
-         s o c k . o n ( ' p r i v a t e _ m a t c h _ s t a r t ' ,   ( d a t a )   = >   { 
- 
-                 c l o s e S u b p a g e ( ) ; 
- 
-                 c o n s t   m m   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' m a t c h - m o d a l ' ) ; 
- 
-                 i f   ( m m )   { 
- 
-                         m m . c l a s s L i s t . r e m o v e ( ' h i d d e n ' ) ; 
- 
-                         m m . s t y l e . d i s p l a y   =   ' f l e x ' ; 
- 
-                 
-        } 
- 
-                 s i m I s R a n k e d   =   f a l s e ; 
- 
-                 s i m I s M u l t i p l a y e r   =   t r u e ; 
- 
-                 s i m M u l t i p l a y e r R o o m   =   d a t a . r o o m ; 
- 
-                 s i m M a t c h I n P r o g r e s s   =   t r u e ; 
- 
-                 s i m L a t e s t N a r r a t i v e T i m e   =   0 ; 
- 
- 
- 
-                 c o n s t   h o m e L a b e l   =   d a t a . i s P l a y e r 1   ?   s t a t e . t e a m . n a m e   :   d a t a . o p p o n e n t N a m e ; 
- 
-                 c o n s t   a w a y L a b e l   =   d a t a . i s P l a y e r 1   ?   d a t a . o p p o n e n t N a m e   :   s t a t e . t e a m . n a m e ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' s i m - h o m e - n a m e ' ) . t e x t C o n t e n t   =   h o m e L a b e l ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' s i m - a w a y - n a m e ' ) . t e x t C o n t e n t   =   a w a y L a b e l ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' s i m - h o m e - s c o r e ' ) . t e x t C o n t e n t   =   " 0 " ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' s i m - a w a y - s c o r e ' ) . t e x t C o n t e n t   =   " 0 " ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' m a t c h - n a r r a t i v e ' ) . i n n e r H T M L   =   " " ; 
- 
- 
- 
-                 s e t T i m e o u t ( ( )   = >   { 
- 
-                         i f   ( t y p e o f   s e n d M u l t i p l a y e r L i n e u p   = = =   ' f u n c t i o n ' )   s e n d M u l t i p l a y e r L i n e u p ( ) ; 
- 
-                 
-        } ,   5 0 0 ) ; 
- 
-         
-    } ) ; 
- 
- 
-} 
- 
- 
- 
- c o n s t   s o c k e t H o o k I n t e r v a l   =   s e t I n t e r v a l ( ( )   = >   { 
- 
-         i f   ( w i n d o w . s o c k e t   & &   w i n d o w . s o c k e t . h a s L i s t e n e r s )   { 
- 
-                 i f   ( ! w i n d o w . s o c k e t . _ p r i v a t e E v e n t s H o o k e d )   { 
- 
-                         s e t u p P r i v a t e M a t c h S o c k e t E v e n t s ( w i n d o w . s o c k e t ) ; 
- 
-                         w i n d o w . s o c k e t . _ p r i v a t e E v e n t s H o o k e d   =   t r u e ; 
- 
-                 
-        } 
- 
-                 c l e a r I n t e r v a l ( s o c k e t H o o k I n t e r v a l ) ; 
- 
-         
-    } 
- 
- 
-} ,   1 0 0 0 ) ; 
- 
- 
- 
- w i n d o w . a c c e p t 1 v 1 I n v i t e   =   f u n c t i o n   ( )   { 
- 
-         i f   ( ! p e n d i n g 1 v 1 I n v i t e   | |   ! w i n d o w . s o c k e t )   r e t u r n ; 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - 1 v 1 - i n v i t e ' ) . c l a s s L i s t . a d d ( ' h i d d e n ' ) ; 
- 
-         w i n d o w . s o c k e t . e m i t ( ' r e s p o n d _ i n v i t e ' ,   {   a c c e p t e d :   t r u e ,   t a r g e t S o c k e t I d :   p e n d i n g 1 v 1 I n v i t e . f r o m S o c k e t I d ,   s e n d e r N a m e :   s t a t e . a u t h . u s e r    } ) ; 
- 
-         p e n d i n g 1 v 1 I n v i t e   =   n u l l ; 
- 
- 
-} 
- 
- 
- 
- w i n d o w . r e j e c t 1 v 1 I n v i t e   =   f u n c t i o n   ( )   { 
- 
-         i f   ( ! p e n d i n g 1 v 1 I n v i t e   | |   ! w i n d o w . s o c k e t )   r e t u r n ; 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - 1 v 1 - i n v i t e ' ) . c l a s s L i s t . a d d ( ' h i d d e n ' ) ; 
- 
-         w i n d o w . s o c k e t . e m i t ( ' r e s p o n d _ i n v i t e ' ,   {   a c c e p t e d :   f a l s e ,   t a r g e t S o c k e t I d :   p e n d i n g 1 v 1 I n v i t e . f r o m S o c k e t I d    } ) ; 
- 
-         p e n d i n g 1 v 1 I n v i t e   =   n u l l ; 
- 
- 
-} 
- 
- 
- 
- / *   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
- 
-       S I S T E M A   D E   T O R N E O S   D E   F I R E B A S E 
- 
-       = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =   * / 
- 
- 
- 
- l e t   u n s u b s c r i b e T o u r n a m e n t s   =   n u l l ; 
- 
- l e t   c u r r e n t T o u r n a m e n t s   =   [ ] ; 
- 
- 
- 
- c o n s t   o r i g i n a l S w i t c h T a b T r n   =   w i n d o w . s w i t c h T a b ; 
- 
- w i n d o w . s w i t c h T a b   =   f u n c t i o n   ( t a b I d )   { 
- 
-         i f   ( o r i g i n a l S w i t c h T a b T r n )   o r i g i n a l S w i t c h T a b T r n ( t a b I d ) ; 
- 
- 
- 
-         i f   ( t a b I d   = = =   ' t o u r n a m e n t s ' )   { 
- 
-                 s t a r t T o u r n a m e n t s L i s t e n e r ( ) ; 
- 
-         
-    }   e l s e   { 
- 
-                 s t o p T o u r n a m e n t s L i s t e n e r ( ) ; 
- 
-         
-    } 
- 
- 
-} 
- 
- 
- 
- f u n c t i o n   s t a r t T o u r n a m e n t s L i s t e n e r ( )   { 
- 
-         i f   ( u n s u b s c r i b e T o u r n a m e n t s )   r e t u r n ; 
- 
-         u n s u b s c r i b e T o u r n a m e n t s   =   d b . c o l l e c t i o n ( ' t o u r n a m e n t s ' ) . o n S n a p s h o t ( s n a p   = >   { 
- 
-                 c u r r e n t T o u r n a m e n t s   =   [ ] ; 
- 
-                 s n a p . f o r E a c h ( d o c   = >   { 
- 
-                         c u r r e n t T o u r n a m e n t s . p u s h ( {   i d :   d o c . i d ,   . . . d o c . d a t a ( )    } ) ; 
- 
-                 
-        } ) ; 
- 
-                 r e n d e r T o u r n a m e n t s L i s t ( ) ; 
- 
-         
-    } ) ; 
- 
- 
-} 
- 
- 
- 
- f u n c t i o n   s t o p T o u r n a m e n t s L i s t e n e r ( )   { 
- 
-         i f   ( u n s u b s c r i b e T o u r n a m e n t s )   { 
- 
-                 u n s u b s c r i b e T o u r n a m e n t s ( ) ; 
- 
-                 u n s u b s c r i b e T o u r n a m e n t s   =   n u l l ; 
- 
-         
-    } 
- 
- 
-} 
- 
- 
- 
- w i n d o w . r e n d e r T o u r n a m e n t s L i s t   =   f u n c t i o n   ( )   { 
- 
-         c o n s t   t b o d y   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' t o u r n a m e n t s - t b o d y ' ) ; 
- 
-         c o n s t   s e a r c h E l   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' t o u r n a m e n t s - s e a r c h - i n p u t ' ) ; 
- 
-         c o n s t   s e a r c h   =   s e a r c h E l   ?   s e a r c h E l . v a l u e . t o L o w e r C a s e ( )   :   " " ; 
- 
-         i f   ( ! t b o d y )   r e t u r n ; 
- 
- 
- 
-         t b o d y . i n n e r H T M L   =   ' ' ; 
- 
- 
- 
-         c o n s t   f i l t e r e d   =   c u r r e n t T o u r n a m e n t s . f i l t e r ( t   = >   t . n a m e . t o L o w e r C a s e ( ) . i n c l u d e s ( s e a r c h ) ) ; 
- 
- 
- 
-         i f   ( f i l t e r e d . l e n g t h   = = =   0 )   { 
- 
-                 t b o d y . i n n e r H T M L   =   ' < t r > < t d   c o l s p a n = " 6 "   c l a s s = " t e x t - c e n t e r   p y - 8   t e x t - s l a t e - 5 0 0   t e x t - x s   i t a l i c " > N o   h a y   t o r n e o s   d i s p o n i b l e s < / t d > < / t r > ' ; 
- 
-                 r e t u r n ; 
- 
-         
-    } 
- 
- 
- 
-         f i l t e r e d . f o r E a c h ( t   = >   { 
- 
-                 c o n s t   i s P r i v a t e   =   t . p a s s w o r d   & &   t . p a s s w o r d . l e n g t h   >   0 ; 
- 
-                 c o n s t   m y R a n k I d x   =   g e t R a n k I n d e x ( s t a t e . c o m p e t i t i v e . r a n k ) ; 
- 
-                 c o n s t   r e q R a n k I d x   =   g e t R a n k I n d e x ( t . m i n R a n k   | |   ' N o v a t o ' ) ; 
- 
- 
- 
-                 l e t   a c t i o n H t m l   =   ' ' ; 
- 
-                 i f   ( t . c r e a t o r U i d   = = =   a u t h . c u r r e n t U s e r . u i d )   { 
- 
-                         a c t i o n H t m l   =   ` < b u t t o n   o n c l i c k = " d e l e t e T o u r n a m e n t ( ' $ { t . i d } ' ) "   c l a s s = " b g - r e d - 6 0 0   h o v e r : b g - r e d - 5 0 0   p x - 3   p y - 1   r o u n d e d   t e x t - [ 1 0 p x ]   t e x t - w h i t e   f o n t - b o l d   t r a n s i t i o n   w - f u l l " > E L I M I N A R < / b u t t o n > ` ; 
- 
-                 
-        }   e l s e   i f   ( m y R a n k I d x   <   r e q R a n k I d x )   { 
- 
-                         a c t i o n H t m l   =   ` < d i v   c l a s s = " t e x t - [ 1 0 p x ]   t e x t - r e d - 4 0 0   f o n t - b o l d   u p p e r c a s e   t e x t - c e n t e r   b o r d e r - 2   b o r d e r - r e d - 5 0 0 / 5 0   r o u n d e d   p - 1 " > R A N G O   B A J O < / d i v > ` ; 
- 
-                 
-        }   e l s e   i f   ( t . p a r t i c i p a n t s   & &   t . p a r t i c i p a n t s . i n c l u d e s ( a u t h . c u r r e n t U s e r . u i d ) )   { 
- 
-                         a c t i o n H t m l   =   ` < d i v   c l a s s = " t e x t - [ 1 0 p x ]   t e x t - g r e e n - 4 0 0   f o n t - b o l d   u p p e r c a s e   t e x t - c e n t e r   b o r d e r - 2   b o r d e r - g r e e n - 5 0 0 / 5 0   r o u n d e d   p - 1 " > I N S C R I T O < / d i v > ` ; 
- 
-                 
-        }   e l s e   { 
- 
-                         i f   ( i s P r i v a t e )   { 
- 
-                                 a c t i o n H t m l   =   ` < b u t t o n   o n c l i c k = " p r o m p t J o i n T o u r n a m e n t ( ' $ { t . i d } ' ,   ' $ { t . m i n R a n k } ' ) "   c l a s s = " b g - y e l l o w - 6 0 0   h o v e r : b g - y e l l o w - 5 0 0   p x - 3   p y - 1   r o u n d e d   t e x t - [ 1 0 p x ]   t e x t - w h i t e   f o n t - b o l d   t r a n s i t i o n   w - f u l l   s h a d o w - [ 0 _ 0 _ 1 0 p x _ r g b a ( 2 3 4 , 1 7 9 , 8 , 0 . 4 ) ] " > U N I R S E   ð x  < / b u t t o n > ` ; 
- 
-                         
-            }   e l s e   { 
- 
-                                 a c t i o n H t m l   =   ` < b u t t o n   o n c l i c k = " j o i n T o u r n a m e n t ( ' $ { t . i d } ' ) "   c l a s s = " b g - b l u e - 6 0 0   h o v e r : b g - b l u e - 5 0 0   p x - 3   p y - 1   r o u n d e d   t e x t - [ 1 0 p x ]   t e x t - w h i t e   f o n t - b o l d   t r a n s i t i o n   w - f u l l " > U N I R S E < / b u t t o n > ` ; 
- 
-                         
-            } 
- 
-                 
-        } 
- 
- 
- 
-                 c o n s t   t r   =   d o c u m e n t . c r e a t e E l e m e n t ( ' t r ' ) ; 
- 
-                 t r . c l a s s N a m e   =   " h o v e r : b g - [ # 1 c 1 c 2 8 ]   t r a n s i t i o n   b o r d e r - b   b o r d e r - [ # 3 1 3 1 4 5 ] " ; 
- 
-                 t r . i n n e r H T M L   =   ` 
- 
-                         < t d   c l a s s = " p l - 4   p y - 3   t e x t - x s   f o n t - b o l d   t e x t - w h i t e   u p p e r c a s e   t r a c k i n g - w i d e s t " > $ { t . n a m e } < / t d > 
- 
-                         < t d   c l a s s = " t e x t - c e n t e r   t e x t - x s   t e x t - s k y - 4 0 0   f o n t - b o l d " > $ { t . c r e a t o r N a m e } < / t d > 
- 
-                         < t d   c l a s s = " t e x t - c e n t e r   t e x t - x s   t e x t - s l a t e - 3 0 0   f o n t - m o n o " > $ { ( t . p a r t i c i p a n t s   | |   [ ] ) . l e n g t h }   J u g a d o r e s < / t d > 
- 
-                         < t d   c l a s s = " t e x t - c e n t e r   t e x t - x s   t e x t - s l a t e - 3 0 0   u p p e r c a s e " > $ { t . m i n R a n k } < / t d > 
- 
-                         < t d   c l a s s = " t e x t - c e n t e r   t e x t - l g " > $ { i s P r i v a t e   ?   ' ð x  '   :   ' ð xR ' } < / t d > 
- 
-                         < t d   c l a s s = " p r - 4 " > $ { a c t i o n H t m l } < / t d > 
- 
-                 ` ; 
- 
-                 t b o d y . a p p e n d C h i l d ( t r ) ; 
- 
-         
-    } ) ; 
- 
- 
-} 
- 
- 
- 
- w i n d o w . o p e n C r e a t e T o u r n a m e n t M o d a l   =   f u n c t i o n   ( )   { 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - c r e a t e - t o u r n a m e n t ' ) . c l a s s L i s t . r e m o v e ( ' h i d d e n ' ) ; 
- 
- 
-} 
- 
- 
- 
- d o c u m e n t . g e t E l e m e n t B y I d ( ' c r e a t e - t o u r n a m e n t - f o r m ' ) . a d d E v e n t L i s t e n e r ( ' s u b m i t ' ,   a s y n c   ( e )   = >   { 
- 
-         e . p r e v e n t D e f a u l t ( ) ; 
- 
-         i f   ( ! s t a t e   | |   ! a u t h . c u r r e n t U s e r )   r e t u r n ; 
- 
- 
- 
-         c o n s t   n a m e   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' t o u r n a m e n t - n a m e ' ) . v a l u e . t r i m ( ) ; 
- 
-         c o n s t   m i n R a n k   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' t o u r n a m e n t - m i n - r a n k ' ) . v a l u e ; 
- 
-         c o n s t   p a s s w o r d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' t o u r n a m e n t - p a s s w o r d ' ) . v a l u e . t r i m ( ) ; 
- 
- 
- 
-         t r y   { 
- 
-                 a w a i t   d b . c o l l e c t i o n ( ' t o u r n a m e n t s ' ) . a d d ( { 
- 
-                         n a m e :   n a m e , 
- 
-                         m i n R a n k :   m i n R a n k , 
- 
-                         p a s s w o r d :   p a s s w o r d , 
- 
-                         c r e a t o r U i d :   a u t h . c u r r e n t U s e r . u i d , 
- 
-                         c r e a t o r N a m e :   s t a t e . a u t h . u s e r , 
- 
-                         p a r t i c i p a n t s :   [ a u t h . c u r r e n t U s e r . u i d ] , 
- 
-                         c r e a t e d A t :   f i r e b a s e . f i r e s t o r e . F i e l d V a l u e . s e r v e r T i m e s t a m p ( ) 
- 
-                 
-        } ) ; 
- 
- 
- 
-                 s h o w A l e r t ( " T o r n e o   c r e a d o   c o n   Ã © x i t o . " ) ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - c r e a t e - t o u r n a m e n t ' ) . c l a s s L i s t . a d d ( ' h i d d e n ' ) ; 
- 
-                 d o c u m e n t . g e t E l e m e n t B y I d ( ' c r e a t e - t o u r n a m e n t - f o r m ' ) . r e s e t ( ) ; 
- 
-         
-    }   c a t c h   ( e r r )   { 
- 
-                 c o n s o l e . e r r o r ( " E r r o r   c r e a t i n g   t o u r n a m e n t " ,   e r r ) ; 
- 
-                 s h o w A l e r t ( " E r r o r   a l   c r e a r   e l   t o r n e o . " ) ; 
- 
-         
-    } 
- 
- 
-} ) ; 
- 
- 
- 
- w i n d o w . d e l e t e T o u r n a m e n t   =   a s y n c   f u n c t i o n   ( t i d )   { 
- 
-         s h o w C o n f i r m ( " Â ¿ S e g u r o   q u e   q u i e r e s   e l i m i n a r   t u   t o r n e o ? " ,   a s y n c   ( )   = >   { 
- 
-                 t r y   { 
- 
-                         a w a i t   d b . c o l l e c t i o n ( ' t o u r n a m e n t s ' ) . d o c ( t i d ) . d e l e t e ( ) ; 
- 
-                         s h o w A l e r t ( " T o r n e o   e l i m i n a d o . " ) ; 
- 
-                 
-        }   c a t c h   ( e r r )   { 
- 
-                         c o n s o l e . e r r o r ( " E r r o r   d e l e t i n g " ,   e r r ) ; 
- 
-                 
-        } 
- 
-         
-    } ) ; 
- 
- 
-} 
- 
- 
- 
- w i n d o w . p r o m p t J o i n T o u r n a m e n t   =   f u n c t i o n   ( t i d ,   r e q R a n k )   { 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' j o i n - t o u r n a m e n t - i d ' ) . v a l u e   =   t i d ; 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' j o i n - t o u r n a m e n t - r e q - r a n k ' ) . v a l u e   =   r e q R a n k ; 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' j o i n - t o u r n a m e n t - p a s s w o r d ' ) . v a l u e   =   " " ; 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - j o i n - t o u r n a m e n t ' ) . c l a s s L i s t . r e m o v e ( ' h i d d e n ' ) ; 
- 
- 
-} 
- 
- 
- 
- w i n d o w . s u b m i t J o i n P r i v a t e T o u r n a m e n t   =   a s y n c   f u n c t i o n   ( )   { 
- 
-         c o n s t   t i d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' j o i n - t o u r n a m e n t - i d ' ) . v a l u e ; 
- 
-         c o n s t   p w d   =   d o c u m e n t . g e t E l e m e n t B y I d ( ' j o i n - t o u r n a m e n t - p a s s w o r d ' ) . v a l u e ; 
- 
- 
- 
-         c o n s t   t   =   c u r r e n t T o u r n a m e n t s . f i n d ( x   = >   x . i d   = = =   t i d ) ; 
- 
-         i f   ( ! t )   r e t u r n ; 
- 
- 
- 
-         i f   ( t . p a s s w o r d   ! = =   p w d )   { 
- 
-                 r e t u r n   s h o w A l e r t ( " C o n t r a s e Ã ± a   i n c o r r e c t a . " ) ; 
- 
-         
-    } 
- 
- 
- 
-         d o c u m e n t . g e t E l e m e n t B y I d ( ' m o d a l - j o i n - t o u r n a m e n t ' ) . c l a s s L i s t . a d d ( ' h i d d e n ' ) ; 
- 
-         j o i n T o u r n a m e n t ( t i d ) ; 
- 
- 
-} 
- 
- 
- 
- w i n d o w . j o i n T o u r n a m e n t   =   a s y n c   f u n c t i o n   ( t i d )   { 
- 
-         i f   ( ! s t a t e   | |   ! a u t h . c u r r e n t U s e r )   r e t u r n ; 
- 
-         t r y   { 
- 
-                 a w a i t   d b . c o l l e c t i o n ( ' t o u r n a m e n t s ' ) . d o c ( t i d ) . u p d a t e ( { 
- 
-                         p a r t i c i p a n t s :   f i r e b a s e . f i r e s t o r e . F i e l d V a l u e . a r r a y U n i o n ( a u t h . c u r r e n t U s e r . u i d ) 
- 
-                 
-        } ) ; 
- 
-                 s h o w A l e r t ( " T e   h a s   i n s c r i t o   a l   t o r n e o . " ) ; 
- 
-         
-    }   c a t c h   ( e r r )   { 
- 
-                 c o n s o l e . e r r o r ( " E r r o r   j o i n i n g " ,   e r r ) ; 
- 
-                 s h o w A l e r t ( " E r r o r   a l   u n i r t e   a l   t o r n e o . " ) ; 
- 
-         
-    } 
- 
- 
+/* =========================================================================
+
+   SISTEMA DE AMIGOS Y 1VS1 PRIVADO
+
+   ========================================================================= */
+
+
+
+window.sendFriendRequest = async function () {
+
+    if (!state || !auth.currentUser) return;
+
+    const searchName = document.getElementById('friend-search-input').value.trim();
+
+    if (!searchName) return showAlert("Introduce un nombre de usuario.");
+
+    if (searchName.toLowerCase() === state.auth.user.toLowerCase()) return showAlert("No puedes enviarte una solicitud a ti mismo.");
+
+
+
+    try {
+
+        const usersRef = db.collection('users');
+
+        const snapshot = await usersRef.where('auth.user', '==', searchName).get();
+
+        if (snapshot.empty) return showAlert("Usuario no encontrado.");
+
+
+
+        const targetDoc = snapshot.docs[0];
+
+        const targetData = targetDoc.data();
+
+        const targetId = targetDoc.id;
+
+
+
+        if (targetData.friends && targetData.friends.some(f => f.uid === auth.currentUser.uid)) {
+
+            return showAlert("Ya sois amigos.");
+
+        
+        }
+
+        if (targetData.friendRequests && targetData.friendRequests.some(r => r.uid === auth.currentUser.uid)) {
+
+            return showAlert("Ya le has enviado una solicitud pendiente.");
+
+        
+        }
+
+
+
+        const newReq = { uid: auth.currentUser.uid, username: state.auth.user, timestamp: Date.now()  };
+
+        await db.collection('users').doc(targetId).update({
+
+            friendRequests: firebase.firestore.FieldValue.arrayUnion(newReq)
+
+        
+        });
+
+
+
+        showAlert("Solicitud de amistad enviada con ÃÂ©xito.");
+
+        document.getElementById('friend-search-input').value = "";
+
+    
+    } catch (err) {
+
+        console.error("Error enviando solicitud:", err);
+
+        showAlert("Error al enviar solicitud: " + err.message);
+
+    
+    }
+
+
+}
+
+
+
+window.acceptFriendRequest = async function (reqUid, reqUsername) {
+
+    if (!state || !auth.currentUser) return;
+
+    try {
+
+        state.friendRequests = state.friendRequests.filter(r => r.uid !== reqUid);
+
+        const myNewFriend = { uid: reqUid, username: reqUsername, addedAt: Date.now()  };
+
+        state.friends.push(myNewFriend);
+
+
+
+        await db.collection('users').doc(auth.currentUser.uid).update({
+
+            friendRequests: state.friendRequests,
+
+            friends: state.friends
+
+        
+        });
+
+
+
+        const theirNewFriend = { uid: auth.currentUser.uid, username: state.auth.user, addedAt: Date.now()  };
+
+        await db.collection('users').doc(reqUid).update({
+
+            friends: firebase.firestore.FieldValue.arrayUnion(theirNewFriend)
+
+        
+        });
+
+
+
+        showAlert(`Has aceptado a ${reqUsername} como amigo.`);
+
+        renderFriendsTab();
+
+    
+    } catch (err) {
+
+        console.error("Error aceptando:", err);
+
+        showAlert("Error aceptando amigo.");
+
+    
+    }
+
+
+}
+
+
+
+window.rejectFriendRequest = async function (reqUid) {
+
+    if (!state || !auth.currentUser) return;
+
+    state.friendRequests = state.friendRequests.filter(r => r.uid !== reqUid);
+
+    try {
+
+        await db.collection('users').doc(auth.currentUser.uid).update({
+
+            friendRequests: state.friendRequests
+
+        
+        });
+
+        renderFriendsTab();
+
+    
+    } catch (err) {
+
+        console.error("Error denegando:", err);
+
+    
+    }
+
+
+}
+
+
+
+const originalShowSubpageFriends = window.showSubpage;
+
+window.showSubpage = async function (pageId) {
+
+    if (pageId === 'friends') {
+
+        if (auth.currentUser) {
+
+            const doc = await db.collection('users').doc(auth.currentUser.uid).get();
+
+            if (doc.exists) {
+
+                const data = doc.data();
+
+                if (data.friendRequests) state.friendRequests = data.friendRequests;
+
+                if (data.friends) state.friends = data.friends;
+
+                renderFriendsTab();
+
+            
+            }
+
+        
+        }
+
+    
+    }
+
+    if (originalShowSubpageFriends) originalShowSubpageFriends(pageId);
+
+
+}
+
+
+
+function renderFriendsTab() {
+
+    const countsEl = document.getElementById('friend-requests-count');
+
+    const friendsCountEl = document.getElementById('friends-count');
+
+    if (countsEl) countsEl.textContent = state.friendRequests ? state.friendRequests.length : 0;
+
+    if (friendsCountEl) friendsCountEl.textContent = state.friends ? state.friends.length : 0;
+
+
+
+    const reqList = document.getElementById('friend-requests-list');
+
+    if (reqList) {
+
+        reqList.innerHTML = '';
+
+        if (!state.friendRequests || state.friendRequests.length === 0) {
+
+            reqList.innerHTML = '<div class="text-[10px] text-slate-500 italic text-center mt-4" id="empty-requests-msg">No hay solicitudes</div>';
+
+        
+        } else {
+
+            state.friendRequests.forEach(req => {
+
+                const div = document.createElement('div');
+
+                div.className = "flex justify-between items-center bg-[#272738] p-3 rounded border border-[#313145]";
+
+                div.innerHTML = `
+
+                    <div class="text-xs font-bold text-white uppercase tracking-widest">${req.username}</div>
+
+                    <div class="flex gap-2">
+
+                        <button onclick="acceptFriendRequest('${req.uid}', '${req.username}')" class="bg-green-600 hover:bg-green-500 text-white p-1 rounded transition text-xs"> </button>
+
+                        <button onclick="rejectFriendRequest('${req.uid}')" class="bg-red-600 hover:bg-red-500 text-white p-1 rounded transition text-xs"> </button>
+
+                    </div>
+
+                `;
+
+                reqList.appendChild(div);
+
+            
+            });
+
+        
+        }
+
+    
+    }
+
+
+
+    const friendList = document.getElementById('friends-list');
+
+    if (friendList) {
+
+        friendList.innerHTML = '';
+
+        if (!state.friends || state.friends.length === 0) {
+
+            friendList.innerHTML = '<div class="text-[11px] text-slate-500 italic text-center mt-10" id="empty-friends-msg">Agrega amigos para jugar partidos 1vs1 privados.</div>';
+
+        
+        } else {
+
+            state.friends.forEach(f => {
+
+                const div = document.createElement('div');
+
+                div.className = "flex justify-between items-center bg-[#272738] p-3 rounded-xl border border-[#313145]";
+
+                div.innerHTML = `
+
+                    <div class="flex items-center gap-3">
+
+                        <img src="${getAvatar(f.username)}" class="w-8 h-8 rounded-full border border-[#313145]">
+
+                        <div class="text-xs font-bold text-white uppercase tracking-widest">${f.username}</div>
+
+                    </div>
+
+                    <button onclick="inviteFriend1v1('${f.uid}')" class="btn-action py-1 px-4 text-[10px] tracking-widest shadow-md flex items-center gap-2"><span>Ã¢a Ã¯Â¸Â</span> INVITAR</button>
+
+                `;
+
+                friendList.appendChild(div);
+
+            
+            });
+
+        
+        }
+
+    
+    }
+
+
+}
+
+
+
+// --- 1V1 INVITATION LOGIC (Socket) ---
+
+let pending1v1Invite = null;
+
+
+
+window.inviteFriend1v1 = function (targetUid) {
+
+    if (!window.socket || !window.socket.connected) return showAlert("No estÃ¡s conectado al servidor multiplayer.");
+
+    window.socket.emit('invite_friend', { targetUid: targetUid, senderName: state.auth.user, senderOvr: state.squadOvr || 50  });
+
+    showAlert("InvitaciÃ³n enviada. Esperando respuesta del jugador...");
+
+
+}
+
+
+
+function setupPrivateMatchSocketEvents(sock) {
+
+    sock.on('receive_invite', (data) => {
+
+        pending1v1Invite = data;
+
+        const modal = document.getElementById('modal-1v1-invite');
+
+        if (modal) {
+
+            document.getElementById('invite-sender-name').textContent = data.senderName;
+
+            modal.classList.remove('hidden');
+
+        
+        }
+
+    
+    });
+
+
+
+    sock.on('invite_response', (data) => {
+
+        if (!data.accepted) {
+
+            showAlert(data.message || "InvitaciÃ³n rechazada o fallida.");
+
+        
+        }
+
+    
+    });
+
+
+
+    sock.on('private_match_start', (data) => {
+
+        closeSubpage();
+
+        const mm = document.getElementById('match-modal');
+
+        if (mm) {
+
+            mm.classList.remove('hidden');
+
+            mm.style.display = 'flex';
+
+        
+        }
+
+        simIsRanked = false;
+
+        simIsMultiplayer = true;
+
+        simMultiplayerRoom = data.room;
+
+        simMatchInProgress = true;
+
+        simLatestNarrativeTime = 0;
+
+
+
+        const homeLabel = data.isPlayer1 ? state.team.name : data.opponentName;
+
+        const awayLabel = data.isPlayer1 ? data.opponentName : state.team.name;
+
+        document.getElementById('sim-home-name').textContent = homeLabel;
+
+        document.getElementById('sim-away-name').textContent = awayLabel;
+
+        document.getElementById('sim-home-score').textContent = "0";
+
+        document.getElementById('sim-away-score').textContent = "0";
+
+        document.getElementById('match-narrative').innerHTML = "";
+
+
+
+        setTimeout(() => {
+
+            if (typeof sendMultiplayerLineup === 'function') sendMultiplayerLineup();
+
+        
+        }, 500);
+
+    
+    });
+
+
+}
+
+
+
+const socketHookInterval = setInterval(() => {
+
+    if (window.socket && window.socket.hasListeners) {
+
+        if (!window.socket._privateEventsHooked) {
+
+            setupPrivateMatchSocketEvents(window.socket);
+
+            window.socket._privateEventsHooked = true;
+
+        
+        }
+
+        clearInterval(socketHookInterval);
+
+    
+    }
+
+
+}, 1000);
+
+
+
+window.accept1v1Invite = function () {
+
+    if (!pending1v1Invite || !window.socket) return;
+
+    document.getElementById('modal-1v1-invite').classList.add('hidden');
+
+    window.socket.emit('respond_invite', { accepted: true, targetSocketId: pending1v1Invite.fromSocketId, senderName: state.auth.user  });
+
+    pending1v1Invite = null;
+
+
+}
+
+
+
+window.reject1v1Invite = function () {
+
+    if (!pending1v1Invite || !window.socket) return;
+
+    document.getElementById('modal-1v1-invite').classList.add('hidden');
+
+    window.socket.emit('respond_invite', { accepted: false, targetSocketId: pending1v1Invite.fromSocketId  });
+
+    pending1v1Invite = null;
+
+
+}
+
+
+
+/* =========================================================================
+
+   SISTEMA DE TORNEOS DE FIREBASE
+
+   ========================================================================= */
+
+
+
+let unsubscribeTournaments = null;
+
+let currentTournaments = [];
+
+
+
+const originalSwitchTabTrn = window.switchTab;
+
+window.switchTab = function (tabId) {
+
+    if (originalSwitchTabTrn) originalSwitchTabTrn(tabId);
+
+
+
+    if (tabId === 'tournaments') {
+
+        startTournamentsListener();
+
+    
+    } else {
+
+        stopTournamentsListener();
+
+    
+    }
+
+
+}
+
+
+
+function startTournamentsListener() {
+
+    if (unsubscribeTournaments) return;
+
+    unsubscribeTournaments = db.collection('tournaments').onSnapshot(snap => {
+
+        currentTournaments = [];
+
+        snap.forEach(doc => {
+
+            currentTournaments.push({ id: doc.id, ...doc.data()  });
+
+        
+        });
+
+        renderTournamentsList();
+
+    
+    });
+
+
+}
+
+
+
+function stopTournamentsListener() {
+
+    if (unsubscribeTournaments) {
+
+        unsubscribeTournaments();
+
+        unsubscribeTournaments = null;
+
+    
+    }
+
+
+}
+
+
+
+window.renderTournamentsList = function () {
+
+    const tbody = document.getElementById('tournaments-tbody');
+
+    const searchEl = document.getElementById('tournaments-search-input');
+
+    const search = searchEl ? searchEl.value.toLowerCase() : "";
+
+    if (!tbody) return;
+
+
+
+    tbody.innerHTML = '';
+
+
+
+    const filtered = currentTournaments.filter(t => t.name.toLowerCase().includes(search));
+
+
+
+    if (filtered.length === 0) {
+
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500 text-xs italic">No hay torneos disponibles</td></tr>';
+
+        return;
+
+    
+    }
+
+
+
+    filtered.forEach(t => {
+
+        const isPrivate = t.password && t.password.length > 0;
+
+        const myRankIdx = getRankIndex(state.competitive.rank);
+
+        const reqRankIdx = getRankIndex(t.minRank || 'Novato');
+
+
+
+        let actionHtml = '';
+
+        if (t.creatorUid === auth.currentUser.uid) {
+            if (t.prizePool > 0) {
+                actionHtml = `<div class="flex gap-1"><button onclick="resolveTournament('${t.id}')" class="bg-green-600 hover:bg-green-500 px-2 py-1 rounded text-[10px] text-white font-bold transition flex-1">REPARTIR</button><button onclick="deleteTournament('${t.id}')" class="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-[10px] text-white font-bold transition flex-1">BORRAR</button></div>`;
+            } else {
+                actionHtml = `<button onclick="deleteTournament('${t.id}')" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-[10px] text-white font-bold transition w-full">ELIMINAR</button>`;
+            }
+        } else if (myRankIdx < reqRankIdx) {
+
+            actionHtml = `<div class="text-[10px] text-red-400 font-bold uppercase text-center border-2 border-red-500/50 rounded p-1">RANGO BAJO</div>`;
+
+        
+        } else if (t.participants && t.participants.includes(auth.currentUser.uid)) {
+
+            actionHtml = `<div class="text-[10px] text-green-400 font-bold uppercase text-center border-2 border-green-500/50 rounded p-1">INSCRITO</div>`;
+
+        
+        } else {
+
+            if (isPrivate) {
+
+                actionHtml = `<button onclick="promptJoinTournament('${t.id}', '${t.minRank}')" class="bg-yellow-600 hover:bg-yellow-500 px-3 py-1 rounded text-[10px] text-white font-bold transition w-full shadow-[0_0_10px_rgba(234,179,8,0.4)]">UNIRSE</button>`;
+
+            
+            } else {
+
+                actionHtml = `<button onclick="joinTournament('${t.id}')" class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-[10px] text-white font-bold transition w-full">UNIRSE</button>`;
+
+            
+            }
+
+        
+        }
+
+
+
+        const tr = document.createElement('tr');
+
+        tr.className = "hover:bg-[#1c1c28] transition border-b border-[#313145]";
+
+        let poolDisplay = t.prizePool > 0 ? (t.currency === 'premium' ? `◈${t.prizePool.toLocaleString()}` : `€${formatM(t.prizePool)}`) : 'Gratis';
+        let poolClass = t.prizePool > 0 ? (t.currency === 'premium' ? 'text-yellow-400' : 'text-green-400') : 'text-slate-500';
+
+        tr.innerHTML = `
+
+            <td class="pl-4 py-3 text-xs font-bold text-white uppercase tracking-widest">${t.name}</td>
+            <td class="text-center text-xs font-mono font-bold ${poolClass}" title="Entrada: ${t.entryFee || 0}">${poolDisplay}</td>
+            <td class="text-center text-xs text-sky-400 font-bold">${t.creatorName}</td>
+
+            <td class="text-center text-xs text-slate-300 font-mono">${(t.participants || []).length} Jugadores</td>
+
+            <td class="text-center text-xs text-slate-300 uppercase">${t.minRank}</td>
+
+            <td class="text-center text-lg">${isPrivate ? 'Privado' : '-'}</td>
+
+            <td class="pr-4">${actionHtml}</td>
+
+        `;
+
+        tbody.appendChild(tr);
+
+    
+    });
+
+
+}
+
+
+
+window.openCreateTournamentModal = function () {
+
+    document.getElementById('modal-create-tournament').classList.remove('hidden');
+
+
+}
+
+
+
+document.getElementById('create-tournament-form').addEventListener('submit', async (e) => {
+
+    e.preventDefault();
+
+    if (!state || !auth.currentUser) return;
+
+
+
+    const name = document.getElementById('tournament-name').value.trim();
+
+    const minRank = document.getElementById('tournament-min-rank').value;
+
+    const password = document.getElementById('tournament-password').value.trim();
+    const entryFee = parseInt(document.getElementById('tournament-entry-fee').value) || 0;
+    const currency = document.getElementById('tournament-currency').value;
+
+    if (entryFee > 0) {
+        if (state.economy[currency] < entryFee) {
+            return showAlert(currency === 'coins' ? "Monedas insuficientes para la entrada." : "Premium insuficiente para la entrada.");
+        }
+    }
+
+    try {
+        if (entryFee > 0) {
+            state.economy[currency] -= entryFee;
+            updateUI();
+            await db.collection('users').doc(auth.currentUser.uid).update({
+                economy: state.economy
+            });
+        }
+
+        await db.collection('tournaments').add({
+            name: name,
+            minRank: minRank,
+            password: password,
+
+            creatorUid: auth.currentUser.uid,
+
+            creatorName: state.auth.user,
+
+            participants: [auth.currentUser.uid],
+
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+
+        
+        });
+
+
+
+        showAlert("Torneo creado con éxito.");
+
+        document.getElementById('modal-create-tournament').classList.add('hidden');
+
+        document.getElementById('create-tournament-form').reset();
+
+    
+    } catch (err) {
+
+        console.error("Error creating tournament", err);
+
+        showAlert("Error al crear el torneo.");
+
+    
+    }
+
+
+});
+
+
+
+window.resolveTournament = async function(tid) {
+    const t = currentTournaments.find(x => x.id === tid);
+    if (!t || !t.prizePool || t.prizePool <= 0) return showAlert("Este torneo no tiene bote acumulado.");
+    
+    const winnerName = prompt(`REPARTO DEL BOTE: ${t.prizePool} ${t.currency === 'premium' ? 'Premium' : 'Monedas'} \n\nEscribe "YO" para quedártelo, o el NOMBRE EXACTO del jugador ganador (ej: User123):`);
+    if (!winnerName) return;
+    
+    try {
+        if (winnerName.toUpperCase() === 'YO' || winnerName === state.auth.user) {
+            state.economy[t.currency] += t.prizePool;
+            updateUI();
+            await db.collection('users').doc(auth.currentUser.uid).update({ economy: state.economy });
+            await db.collection('tournaments').doc(tid).delete();
+            showAlert(`¡Has reclamado el Bote de ${t.prizePool}! Torneo cerrado.`);
+        } else {
+            const snap = await db.collection('users').where('auth.user', '==', winnerName).limit(1).get();
+            if (snap.empty) return showAlert("Jugador no encontrado. Revisa las mayúsculas (sensible a Exact Match).");
+            
+            const winnerDoc = snap.docs[0];
+            const wData = winnerDoc.data();
+            
+            if (!wData.economy) wData.economy = { coins: 50000000, premium: 0 };
+            wData.economy[t.currency] = (wData.economy[t.currency] || 0) + t.prizePool;
+            
+            await db.collection('users').doc(winnerDoc.id).update({ economy: wData.economy });
+            await db.collection('tournaments').doc(tid).delete();
+            showAlert(`Bote de ${t.prizePool} entregado a ${winnerName}. Torneo cerrado exitosamente.`);
+        }
+    } catch(err) {
+        console.error(err);
+        showAlert("Error crítico al repartir el bote.");
+    }
+}
+
+window.deleteTournament = async function (tid) {
+
+    showConfirm("¿Seguro que quieres eliminar tu torneo?", async () => {
+
+        try {
+
+            await db.collection('tournaments').doc(tid).delete();
+
+            showAlert("Torneo eliminado.");
+
+        
+        } catch (err) {
+
+            console.error("Error deleting", err);
+
+        
+        }
+
+    
+    });
+
+
+}
+
+
+
+window.promptJoinTournament = function (tid, reqRank) {
+
+    document.getElementById('join-tournament-id').value = tid;
+
+    document.getElementById('join-tournament-req-rank').value = reqRank;
+
+    document.getElementById('join-tournament-password').value = "";
+
+    document.getElementById('modal-join-tournament').classList.remove('hidden');
+
+
+}
+
+
+
+window.submitJoinPrivateTournament = async function () {
+
+    const tid = document.getElementById('join-tournament-id').value;
+
+    const pwd = document.getElementById('join-tournament-password').value;
+
+
+
+    const t = currentTournaments.find(x => x.id === tid);
+
+    if (!t) return;
+
+
+
+    if (t.password !== pwd) {
+
+        return showAlert("Contraseña incorrecta.");
+
+    
+    }
+
+
+
+    document.getElementById('modal-join-tournament').classList.add('hidden');
+
+    joinTournament(tid);
+
+
+}
+
+
+
+window.joinTournament = async function (tid) {
+
+    if (!state || !auth.currentUser) return;
+
+    try {
+
+        await db.collection('tournaments').doc(tid).update({
+
+            participants: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid)
+
+        
+        });
+
+        showAlert("Te has inscrito al torneo.");
+
+    
+    } catch (err) {
+
+        console.error("Error joining", err);
+
+        showAlert("Error al unirte al torneo.");
+
+    
+    }
+
+
 }
 
 /* =========================================================================
@@ -5503,6 +5771,6 @@ function initConfetti() {
 function stopConfetti() {
     confettiActive = false;
 }
- 
- 
- 
+
+
+
