@@ -788,7 +788,7 @@ window.showSubpage = function (id) {
         if (!state.competitive.history || state.competitive.history.length === 0) {
             historyContainer.innerHTML = `
             <div>
-                <div class="text-3xl mb-2 opacity-50">âš½</div>
+                <div class="text-3xl mb-2 opacity-50">⚽</div>
                 Aún no has jugado partidos clasificatorios
             </div>`;
         } else {
@@ -1317,10 +1317,10 @@ function startMultiplayerSearch(mode) {
         // Events
         if (data.eventType === 'home_goal') {
             const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
-            pvpMatchState.events.push({ min: data.min, icon: 'âš½', text: `GOL â€” ${scorer}`, side: 'home' });
+            pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL â€” ${scorer}`, side: 'home' });
         } else if (data.eventType === 'away_goal') {
             const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
-            pvpMatchState.events.push({ min: data.min, icon: 'âš½', text: `GOL â€” ${scorer}`, side: 'away' });
+            pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL â€” ${scorer}`, side: 'away' });
         }
         if (data.card) {
             pvpMatchState.events.push({ min: data.min, icon: 'ðŸŸ¨', text: 'Tarjeta amarilla', side: data.card.side });
@@ -1583,6 +1583,7 @@ window.switchTab = function (tabId) {
     if (tabId === 'sobres') renderSobresTab();
     if (tabId === 'dash') updateUI();
     if (tabId === 'squad') renderSquad();
+    if (tabId === 'comp') window.renderCompLeaderboard();
 }
 
 window.showRanksInfo = function () {
@@ -1723,7 +1724,7 @@ function updateUI() {
             if (!state.competitive.history || state.competitive.history.length === 0) {
                 histContainer.innerHTML = `
                     <div>
-                        <div class="text-3xl mb-2 opacity-50">âš½</div>
+                        <div class="text-3xl mb-2 opacity-50">⚽</div>
                         Aún no has jugado partidos clasificatorios
                     </div>
                 `;
@@ -5392,8 +5393,11 @@ window.renderTournamentsList = function () {
 
         tr.innerHTML = `
 
-            <td class="pl-4 py-3 text-xs font-bold text-white uppercase tracking-widest">${t.name}</td>
-            <td class="text-center text-xs font-mono font-bold ${poolClass}" title="Entrada: ${t.entryFee || 0}">${poolDisplay}</td>
+        <td class="pl-4 py-3 text-xs font-bold text-white uppercase tracking-widest">
+            <div>${t.name}</div>
+            <div class="text-[9px] text-slate-400 normal-case mt-0.5" style="letter-spacing: 0;">Formato: ${t.format || 'Ida y Vuelta'} | Subs: ${t.subsLimit || '3 Cambios'}</div>
+        </td>
+        <td class="text-center text-xs font-mono font-bold ${poolClass}" title="Entrada: ${t.entryFee || 0}">${poolDisplay}</td>
             <td class="text-center text-xs text-sky-400 font-bold">${t.creatorName}</td>
 
             <td class="text-center text-xs text-slate-300 font-mono">${(t.participants || []).length} Jugadores</td>
@@ -5440,6 +5444,9 @@ document.getElementById('create-tournament-form').addEventListener('submit', asy
     const password = document.getElementById('tournament-password').value.trim();
     const entryFee = parseInt(document.getElementById('tournament-entry-fee').value) || 0;
     const currency = document.getElementById('tournament-currency').value;
+    const formatMatch = document.getElementById('tournament-format').value;
+    const subsLimit = document.getElementById('tournament-subs').value;
+
 
     if (entryFee > 0) {
         if (state.economy[currency] < entryFee) {
@@ -5774,3 +5781,70 @@ function stopConfetti() {
 
 
 
+
+/* =========================================================================
+   RANKING GLOBAL COMPETITIVO (TOP ELO)
+   ========================================================================= */
+let unsubscribeCompLeaderboard = null;
+
+window.renderCompLeaderboard = function () {
+    const tbody = document.getElementById('comp-leaderboard-tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500 italic">Cargando datos del servidor...</td></tr>';
+
+    if (unsubscribeCompLeaderboard) unsubscribeCompLeaderboard();
+
+    unsubscribeCompLeaderboard = db.collection('users')
+        .orderBy('competitive.points', 'desc')
+        .limit(50)
+        .onSnapshot(snap => {
+            const users = [];
+            snap.forEach(doc => {
+                users.push({ id: doc.id, ...doc.data() });
+            });
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500 italic">Nadie ha jugado aún</td></tr>';
+                return;
+            }
+
+            // Mapeo inverso de Ranks para Iconos
+            const iconMap = {
+                'Novato I': '🌱', 'Novato II': '☘️', 'Novato III': '🍀',
+                'Bronce I': '🥉', 'Bronce II': '🥉', 'Bronce III': '🥉',
+                'Plata I': '🥈', 'Plata II': '🥈', 'Plata III': '🥈',
+                'Oro I': '🥇', 'Oro II': '🥇', 'Oro III': '🥇',
+                'Platino I': '💎', 'Platino II': '💎', 'Platino III': '💎',
+                'Diamante I': '💠', 'Diamante II': '💠', 'Diamante III': '💠',
+                'Campeón I': '🏆', 'Campeón II': '🏆', 'Campeón III': '🏆',
+                'Leyenda': '👑'
+            };
+
+            tbody.innerHTML = users.map((u, index) => {
+                const isMe = auth.currentUser && u.id === auth.currentUser.uid;
+                const rowClass = isMe ? 'bg-purple-900/40 font-bold border-l-4 border-purple-500 shadow-inner' : 'hover:bg-[#1c1c28] border-b border-[#313145]';
+                const nameColor = isMe ? 'text-purple-400' : 'text-slate-200';
+                
+                const comp = u.competitive || { points: 0, rank: 'Novato I' };
+                const icon = iconMap[comp.rank] || '🌱';
+
+                let posClass = 'text-slate-400 font-bold';
+                if (index === 0) posClass = 'text-yellow-400 text-lg shadow-[0_0_10px_rgba(234,179,8,0.5)]';
+                else if (index === 1) posClass = 'text-gray-300 text-lg shadow-[0_0_10px_rgba(209,213,219,0.3)]';
+                else if (index === 2) posClass = 'text-amber-600 text-lg shadow-[0_0_10px_rgba(217,119,6,0.2)]';
+
+                return `
+                <tr class="transition ${rowClass}">
+                    <td class="text-center py-3 font-gaming ${posClass}">${index + 1}</td>
+                    <td class="text-left pl-2 ${nameColor} tracking-widest text-[10px] uppercase">${u.auth ? u.auth.user : 'Desconocido'}</td>
+                    <td class="text-center text-sm" title="${comp.rank}">${icon}</td>
+                    <td class="text-right pr-2 text-yellow-400 font-mono font-bold">${comp.points}</td>
+                </tr>
+                `;
+            }).join('');
+        }, err => {
+            console.error("Error Global Ranking:", err);
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-500 italic">Error de conexión</td></tr>';
+        });
+}
