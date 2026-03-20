@@ -1318,9 +1318,27 @@ function startMultiplayerSearch(mode) {
         if (data.eventType === 'home_goal') {
             const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
             pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL â€” ${scorer}`, side: 'home' });
+            triggerGoalPopup({
+                type: 'GOAL',
+                team: 'home',
+                scorer: scorer,
+                assist: null,
+                minute: data.min,
+                newScore: `${data.homeGoals} - ${data.awayGoals}`,
+                badgeHTML: document.getElementById('pvp-home-shield') ? document.getElementById('pvp-home-shield').innerHTML : ''
+            });
         } else if (data.eventType === 'away_goal') {
             const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
             pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL â€” ${scorer}`, side: 'away' });
+            triggerGoalPopup({
+                type: 'GOAL',
+                team: 'away',
+                scorer: scorer,
+                assist: null,
+                minute: data.min,
+                newScore: `${data.homeGoals} - ${data.awayGoals}`,
+                badgeHTML: document.getElementById('pvp-away-shield') ? document.getElementById('pvp-away-shield').innerHTML : ''
+            });
         }
         if (data.card) {
             pvpMatchState.events.push({ min: data.min, icon: 'ðŸŸ¨', text: 'Tarjeta amarilla', side: data.card.side });
@@ -3188,139 +3206,78 @@ function launchMatch() {
 // ==========================================
 // ANIMACIÓN DE GOL (2D + EFFECTS)
 // ==========================================
-function playGoalAnimation(scorer, assist, minute, isLocalTeam) {
-    const overlay = document.getElementById('goal-overlay');
-    const giantText = document.getElementById('goal-text-giant');
-    const scorerInfo = document.getElementById('goal-scorer-info');
-    const assistInfo = document.getElementById('goal-assist-info');
-    
-    // Nombres y Minuto
-    document.getElementById('goal-scorer-name').textContent = typeof scorer === 'object' ? (scorer.name || 'Jugador') : scorer;
-    document.getElementById('goal-minute-text').textContent = minute;
-    
-    if (assist) {
-        document.getElementById('goal-assist-name').textContent = typeof assist === 'object' ? (assist.name || 'Asistente') : assist;
-        assistInfo.classList.remove('hidden');
-    } else {
-        assistInfo.classList.add('hidden');
+// GOAL BROADCAST POPUP  Event-Based Architecture
+// ==========================================
+const goalPopupQueue = [];
+let goalPopupActive = false;
+
+function triggerGoalPopup(payload) {
+    goalPopupQueue.push(payload);
+    if (!goalPopupActive) {
+        _processGoalQueue();
     }
-    
-    // Elementos del pitch 2D
-    const assisterDot = document.getElementById('anim-assister');
-    const scorerDot = document.getElementById('anim-scorer');
-    const ballDot = document.getElementById('anim-ball');
-    
-    // Resetear posiciones y display
-    assisterDot.style.cssText = 'left: 20%; top: 50%; display: none;';
-    scorerDot.style.cssText = 'left: 60%; top: 50%; display: none;';
-    ballDot.style.cssText = 'left: 20%; top: 50%; display: none;';
-    
-    // Clases del equipo (Color)
-    const teamColorClass = isLocalTeam ? 'bg-blue-500 shadow-[0_0_15px_blue]' : 'bg-red-500 shadow-[0_0_15px_red]';
-    assisterDot.className = `absolute w-5 h-5 md:w-6 md:h-6 rounded-full z-20 transition-all duration-700 border-[2px] border-white ${teamColorClass}`;
-    scorerDot.className = `absolute w-6 h-6 md:w-7 md:h-7 rounded-full z-20 transition-all duration-700 border-[2px] border-white ${teamColorClass}`;
-    ballDot.className = 'absolute w-4 h-4 rounded-full bg-white shadow-[0_0_15px_white] z-30 transition-all duration-300';
-    
-    // Removemos hidden y ponemos opacidad 0
-    overlay.classList.remove('hidden');
-    
-    // Delay de 50ms para que transicione opacity
-    setTimeout(() => {
-        overlay.classList.remove('opacity-0');
-        overlay.classList.add('opacity-100');
-        
-        // PASO 1: POSICIONAMIENTO INICIAL
-        if (assist) {
-            assisterDot.style.display = 'block';
-            assisterDot.style.left = '30%';
-            assisterDot.style.top = '70%';
-        }
-        
-        scorerDot.style.display = 'block';
-        scorerDot.style.left = '60%';
-        scorerDot.style.top = '40%';
-        
-        ballDot.style.display = 'block';
-        if (assist) {
-            ballDot.style.left = '30%';
-            ballDot.style.top = '70%';
-        } else {
-            // Si no hay asistencia, el balón empieza con el goleador
-            ballDot.style.left = '50%';
-            ballDot.style.top = '50%';
-        }
-        
-        // PASO 2: EL PASE (si hay) y CARRERA
-        setTimeout(() => {
-            if (assist) {
-                // El balón va hacia el goleador
-                ballDot.style.transitionDuration = '450ms';
-                ballDot.style.left = '60%';
-                ballDot.style.top = '40%';
-                
-                // El goleador avanza un poco al área
-                scorerDot.style.left = '70%';
-                scorerDot.style.top = '45%';
-            } else {
-                // El goleador avanza
-                scorerDot.style.left = '70%';
-                scorerDot.style.top = '45%';
-                
-                ballDot.style.transitionDuration = '400ms';
-                ballDot.style.left = '70%';
-                ballDot.style.top = '45%';
-            }
-            
-            // PASO 3: EL TIRO
-            setTimeout(() => {
-                // Animación de impulso del goleador
-                scorerDot.style.transform = 'scale(1.4)';
-                setTimeout(() => {
-                    scorerDot.style.transform = 'scale(1)';
-                    // El balón sale disparado
-                    ballDot.style.transitionDuration = '200ms';
-                    ballDot.style.left = '98%'; 
-                    ballDot.style.top = '50%';
-                    
-                    // PASO 4: EL IMPACTO Y CELEBRACIÓN
-                    setTimeout(() => {
-                        // Shake the screen
-                        document.body.classList.add('camera-shake');
-                        setTimeout(() => document.body.classList.remove('camera-shake'), 500);
-                        
-                        // Text and UI
-                        giantText.classList.remove('scale-0');
-                        giantText.classList.add('goal-text-animate');
-                        scorerInfo.classList.remove('opacity-0');
-                        scorerInfo.classList.add('opacity-100');
-                        
-                        // Confetti
-                        fireConfetti();
-                        
-                        // Cierre Automático
-                        setTimeout(() => {
-                            overlay.classList.remove('opacity-100');
-                            overlay.classList.add('opacity-0');
-                            setTimeout(() => {
-                                overlay.classList.add('hidden');
-                                giantText.classList.remove('goal-text-animate');
-                                giantText.classList.add('scale-0');
-                                scorerInfo.classList.remove('opacity-100');
-                                scorerInfo.classList.add('opacity-0');
-                            }, 500);
-                        }, 4000);
-                        
-                    }, 200); // Ms que tarda el tiro
-                }, 150); // Scale recovery
-                
-            }, assist ? 450 : 400); // Tiempo del pase / carrera
-        }, 300); // Pause antes de empezar la jugada
-    }, 50);
 }
 
-// Confetti Engine (Canvas)
-function fireConfetti() {
-    const canvas = document.getElementById('confetti-canvas');
+function _processGoalQueue() {
+    if (goalPopupQueue.length === 0) {
+        goalPopupActive = false;
+        return;
+    }
+    goalPopupActive = true;
+    const payload = goalPopupQueue.shift();
+    _showGoalBroadcast(payload);
+}
+
+function _showGoalBroadcast(payload) {
+    const overlay = document.getElementById('goal-broadcast-popup');
+    const card = document.getElementById('goal-broadcast-card');
+    if (!overlay || !card) { goalPopupActive = false; return; }
+    
+    overlay.style.display = 'flex';
+    overlay.classList.remove('goal-visible', 'goal-fading-out');
+    card.classList.remove('goal-team-home', 'goal-team-away');
+    
+    const teamClass = payload.team === 'home' ? 'goal-team-home' : 'goal-team-away';
+    card.classList.add(teamClass);
+    
+    const badgeEl = document.getElementById('goal-broadcast-badge');
+    const scorerEl = document.getElementById('goal-broadcast-scorer');
+    const assistEl = document.getElementById('goal-broadcast-assist');
+    const scoreEl = document.getElementById('goal-broadcast-score');
+    const minuteEl = document.getElementById('goal-broadcast-minute');
+    
+    if (badgeEl) badgeEl.innerHTML = payload.badgeHTML || '';
+    if (scorerEl) scorerEl.textContent = payload.scorer || 'Jugador';
+    if (assistEl) {
+        assistEl.textContent = payload.assist ? `Asist: ${payload.assist}` : '';
+        assistEl.style.display = payload.assist ? 'block' : 'none';
+    }
+    if (scoreEl) scoreEl.textContent = payload.newScore || '0 - 0';
+    if (minuteEl) minuteEl.textContent = `Min ${payload.minute || 0}'`;
+    
+    document.body.classList.add('camera-shake');
+    setTimeout(() => document.body.classList.remove('camera-shake'), 400);
+    
+    fireGoalConfetti();
+    
+    requestAnimationFrame(() => {
+        overlay.classList.add('goal-visible');
+    });
+    
+    setTimeout(() => {
+        overlay.classList.remove('goal-visible');
+        overlay.classList.add('goal-fading-out');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('goal-fading-out');
+            card.classList.remove('goal-team-home', 'goal-team-away');
+            _processGoalQueue();
+        }, 700);
+    }, 3000);
+}
+
+function fireGoalConfetti() {
+    const canvas = document.getElementById('goal-confetti-canvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
@@ -3348,7 +3305,7 @@ function fireConfetti() {
             p.tiltAngle += p.tiltAngleInc;
             p.y += (Math.cos(p.tiltAngle) + p.dy + p.r / 2) / 2;
             p.x += Math.sin(p.tiltAngle) * 2 + p.dx;
-            p.dy += 0.3; // Gravedad
+            p.dy += 0.3;
             
             if (p.y <= canvas.height) active = true;
             
@@ -3364,6 +3321,7 @@ function fireConfetti() {
     animate();
 }
 
+function fireConfetti() { fireGoalConfetti(); }
 // ==========================================
 // ADVANCED MATCH ENGINE (MINUTO A MINUTO)
 // ==========================================
@@ -3494,7 +3452,19 @@ function runMatchLoop(targetMinute) {
                     setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
                     
                     // Disparar animación en pantalla
-                    playGoalAnimation(scorer, assist, matchState.min, matchState.isHome);
+                    // === EVENTO DE GOL (Multiplayer-Ready) ===
+                    const homeScore1 = matchState.isHome ? matchState.mG : matchState.oG;
+                    const awayScore1 = matchState.isHome ? matchState.oG : matchState.mG;
+                    const goalPayload = {
+                        type: 'GOAL',
+                        team: goalSide,
+                        scorer: scorer.name,
+                        assist: assist ? assist.name : null,
+                        minute: matchState.min,
+                        newScore: `${homeScore1} - ${awayScore1}`,
+                        badgeHTML: document.getElementById(goalSide === 'home' ? 'sim-home-shield' : 'sim-away-shield').innerHTML
+                    };
+                    triggerGoalPopup(goalPayload);
                 } else {
                     // Paradón o Fallo
                     if (Math.random() < 0.5) {
@@ -3538,7 +3508,19 @@ function runMatchLoop(targetMinute) {
                     matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer.name}`, side: goalSide });
                     setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
                     
-                    playGoalAnimation(scorer, assist, matchState.min, !matchState.isHome);
+                    // === EVENTO DE GOL RIVAL (Multiplayer-Ready) ===
+                    const homeScore2 = matchState.isHome ? matchState.mG : matchState.oG;
+                    const awayScore2 = matchState.isHome ? matchState.oG : matchState.mG;
+                    const goalPayload2 = {
+                        type: 'GOAL',
+                        team: goalSide,
+                        scorer: scorer.name,
+                        assist: assist ? assist.name : null,
+                        minute: matchState.min,
+                        newScore: `${homeScore2} - ${awayScore2}`,
+                        badgeHTML: document.getElementById(goalSide === 'home' ? 'sim-home-shield' : 'sim-away-shield').innerHTML
+                    };
+                    triggerGoalPopup(goalPayload2);
                 } else {
                     // Parada de nuestro portero o fuera
                     if (Math.random() < 0.5) {
@@ -4756,73 +4738,185 @@ function renderSobresTab() {
 
 
 
-window.sendFriendRequest = async function () {
+// --- NUEVO SISTEMA DE B�SQUEDA DE AMIGOS ---
+window.searchFriends = async function () {
+    if (!state || !auth.currentUser) return;
+    const searchInput = document.getElementById('friend-search-input');
+    const searchName = searchInput.value.trim().toLowerCase();
+    const btn = document.getElementById('btn-search-friends');
+    const resultsContainer = document.getElementById('friend-search-results');
+
+    if (!searchName) return showAlert("Introduce parte del nombre para buscar.");
+    
+    // UI Loading state
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="animate-pulse">BUSCANDO...</span>';
+    btn.disabled = true;
+    resultsContainer.innerHTML = '';
+    resultsContainer.classList.remove('hidden');
+
+    try {
+        // Obtenemos todos los usuarios (en apps enormes de producci�n esto ser�a una Cloud Function o Algolia, pero aqu� es suficiente)
+        const snapshot = await db.collection('users').get();
+        if (snapshot.empty) {
+            resultsContainer.innerHTML = '<div class="text-[10px] text-red-400 p-2 text-center">No hay usuarios registrados.</div>';
+            return;
+        }
+
+        let matches = [];
+        snapshot.forEach(doc => {
+            if (doc.id === auth.currentUser.uid) return; // No nosotros mismos
+            const data = doc.data();
+            if (data && data.auth && data.auth.user) {
+                if (data.auth.user.toLowerCase().includes(searchName)) {
+                    matches.push({ id: doc.id, username: data.auth.user, myFriendsRow: data.friends || [], myReqRow: data.friendRequests || [] });
+                }
+            }
+        });
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = '<div class="text-[10px] text-slate-400 p-2 text-center">No se encontr� a nadie con ese nombre.</div>';
+        } else {
+            // Render results
+            // Solo mostramos hasta 5 para no saturar la UI
+            matches.slice(0, 5).forEach(targetUser => {
+                const isFriend = targetUser.myFriendsRow.some(f => f.uid === auth.currentUser.uid);
+                const hasSentReq = targetUser.myReqRow.some(r => r.uid === auth.currentUser.uid);
+                
+                let actionBtnHTML = '';
+                if (isFriend) {
+                    actionBtnHTML = '<span class="text-[9px] text-green-400 font-bold tracking-widest">AMIGOS</span>';
+                } else if (hasSentReq) {
+                    actionBtnHTML = '<span class="text-[9px] text-yellow-500 font-bold tracking-widest">PENDIENTE</span>';
+                } else {
+                    actionBtnHTML = `<button onclick="sendFriendRequest('${targetUser.id}', '${targetUser.username}')" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] px-2 py-1 rounded tracking-widest shadow-md transition">A�ADIR</button>`;
+                }
+
+                resultsContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded bg-[#161622] border border-[#313145] shadow hover:border-blue-500/50 transition">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] uppercase font-bold text-slate-400">${targetUser.username.substring(0,2)}</div>
+                            <span class="text-[11px] font-bold text-white truncate">${targetUser.username}</span>
+                        </div>
+                        <div id="req-action-${targetUser.id}">
+                            ${actionBtnHTML}
+                        </div>
+                    </div>
+                `;
+            });
+            if (matches.length > 5) {
+                resultsContainer.innerHTML += `<div class="text-[9px] text-slate-500 text-center italic pt-1">+ ${matches.length - 5} resultados m�s ocultos. S� m�s espec�fico.</div>`;
+            }
+        }
+    } catch (err) {
+        console.error("Error buscando usuarios:", err);
+        resultsContainer.innerHTML = '<div class="text-[10px] text-red-500 p-2 text-center">Error de conexi�n.</div>';
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
+window.sendFriendRequest = async function (targetId, targetUsername) {
+    if (!state || !auth.currentUser) return;
+    
+    const actionContainer = document.getElementById(`req-action-${targetId}`);
+    if (actionContainer) {
+        actionContainer.innerHTML = '<span class="text-[9px] text-yellow-500 font-bold tracking-widest animate-pulse">ENVIANDO...</span>';
+    }
+
+    try {
+        const newReq = { uid: auth.currentUser.uid, username: state.auth.user, timestamp: Date.now() };
+        await db.collection('users').doc(targetId).update({
+            friendRequests: firebase.firestore.FieldValue.arrayUnion(newReq)
+        });
+        
+        showAlert(`Solicitud de amistad enviada a ${targetUsername}.`);
+        if (actionContainer) actionContainer.innerHTML = '<span class="text-[9px] text-yellow-500 font-bold tracking-widest">PENDIENTE</span>';
+    } catch (err) {
+        console.error("Error enviando solicitud:", err);
+        showAlert("Error al enviar solicitud.");
+        if (actionContainer) actionContainer.innerHTML = '<span class="text-[9px] text-red-500 font-bold">ERROR</span>';
+    }
+}
+
+// Permitir borrar amigos (se borrar� mutuamente)
+window.removeFriend = async function(friendUid, friendUsername) {
+    if (!confirm(`�Seguro que quieres eliminar a ${friendUsername} de tu lista de amigos?`)) return;
+    
+    try {
+        // Removerlo de nuestra lista local
+        state.friends = state.friends.filter(f => f.uid !== friendUid);
+        await db.collection('users').doc(auth.currentUser.uid).update({
+            friends: state.friends
+        });
+        
+        // Removernos de su lista
+        const targetDoc = await db.collection('users').doc(friendUid).get();
+        if (targetDoc.exists) {
+            const tData = targetDoc.data();
+            if (tData.friends) {
+                const updatedTargetFriends = tData.friends.filter(f => f.uid !== auth.currentUser.uid);
+                await db.collection('users').doc(friendUid).update({
+                    friends: updatedTargetFriends
+                });
+            }
+        }
+        
+        showAlert(`${friendUsername} eliminado de amigos.`);
+        renderFriendsTab();
+    } catch (err) {
+        console.error("Error eliminando amigo:", err);
+        showAlert("Hubo un error al eliminar al amigo.");
+    }
+}
+
+window.acceptFriendRequest = async function (reqUid, reqUsername) {
 
     if (!state || !auth.currentUser) return;
 
-    const searchName = document.getElementById('friend-search-input').value.trim();
-
-    if (!searchName) return showAlert("Introduce un nombre de usuario.");
-
-    if (searchName.toLowerCase() === state.auth.user.toLowerCase()) return showAlert("No puedes enviarte una solicitud a ti mismo.");
-
-
-
     try {
 
-        const usersRef = db.collection('users');
+        state.friendRequests = state.friendRequests.filter(r => r.uid !== reqUid);
 
-        const snapshot = await usersRef.where('auth.user', '==', searchName).get();
+        const myNewFriend = { uid: reqUid, username: reqUsername, addedAt: Date.now()  };
 
-        if (snapshot.empty) return showAlert("Usuario no encontrado.");
-
-
-
-        const targetDoc = snapshot.docs[0];
-
-        const targetData = targetDoc.data();
-
-        const targetId = targetDoc.id;
+        state.friends.push(myNewFriend);
 
 
 
-        if (targetData.friends && targetData.friends.some(f => f.uid === auth.currentUser.uid)) {
+        await db.collection('users').doc(auth.currentUser.uid).update({
 
-            return showAlert("Ya sois amigos.");
+            friendRequests: state.friendRequests,
 
-        
-        }
-
-        if (targetData.friendRequests && targetData.friendRequests.some(r => r.uid === auth.currentUser.uid)) {
-
-            return showAlert("Ya le has enviado una solicitud pendiente.");
-
-        
-        }
-
-
-
-        const newReq = { uid: auth.currentUser.uid, username: state.auth.user, timestamp: Date.now()  };
-
-        await db.collection('users').doc(targetId).update({
-
-            friendRequests: firebase.firestore.FieldValue.arrayUnion(newReq)
+            friends: state.friends
 
         
         });
 
 
 
-        showAlert("Solicitud de amistad enviada con ÃÂ©xito.");
+        const theirNewFriend = { uid: auth.currentUser.uid, username: state.auth.user, addedAt: Date.now()  };
 
-        document.getElementById('friend-search-input').value = "";
+        await db.collection('users').doc(reqUid).update({
+
+            friends: firebase.firestore.FieldValue.arrayUnion(theirNewFriend)
+
+        
+        });
+
+
+
+        showAlert(`Has aceptado a ${reqUsername} como amigo.`);
+
+        renderFriendsTab();
 
     
     } catch (err) {
 
-        console.error("Error enviando solicitud:", err);
+        console.error("Error aceptando:", err);
 
-        showAlert("Error al enviar solicitud: " + err.message);
+        showAlert("Error aceptando amigo.");
 
     
     }
@@ -4831,6 +4925,3888 @@ window.sendFriendRequest = async function () {
 }
 
 
+
+window.rejectFriendRequest = async function (reqUid) {
+
+    if (!state || !auth.currentUser) return;
+
+    state.friendRequests = state.friendRequests.filter(r => r.uid !== reqUid);
+
+    try {
+
+        await db.collection('users').doc(auth.currentUser.uid).update({
+
+            friendRequests: state.friendRequests
+
+        
+        });
+
+        renderFriendsTab();
+
+    
+    } catch (err) {
+
+        console.error("Error denegando:", err);
+
+    
+    }
+
+
+}
+
+
+
+const originalShowSubpageFriends = window.showSubpage;
+
+window.showSubpage = async function (pageId) {
+
+    if (pageId === 'friends') {
+
+        if (auth.currentUser) {
+
+            const doc = await db.collection('users').doc(auth.currentUser.uid).get();
+
+            if (doc.exists) {
+
+                const data = doc.data();
+
+                if (data.friendRequests) state.friendRequests = data.friendRequests;
+
+                if (data.friends) state.friends = data.friends;
+
+                renderFriendsTab();
+
+            
+            }
+
+        
+        }
+
+    
+    }
+
+    if (originalShowSubpageFriends) originalShowSubpageFriends(pageId);
+
+
+}
+
+
+
+function renderFriendsTab() {
+    if (!state) return;
+    const countsEl = document.getElementById('friend-requests-count');
+    const friendsCountEl = document.getElementById('friends-count');
+    if (countsEl) countsEl.textContent = state.friendRequests ? state.friendRequests.length : 0;
+    if (friendsCountEl) friendsCountEl.textContent = state.friends ? state.friends.length : 0;
+
+    // ----- PETICIONES PENDIENTES -----
+    const reqList = document.getElementById('friend-requests-list');
+    const emptyReq = document.getElementById('empty-requests-msg');
+    
+    if (reqList) {
+        reqList.innerHTML = '';
+        if (!state.friendRequests || state.friendRequests.length === 0) {
+            reqList.appendChild(emptyReq);
+        } else {
+            state.friendRequests.forEach(req => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 rounded-xl bg-[#161622] border border-[#313145] hover:border-[#4d4d6e] transition shadow-md';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold uppercase text-xs border border-yellow-500/50">${req.username.substring(0,2)}</div>
+                        <div class="flex flex-col truncate">
+                            <span class="text-xs font-bold text-white truncate">${req.username}</span>
+                            <span class="text-[9px] text-slate-400 truncate">Sol�cita tu amistad</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <button onclick="acceptFriendRequest('${req.uid}', '${req.username}')" class="bg-green-600/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-600 px-3 py-1 rounded text-[10px] font-bold tracking-widest transition"></button>
+                        <button onclick="rejectFriendRequest('${req.uid}')" class="bg-red-600/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-600 px-3 py-1 rounded text-[10px] font-bold tracking-widest transition"></button>
+                    </div>
+                `;
+                reqList.appendChild(div);
+            });
+        }
+    }
+
+    // ----- LISTA DE AMIGOS -----
+    const friendList = document.getElementById('friends-list');
+    const emptyFriends = document.getElementById('empty-friends-msg');
+    
+    if (friendList) {
+        friendList.innerHTML = '';
+        if (!state.friends || state.friends.length === 0) {
+            friendList.appendChild(emptyFriends);
+        } else {
+            state.friends.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 rounded-xl bg-[#161622] border border-[#313145] shadow-lg group hover:border-[#4d4d6e] transition';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden shrink-0">
+                        <div class="relative">
+                            <div class="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold text-sm uppercase border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]">${f.username.substring(0,2)}</div>
+                            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#161622] rounded-full"></div>
+                        </div>
+                        <div class="flex flex-col truncate w-32 md:w-48">
+                            <span class="text-sm font-bold text-white truncate">${f.username}</span>
+                            <span class="text-[10px] text-blue-400 font-medium tracking-widest truncate">A�ADIDO RECIENTEMENTE</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <button onclick="removeFriend('${f.uid}', '${f.username}')" class="opacity-0 group-hover:opacity-100 btn-action py-1 px-3 text-[9px] bg-red-600 hover:bg-red-500 tracking-widest transition" title="Eliminar amigo">X</button>
+                        <button onclick="inviteFriend1v1('${f.uid}')" class="btn-action py-1 px-4 text-[10px] tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] flex items-center gap-2 border border-blue-500/50"><span>�</span> INVITAR</button>
+                    </div>
+                `;
+                friendList.appendChild(div);
+            });
+        }
+    }
+}
+
+window.inviteFriend1v1 = function (targetUid) {
+            if (!pvpSocket || !pvpSocket.connected) return showAlert("No estás conectado al servidor multiplayer.");
+            pvpSocket.emit('invite_friend', { targetUid: targetUid, senderName: state.auth.user, senderOvr: state.squadOvr || 50 });
+            showAlert("Invitación enviada. Esperando respuesta del jugador...");
+        }
+
+        window.setupPrivateMatchSocketEvents = function (sock) {
+            if (sock._privateEventsHooked) return;
+            sock._privateEventsHooked = true;
+
+            sock.on('receive_invite', (data) => {
+                pending1v1Invite = data;
+                const modal = document.getElementById('modal-1v1-invite');
+                if (modal) {
+                    document.getElementById('invite-sender-name').textContent = data.senderName;
+                    modal.classList.remove('hidden');
+                }
+            });
+
+            sock.on('invite_response', (data) => {
+                if (!data.accepted) {
+                    showAlert(data.message || "Invitación rechazada o fallida.");
+                }
+            });
+
+            sock.on('private_match_start', (data) => {
+                closeSubpage();
+                const mm = document.getElementById('match-modal');
+                if (mm) {
+                    mm.classList.remove('hidden');
+                    mm.style.display = 'flex';
+                }
+                simIsRanked = false;
+                simIsMultiplayer = true;
+                simMultiplayerRoom = data.room;
+                simMatchInProgress = true;
+                simLatestNarrativeTime = 0;
+
+                const homeLabel = data.isPlayer1 ? state.team.name : data.opponentName;
+                const awayLabel = data.isPlayer1 ? data.opponentName : state.team.name;
+                document.getElementById('sim-home-name').textContent = homeLabel;
+                document.getElementById('sim-away-name').textContent = awayLabel;
+                document.getElementById('sim-home-score').textContent = "0";
+                document.getElementById('sim-away-score').textContent = "0";
+                document.getElementById('match-narrative').innerHTML = "";
+
+                setTimeout(() => {
+                    if (typeof sendMultiplayerLineup === 'function') sendMultiplayerLineup();
+                }, 500);
+            });
+        }
+
+        // Hook inicial por si ya está conectado
+        if (pvpSocket && pvpSocket.connected) {
+            setupPrivateMatchSocketEvents(pvpSocket);
+        }
+
+        window.accept1v1Invite = function () {
+            if (!pending1v1Invite || !pvpSocket) return;
+            document.getElementById('modal-1v1-invite').classList.add('hidden');
+            pvpSocket.emit('respond_invite', { accepted: true, targetSocketId: pending1v1Invite.fromSocketId, senderName: state.auth.user });
+            pending1v1Invite = null;
+        }
+
+        window.reject1v1Invite = function () {
+            if (!pending1v1Invite || !pvpSocket) return;
+            document.getElementById('modal-1v1-invite').classList.add('hidden');
+            pvpSocket.emit('respond_invite', { accepted: false, targetSocketId: pending1v1Invite.fromSocketId });
+            pending1v1Invite = null;
+        }
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+        document.getElementById('pvp-post-match').classList.add('hidden');
+        setNowPlayingVisibility();
+
+        // Re-enable halftime talk buttons for the new match
+        const pvpBtnM = document.getElementById('pvp-btn-talk-motivar');
+        const pvpBtnB = document.getElementById('pvp-btn-talk-bronca');
+        [pvpBtnM, pvpBtnB].forEach(btn => {
+            if (!btn) return;
+            btn.disabled = false;
+            btn.classList.remove('fm-dugout-btn-disabled');
+        });
+        if (pvpBtnM) pvpBtnM.onclick = function () { pvpHalftimeAction('animar'); };
+        if (pvpBtnB) pvpBtnB.onclick = function () { pvpHalftimeAction('bronca'); };
+
+        // Reset state
+        pvpMatchState.stats = { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 };
+        pvpMatchState.events = [];
+        window._pvpEvents = [];
+        pvpPitchPhase = 'neutral';
+        pvpPitchPhaseTimer = 0;
+
+        // Header data
+        document.getElementById('pvp-home-name').textContent = data.homeName;
+        document.getElementById('pvp-away-name').textContent = data.awayName;
+        document.getElementById('pvp-home-score').textContent = '0';
+        document.getElementById('pvp-away-score').textContent = '0';
+        document.getElementById('pvp-match-progress').style.width = '0%';
+        document.getElementById('pvp-match-time').textContent = "0'";
+        document.getElementById('pvp-match-narrative').innerHTML = '';
+
+        // FM panel team labels
+        const statHomeLbl = document.getElementById('pvp-fm-stat-home-name');
+        const statAwayLbl = document.getElementById('pvp-fm-stat-away-name');
+        if (statHomeLbl) statHomeLbl.textContent = data.homeName;
+        if (statAwayLbl) statAwayLbl.textContent = data.awayName;
+        const evtTabHome = document.getElementById('pvp-fm-evt-tab-home');
+        const evtTabAway = document.getElementById('pvp-fm-evt-tab-away');
+        if (evtTabHome) evtTabHome.textContent = data.homeName;
+        if (evtTabAway) evtTabAway.textContent = data.awayName;
+        const pitchLblH = document.getElementById('pvp-fm-pitch-label-home');
+        const pitchLblA = document.getElementById('pvp-fm-pitch-label-away');
+        if (pitchLblH) pitchLblH.textContent = data.homeName;
+        if (pitchLblA) pitchLblA.textContent = data.awayName;
+
+        // Badges (FM-style)
+        const myBadge = { shape: state.team.shape, c1: state.team.c1, c2: state.team.c2, pattern: state.team.pattern };
+        const oppBadge = data.opponentBadge || { shape: 'shape-shield', c1: '#666', c2: '#333' };
+
+        if (pvpSide === 'home') {
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]', myBadge.pattern);
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]', oppBadge.pattern);
+        } else {
+            document.getElementById('pvp-home-shield').innerHTML = getBadgeHTML(data.homeName, oppBadge.shape, oppBadge.c1, oppBadge.c2, 'w-8 h-10 text-[8px]', oppBadge.pattern);
+            document.getElementById('pvp-away-shield').innerHTML = getBadgeHTML(data.awayName, myBadge.shape, myBadge.c1, myBadge.c2, 'w-8 h-10 text-[8px]', myBadge.pattern);
+        }
+
+        // Render formation panels â€” use real opponent roster if available from server
+        const myPlayers = getStartingXI().map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
+        let oppPlayers;
+        if (data.opponentRoster && data.opponentRoster.length > 0) {
+            // Use real opponent roster sent by server (with lineup filter if available)
+            let oppRosterFull = data.opponentRoster;
+            if (data.opponentLineup && data.opponentLineup.length === 11) {
+                const lineupPlayers = data.opponentLineup.map(id => oppRosterFull.find(p => p.id === id)).filter(Boolean);
+                oppPlayers = lineupPlayers.length >= 11 ? lineupPlayers : oppRosterFull.slice(0, 11);
+            } else {
+                oppPlayers = oppRosterFull.slice(0, 11);
+            }
+            oppPlayers = oppPlayers.map(p => ({ name: p.name, pos: p.pos, ovr: p.ovr || calcPlayerOVR(p), img: p.img || '' }));
+        } else {
+            oppPlayers = generateAIPlayers(pvpSide === 'home' ? data.awayName : data.homeName, pvpSide === 'home' ? data.awayOvr : data.homeOvr);
+        }
+        const homeColor = pvpSide === 'home' ? (myBadge.c1 || '#2563eb') : (oppBadge.c1 || '#2563eb');
+        const awayColor = pvpSide === 'home' ? (oppBadge.c1 || '#dc2626') : (myBadge.c1 || '#dc2626');
+
+        if (pvpSide === 'home') {
+            renderFormationPanel('pvp-fm-formation-home', myPlayers, homeColor);
+            renderFormationPanel('pvp-fm-formation-away', oppPlayers, awayColor);
+        } else {
+            renderFormationPanel('pvp-fm-formation-home', oppPlayers, homeColor);
+            renderFormationPanel('pvp-fm-formation-away', myPlayers, awayColor);
+        }
+
+        pvpRenderMatchEvents('home');
+        pvpInitPitchTokens();
+        pvpAnimatePitchTokens();
+
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Conectado. Esperando inicio...</div>';
+
+        pvpUpdateMatchStatsUI(pvpMatchState.stats);
+    });
+
+    // ---- KICKOFF ----
+    pvpSocket.on('match_kickoff', (data) => {
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class='text-blue-400 font-bold'>${data.message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Partido en curso...</div>';
+    });
+
+    // ---- TICK DEL PARTIDO ----
+    pvpSocket.on('match_tick', (data) => {
+        document.getElementById('pvp-match-time').textContent = data.min + "'";
+        document.getElementById('pvp-home-score').textContent = data.homeGoals;
+        document.getElementById('pvp-away-score').textContent = data.awayGoals;
+        document.getElementById('pvp-match-progress').style.width = data.progress + '%';
+
+        pvpMatchState.stats = data.stats;
+
+        // Set pitch phase from server
+        if (data.pitchPhase && data.pitchPhase !== 'neutral') {
+            pvpPitchPhase = data.pitchPhase;
+            pvpPitchPhaseTimer = data.pitchPhase.includes('goal') ? 4 : 2;
+        }
+
+        // Events
+        if (data.eventType === 'home_goal') {
+            const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
+            pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL â€” ${scorer}`, side: 'home' });
+            triggerGoalPopup({
+                type: 'GOAL',
+                team: 'home',
+                scorer: scorer,
+                assist: null,
+                minute: data.min,
+                newScore: `${data.homeGoals} - ${data.awayGoals}`,
+                badgeHTML: document.getElementById('pvp-home-shield') ? document.getElementById('pvp-home-shield').innerHTML : ''
+            });
+        } else if (data.eventType === 'away_goal') {
+            const scorer = data.narrative.replace(/^.*perfecta de |^.*jugada de /i, '').replace(/\.$/, '') || 'Jugador';
+            pvpMatchState.events.push({ min: data.min, icon: '⚽', text: `GOL â€” ${scorer}`, side: 'away' });
+            triggerGoalPopup({
+                type: 'GOAL',
+                team: 'away',
+                scorer: scorer,
+                assist: null,
+                minute: data.min,
+                newScore: `${data.homeGoals} - ${data.awayGoals}`,
+                badgeHTML: document.getElementById('pvp-away-shield') ? document.getElementById('pvp-away-shield').innerHTML : ''
+            });
+        }
+        if (data.card) {
+            pvpMatchState.events.push({ min: data.min, icon: 'ðŸŸ¨', text: 'Tarjeta amarilla', side: data.card.side });
+        }
+
+        // Narrativa
+        const logDiv = document.getElementById('pvp-match-narrative');
+        let cssClass = '';
+        if (data.eventType === 'home_goal') cssClass = 'text-green-400 font-bold';
+        else if (data.eventType === 'away_goal') cssClass = 'text-red-400 font-bold';
+        logDiv.innerHTML += `<div><span class="text-slate-500">${data.min}'</span> - <span class="${cssClass}">${data.narrative.split(' - ').slice(1).join(' - ') || data.narrative}</span></div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+        pvpUpdateMatchStatsUI(data.stats);
+        pvpRenderMatchEvents('home');
+    });
+
+    // ---- DESCANSO ----
+    pvpSocket.on('match_halftime', (data) => {
+        pvpStopPitchAnimation();
+        document.getElementById('pvp-halftime-actions').classList.remove('hidden');
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="mt-4"><strong class="text-yellow-400 font-bold">${data.narrative}</strong></div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        pvpMatchState.events.push({ min: 45, icon: 'â±', text: 'Descanso', side: 'home' });
+        pvpRenderMatchEvents('home');
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Medio tiempo â€” elige tus acciones en el dugout.</div>';
+    });
+
+    pvpSocket.on('halftime_response', (data) => {
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">${data.message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+    });
+
+    pvpSocket.on('match_resume', (data) => {
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">${data.message}</strong></div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Segunda parte en juego...</div>';
+        pvpAnimatePitchTokens();
+    });
+
+    // ---- FIN DEL PARTIDO ----
+    pvpSocket.on('match_result', (data) => {
+        pvpStopPitchAnimation();
+        document.getElementById('pvp-post-match').classList.remove('hidden');
+
+        const logDiv = document.getElementById('pvp-match-narrative');
+        logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+
+        const rewards = data.yourRewards;
+        let resultText = '';
+        if (rewards.result === 'win') resultText = 'ðŸ† ¡VICTORIA!';
+        else if (rewards.result === 'draw') resultText = 'ðŸ¤ EMPATE';
+        else resultText = 'ðŸ’” DERROTA';
+
+        document.getElementById('pvp-result-text').textContent = resultText;
+        document.getElementById('pvp-rewards-text').innerHTML = `+€${(rewards.coins / 1000000).toFixed(1)}M | +${rewards.pts} PTS | REP: ${rewards.rep > 0 ? '+' : ''}${rewards.rep}`;
+
+        const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+        if (dugNarr) dugNarr.innerHTML = '<div class="text-amber-400 text-[10px] font-bold">Partido finalizado.</div>';
+
+        if (rewards.result === 'win') state.stats.wins++;
+        else if (rewards.result === 'draw') state.stats.draws++;
+        else state.stats.losses++;
+        state.stats.matches++;
+        state.stats.goals += rewards.goalsScored;
+        state.economy.coins += rewards.coins;
+        state.stats.rep = Math.max(0, state.stats.rep + rewards.rep);
+
+        // --- Actualizar estadísticas PVP online ---
+        const myGF = (data.you === 'home') ? data.homeGoals : data.awayGoals;
+        const myGA = (data.you === 'home') ? data.awayGoals : data.homeGoals;
+        if (!state.pvpStats) state.pvpStats = { matches: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0 };
+        state.pvpStats.matches++;
+        state.pvpStats.gf += myGF;
+        state.pvpStats.ga += myGA;
+        if (rewards.result === 'win') { state.pvpStats.wins++; state.pvpStats.pts += 3; }
+        else if (rewards.result === 'draw') { state.pvpStats.draws++; state.pvpStats.pts += 1; }
+        else { state.pvpStats.losses++; }
+
+        // --- Ranked Match Logic ---
+        if (currentGameMode === 'multiplayer-ranked') {
+            const ptsChange = calculateRankPoints(state.competitive.rank, state.competitive.subrank, rewards.result);
+            processRankUpdate(state, ptsChange);
+
+            // Add match to history
+            state.competitive.history.unshift({
+                opponentName: data.you === 'home' ? data.awayName : data.homeName,
+                result: rewards.result,
+                myGoals: myGF,
+                oppGoals: myGA,
+                pointsChange: ptsChange,
+                date: new Date().toISOString()
+            });
+
+            // Keep history limited to 20 matches max
+            if (state.competitive.history.length > 20) {
+                state.competitive.history.pop();
+            }
+
+            // Also show points change in rewards text
+            const ptsSign = ptsChange > 0 ? '+' : '';
+            document.getElementById('pvp-rewards-text').innerHTML += ` | RANK: <span class="${ptsChange >= 0 ? 'text-green-400' : 'text-red-400'}">${ptsSign}${ptsChange} PTS</span>`;
+        }
+
+        // --- Condición Física y Lesiones Post-Partido (PvP) ---
+        state.lineup.forEach(id => {
+            if (!id) return;
+            const p = state.roster.find(x => x.id === id);
+            if (p) p.con = Math.max(30, p.con - 15);
+        });
+        state.roster.forEach(p => {
+            if (p.injuryMatches && p.injuryMatches > 0) {
+                p.injuryMatches--;
+                if (p.injuryMatches <= 0) p.con = 80; // Sale de lesión con 80%  
+            }
+        });
+
+        pvpMatchFinished = true;
+        saveState();
+    });
+
+    // ---- RIVAL DESCONECTADO ----
+    pvpSocket.on('opponent_disconnected', (data) => {
+        if (pvpMatchFinished) return;
+
+        pvpStopPitchAnimation();
+        document.getElementById('pvp-searching-overlay').classList.add('hidden');
+        document.getElementById('pvp-halftime-actions').classList.add('hidden');
+        document.getElementById('pvp-post-match').classList.remove('hidden');
+        document.getElementById('pvp-result-text').textContent = 'ðŸ† ¡VICTORIA POR ABANDONO!';
+        document.getElementById('pvp-rewards-text').textContent = data.message;
+    });
+}
+
+/* --- PVP Event Tabs --- */
+window.pvpFmEvtTab = function (team) {
+    document.getElementById('pvp-fm-evt-tab-home').className = 'fm-evt-tab' + (team === 'home' ? ' active' : '');
+    document.getElementById('pvp-fm-evt-tab-away').className = 'fm-evt-tab' + (team === 'away' ? ' active' : '');
+    const list = document.getElementById('pvp-fm-events-list');
+    if (!list) return;
+    const filtered = (window._pvpEvents || []).filter(e => team === 'home' ? e.side === 'home' : e.side === 'away');
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
+        return;
+    }
+    list.innerHTML = filtered.map(e => `
+        <div class="fm-event-item">
+            <span class="fm-event-icon">${e.icon}</span>
+            <span class="fm-event-text">${e.text}</span>
+            <span class="fm-event-min">${e.min}'</span>
+        </div>
+    `).join('');
+};
+
+/* --- PVP Dugout toggle --- */
+window.togglePvpDugout = function () {
+    const content = document.getElementById('pvp-fm-dugout-content');
+    if (content) content.classList.toggle('expanded');
+};
+
+window.pvpHalftimeAction = function (action) {
+    if (pvpSocket && pvpRoomId) {
+        pvpSocket.emit('match_halftime_action', { roomId: pvpRoomId, action: action });
+    }
+    // Disable both talk buttons after choosing
+    const btnM = document.getElementById('pvp-btn-talk-motivar');
+    const btnB = document.getElementById('pvp-btn-talk-bronca');
+    [btnM, btnB].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('fm-dugout-btn-disabled');
+        btn.onclick = null;
+    });
+    const dugNarr = document.getElementById('pvp-fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2ª PARTE" para continuar.</div>';
+}
+
+window.pvpGoToTactics = function () {
+    document.getElementById('pvp-match-modal').classList.add('hidden');
+    document.getElementById('app-layout').classList.remove('hidden');
+    setNowPlayingVisibility();
+    switchTab('tactics');
+
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'VOLVER AL PARTIDO â±';
+    topBtn.className = "btn-continue shadow-lg bg-yellow-600";
+    topBtn.onclick = function () {
+        document.getElementById('app-layout').classList.add('hidden');
+        document.getElementById('pvp-match-modal').classList.remove('hidden');
+        setNowPlayingVisibility();
+        topBtn.innerHTML = 'CONTINUAR â­';
+        topBtn.className = "btn-continue shadow-lg";
+        topBtn.onclick = startMatch;
+    };
+}
+
+window.pvpResumeMatch = function () {
+    if (pvpSocket && pvpRoomId) {
+        pvpSocket.emit('resume_match', { roomId: pvpRoomId });
+    }
+}
+
+window.cancelMultiplayerSearch = function () {
+    if (pvpSocket) {
+        pvpSocket.disconnect();
+        pvpSocket = null;
+    }
+    document.getElementById('pvp-searching-overlay').classList.add('hidden');
+    routeView();
+}
+
+window.exitPvpMatch = function () {
+    if (pvpSocket) {
+        pvpSocket.disconnect();
+        pvpSocket = null;
+    }
+    pvpRoomId = null;
+    pvpSide = null;
+    pvpMatchFinished = false;
+    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+    setNowPlayingVisibility();
+    routeView();
+}
+
+/* =========================================================================
+   UI GLOBAL, TABS Y BUZÓN
+   ========================================================================= */
+window.switchTab = function (tabId) {
+    document.querySelectorAll('.fm-tab').forEach(t => { t.classList.remove('active'); t.style.display = 'none'; });
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    const targetTab = document.getElementById('tab-' + tabId);
+    if (targetTab) { targetTab.classList.add('active'); targetTab.style.display = 'flex'; }
+
+    const targetBtn = document.getElementById('nav-' + tabId);
+    if (targetBtn) targetBtn.classList.add('active');
+
+    const titles = { 'dash': 'Inicio', 'squad': 'Plantilla', 'tactics': 'Tácticas', 'train': 'Entrenamientos', 'talk': 'Vestuario', 'league': 'Clasificación', 'season': 'Resultados Temporada', 'market': 'Mercado de Fichajes', 'sobres': 'Sobres de Jugadores', 'bet': 'Apuestas', 'comp': 'Competición' };
+    const pTitle = document.getElementById('page-title');
+    if (pTitle) pTitle.textContent = titles[tabId] || 'Panel';
+
+    // Guardar tab activo en localStorage
+    localStorage.setItem('inafuma_active_tab', tabId);
+
+    if (tabId === 'market') { setMarketMode('buy'); filterMarket(); }
+    if (tabId === 'tactics') renderTactics();
+    if (tabId === 'league') renderLeague();
+    if (tabId === 'train') renderTrainStatus();
+    if (tabId === 'talk') renderTalkStatus();
+    if (tabId === 'season') renderSeasonTab();
+    if (tabId === 'bet') renderBetTab();
+    if (tabId === 'sobres') renderSobresTab();
+    if (tabId === 'dash') updateUI();
+    if (tabId === 'squad') renderSquad();
+    if (tabId === 'comp') window.renderCompLeaderboard();
+}
+
+window.showRanksInfo = function () {
+    document.getElementById('modal-comp-ranks-info').classList.remove('hidden');
+}
+
+window.closeRanksInfo = function () {
+    document.getElementById('modal-comp-ranks-info').classList.add('hidden');
+}
+
+function addEmail(sender, subject, body) {
+    const date = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    state.inbox.unshift({ id: Date.now(), sender, subject, body, date, read: false });
+}
+
+function renderInbox() {
+    const list = document.getElementById('inbox-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (state.inbox.length === 0) {
+        list.innerHTML = '<div class="text-slate-500 text-sm text-center italic mt-4">Sin noticias.</div>';
+        return;
+    }
+
+    state.inbox.forEach(mail => {
+        const opacity = mail.read ? 'opacity-60' : 'opacity-100';
+        const dot = mail.read ? '' : '<span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2"></span>';
+        list.innerHTML += `
+        <div class="bg-[#111119] p-3 rounded border border-[#313145] cursor-pointer hover:border-slate-500 transition mb-2 ${opacity}" onclick="readMail(${mail.id})">
+            <div class="flex justify-between items-baseline mb-1">
+                <span class="text-[10px] font-bold text-blue-400">${mail.sender}</span>
+                <span class="text-[9px] text-slate-500">${mail.date}</span>
+            </div>
+            <h4 class="text-xs font-bold text-white truncate">${dot}${mail.subject}</h4>
+            <p class="text-[10px] text-slate-400 mt-1 line-clamp-2">${mail.body}</p>
+        </div>`;
+    });
+}
+window.readMail = function (id) { const m = state.inbox.find(x => x.id === id); if (m) { m.read = true; saveState(); renderInbox(); } }
+
+function getStartingXI() {
+    if (!state || !state.lineup) return [];
+    return state.lineup.map(id => state.roster.find(p => p.id === id)).filter(p => p && !p.suspension);
+}
+function getTeamOvr() {
+    const xi = getStartingXI();
+    if (xi.length === 0) return 0;
+    const sum = xi.reduce((acc, p) => acc + calcPlayerOVR(p), 0);
+    return Math.round(sum / xi.length);
+}
+
+function getBadgeHTML(name, shape, c1, c2, extraClass = "w-8 h-10 text-[10px]", pattern, icon) {
+    let n = name ? name.substring(0, 3).toUpperCase() : "FM";
+    let sh = shape || "shape-shield";
+    let col1 = c1 || "#1e293b";
+    let col2 = c2 || "#0f172a";
+    let pat = pattern || 'diagonal';
+    let ic = icon || '';
+    let bg = '';
+    if (pat === 'vertical') bg = `linear-gradient(90deg, ${col1} 50%, ${col2} 50%)`;
+    else if (pat === 'horizontal') bg = `linear-gradient(180deg, ${col1} 50%, ${col2} 50%)`;
+    else if (pat === 'solid') bg = col1;
+    else if (pat === 'gradient') bg = `linear-gradient(180deg, ${col1}, ${col2})`;
+    else bg = `linear-gradient(135deg, ${col1} 50%, ${col2} 50%)`;
+    let iconHtml = ic ? `<span class="badge-icon">${ic}</span>` : '';
+    return `<div class="club-badge ${sh} ${extraClass}" style="background: ${bg};">${iconHtml}${n}</div>`;
+}
+
+function updateUI() {
+    if (!state || !state.team) return;
+    const formatM = (num) => num >= 1000000 ? (num / 1000000).toFixed(1) + 'M' : num.toLocaleString();
+
+    document.getElementById('ui-rep').textContent = "★ " + state.stats.rep;
+    document.getElementById('ui-coins').textContent = "€" + formatM(state.economy.coins);
+    document.getElementById('ui-prem').textContent = state.economy.premium;
+    document.getElementById('ui-jornada').textContent = state.stats.matchday || 1;
+    document.getElementById('dash-jornada').textContent = state.stats.matchday || 1;
+
+    document.getElementById('top-manager').textContent = state.team.manager;
+    document.getElementById('sidebar-manager').textContent = state.team.manager;
+
+    const teamNameEls = document.querySelectorAll('#top-teamname, #sidebar-teamname, #dash-greeting-team');
+    teamNameEls.forEach(el => el.textContent = state.team.name);
+
+    const badgeHTML = getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full text-xs shadow", state.team.pattern);
+    document.getElementById('top-shield').innerHTML = badgeHTML;
+    document.getElementById('sidebar-shield').innerHTML = badgeHTML;
+
+    // Próximo Partido en UI
+    let myNextFix = state.nextFixtures ? state.nextFixtures.find(f => f.isUserMatch) : null;
+    if (myNextFix) {
+        let isHome = myNextFix.home === state.team.name;
+        let oppName = isHome ? myNextFix.away : myNextFix.home;
+        let oppData = state.league.find(t => t.name === oppName) || { badge: AI_TEAMS[0] };
+
+        document.getElementById('ui-next-opp').textContent = oppName;
+        document.getElementById('dash-next-home').textContent = myNextFix.home;
+        document.getElementById('dash-next-away').textContent = myNextFix.away;
+
+        let homeBadge = isHome ? getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20", state.team.pattern) : getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20");
+        let awayBadge = isHome ? getBadgeHTML(oppName, oppData.badge.shape, oppData.badge.c1, oppData.badge.c2, "w-full h-full border border-white/20") : getBadgeHTML(state.team.name, state.team.shape, state.team.c1, state.team.c2, "w-full h-full border border-white/20", state.team.pattern);
+
+        document.getElementById('dash-next-home-shield').innerHTML = homeBadge;
+        document.getElementById('dash-next-away-shield').innerHTML = awayBadge;
+    } else {
+        document.getElementById('ui-next-opp').textContent = "Fin Temporada";
+    }
+
+    document.getElementById('dash-ovr-big').textContent = getTeamOvr();
+    document.getElementById('dash-matches').textContent = state.stats.matches;
+    document.getElementById('dash-wins').textContent = state.stats.wins;
+    document.getElementById('dash-draws').textContent = state.stats.draws;
+    document.getElementById('dash-losses').textContent = state.stats.losses;
+
+    // Actualizar UI del Modo Competitivo
+    if (state.competitive) {
+        let rankNameEl = document.getElementById('comp-rank-name');
+        let pointsTextEl = document.getElementById('comp-rank-points-text');
+        let progressBarEl = document.getElementById('comp-rank-progress-bar');
+
+        if (rankNameEl) {
+            let rootRankStr = state.competitive.rank || 'Novato';
+            let subRanks = ['I', 'II', 'III'];
+            // subrank 1 -> I, 2 -> II, 3 -> III
+            let subIndex = Math.max(1, Math.min(3, state.competitive.subrank || 1)) - 1;
+            rankNameEl.textContent = `${rootRankStr} ${subRanks[subIndex]}`;
+        }
+        if (pointsTextEl && progressBarEl) {
+            let pts = Math.max(0, Math.min(100, state.competitive.points || 0));
+            pointsTextEl.textContent = `${pts} / 100 PTS`;
+            progressBarEl.style.width = `${pts}%`;
+        }
+
+        // Historial de Partidos (Empty state o historial)
+        let histContainer = document.getElementById('comp-match-history');
+        if (histContainer) {
+            if (!state.competitive.history || state.competitive.history.length === 0) {
+                histContainer.innerHTML = `
+                    <div>
+                        <div class="text-3xl mb-2 opacity-50">⚽</div>
+                        Aún no has jugado partidos clasificatorios
+                    </div>
+                `;
+            } else {
+                // En el futuro, renderizar historial aquí
+                histContainer.innerHTML = '';
+                state.competitive.history.slice(-5).reverse().forEach(match => {
+                    let resultClass = match.result === 'win' ? 'text-green-500' : (match.result === 'loss' ? 'text-red-500' : 'text-gray-400');
+                    histContainer.innerHTML += `
+                        <div class="flex justify-between items-center w-full p-2 bg-[#0b1628] rounded border border-[#313145]">
+                            <span class="${resultClass} font-bold w-12 text-left">${match.result === 'win' ? 'V' : (match.result === 'loss' ? 'D' : 'E')}</span>
+                            <span class="flex-1 text-white">${match.opponent}</span>
+                            <span class="text-yellow-400 font-mono w-16 text-right">${match.pointsChange > 0 ? '+' : ''}${match.pointsChange}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+    }
+
+    renderInbox(); renderSquad();
+    if (document.getElementById('tab-tactics').classList.contains('active')) renderTactics();
+}
+
+/* =========================================================================
+   FIXTURES (CALENDARIO DE 38 JORNADAS) Y RESULTADOS
+   ========================================================================= */
+function generateFixtures(targetState = state) {
+    if (targetState.stats.matchday > 38) return;
+    let fixtures = [];
+
+    // Buscamos equipo que el usuario haya jugado MENOS de 2 veces.
+    const unplayed = targetState.league.filter(t => !t.isUser && targetState.playedTeams.filter(x => x === t.name).length < 2);
+    let myOpponent = null;
+
+    if (unplayed.length > 0) {
+        myOpponent = unplayed[Math.floor(Math.random() * unplayed.length)];
+        let isHome = Math.random() > 0.5;
+        if (isHome) fixtures.push({ home: targetState.team.name, away: myOpponent.name, isUserMatch: true, homeOvr: getTeamOvr(), awayOvr: myOpponent.ovr });
+        else fixtures.push({ home: myOpponent.name, away: targetState.team.name, isUserMatch: true, homeOvr: myOpponent.ovr, awayOvr: getTeamOvr() });
+    }
+
+    // Partidos IA contra IA
+    let remainingAIs = targetState.league.filter(t => !t.isUser && (!myOpponent || t.name !== myOpponent.name));
+    remainingAIs = remainingAIs.sort(() => Math.random() - 0.5);
+
+    for (let i = 0; i < remainingAIs.length; i += 2) {
+        if (remainingAIs[i + 1]) {
+            fixtures.push({
+                home: remainingAIs[i].name,
+                away: remainingAIs[i + 1].name,
+                isUserMatch: false,
+                homeOvr: remainingAIs[i].ovr,
+                awayOvr: remainingAIs[i + 1].ovr
+            });
+        }
+    }
+    targetState.nextFixtures = fixtures;
+}
+
+window.renderSeasonTab = function () {
+    const selector = document.getElementById('season-matchday-select');
+    const list = document.getElementById('season-results-list');
+    if (!selector || !list) return;
+
+    if (selector.options.length === 0 || selector.options.length < state.stats.matchday - 1) {
+        selector.innerHTML = '';
+        for (let i = 1; i < state.stats.matchday; i++) {
+            selector.innerHTML += `<option value="${i}">Jornada ${i}</option>`;
+        }
+        if (selector.options.length > 0) selector.value = state.stats.matchday - 1;
+    }
+
+    const selectedDay = selector.value;
+    list.innerHTML = '';
+
+    if (!state.history || !state.history[selectedDay]) {
+        list.innerHTML = '<div class="text-center text-slate-500 text-xs mt-10">Selecciona una jornada pasada.</div>';
+        return;
+    }
+
+    state.history[selectedDay].forEach(res => {
+        let hClass = res.hG > res.aG ? "text-green-400 font-bold" : "text-white";
+        let aClass = res.aG > res.hG ? "text-green-400 font-bold" : "text-white";
+        let isMyMatch = res.home === state.team.name || res.away === state.team.name;
+        let borderClass = isMyMatch ? "border-blue-500 bg-[#1e293b]" : "border-[#313145] bg-[#111119]";
+
+        list.innerHTML += `
+        <div class="p-3 rounded border ${borderClass} flex justify-between items-center text-xs shadow-lg mb-2">
+            <span class="w-2/5 text-right ${hClass} truncate px-2">${res.home}</span>
+            <span class="w-1/5 text-center font-bold bg-black py-1 rounded mx-2">${res.hG} - ${res.aG}</span>
+            <span class="w-2/5 text-left ${aClass} truncate px-2">${res.away}</span>
+        </div>`;
+    });
+}
+
+/* =========================================================================
+   APUESTAS DEPORTIVAS
+   ========================================================================= */
+window.renderBetTab = function () {
+    const selMatch = document.getElementById('bet-match-select');
+    const listBets = document.getElementById('active-bets-list');
+    if (!selMatch || !listBets) return;
+
+    selMatch.innerHTML = '';
+    if (state.nextFixtures) {
+        state.nextFixtures.forEach((fix, index) => {
+            selMatch.innerHTML += `<option value="${index}">${fix.home} vs ${fix.away}</option>`;
+        });
+    }
+
+    listBets.innerHTML = '';
+
+    // Show resolved bet history
+    if (state.betHistory && state.betHistory.length > 0) {
+        state.betHistory.slice(-10).reverse().forEach(bet => {
+            let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
+            let resultIcon = bet.result === 'exact' ? 'âœ… EXACTO' : bet.result === 'winner' ? 'âœ… GANADOR' : 'âŒ FALLO';
+            let resultColor = bet.result === 'fail' ? 'red' : 'green';
+            listBets.innerHTML += `
+            <div class="bg-[#111119] border border-slate-600/50 p-3 rounded flex justify-between items-center opacity-80">
+                <div>
+                    <div class="text-[10px] text-${resultColor}-400 font-bold mb-1 uppercase">${resultIcon}</div>
+                    <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
+                    <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span> | Real: <span class="text-white font-bold">${bet.realHG}-${bet.realAG}</span></div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-mono font-bold text-${bet.result === 'fail' ? 'red' : 'green'}-400">${bet.result === 'fail' ? '-' : '+'}${bet.winnings || bet.amount}</div>
+                    <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // Show active bets
+    if (!state.activeBets || state.activeBets.length === 0) {
+        if (!state.betHistory || state.betHistory.length === 0) {
+            listBets.innerHTML = '<div class="text-slate-500 text-xs italic text-center mt-4">No tienes apuestas activas para esta jornada.</div>';
+        }
+        return;
+    }
+
+    state.activeBets.forEach(bet => {
+        let currText = bet.currency === 'coins' ? '€ Club' : 'Premium';
+        listBets.innerHTML = `
+        <div class="bg-[#111119] border border-yellow-500/50 p-3 rounded flex justify-between items-center">
+            <div>
+                <div class="text-[10px] text-yellow-400 font-bold mb-1 uppercase">â³ Boleto en Curso</div>
+                <div class="text-xs text-white">${bet.home} vs ${bet.away}</div>
+                <div class="text-[10px] text-slate-400 mt-1">Pronóstico: <span class="text-white font-bold bg-slate-800 px-2 py-0.5 rounded">${bet.hG} - ${bet.aG}</span></div>
+            </div>
+            <div class="text-right">
+                <div class="text-[9px] font-bold text-slate-300 uppercase">Inversión</div>
+                <div class="text-lg font-mono font-bold text-${bet.currency === 'coins' ? 'green' : 'yellow'}-400">${bet.amount}</div>
+                <div class="text-[9px] text-slate-500 uppercase">${currText}</div>
+            </div>
+        </div>` + listBets.innerHTML;
+    });
+}
+
+window.placeBet = function () {
+    const matchIdx = document.getElementById('bet-match-select').value;
+    const hG = parseInt(document.getElementById('bet-hg').value);
+    const aG = parseInt(document.getElementById('bet-ag').value);
+    const amount = parseInt(document.getElementById('bet-amount').value);
+    const currency = document.getElementById('bet-currency').value;
+
+    if (isNaN(hG) || isNaN(aG) || isNaN(amount) || amount < 10) return showAlert("Introduce datos válidos. Mínimo 10 de apuesta.");
+    if (currency === 'coins' && state.economy.coins < amount) return showAlert("No hay fondos suficientes en el club.");
+    if (currency === 'premium' && state.economy.premium < amount) return showAlert("No tienes suficientes Monedas Premium.");
+
+    if (currency === 'coins') state.economy.coins -= amount;
+    else state.economy.premium -= amount;
+
+    const fixture = state.nextFixtures[matchIdx];
+    state.activeBets.push({ home: fixture.home, away: fixture.away, hG: hG, aG: aG, amount: amount, currency: currency });
+
+    saveState();
+    renderBetTab();
+    showAlert(`Boleto validado: ${amount} apostados al resultado ${hG}-${aG}.`);
+}
+
+/* =========================================================================
+   LIGA Y TABLA DE CLASIFICACIÓN
+   ========================================================================= */
+function renderLeague() {
+    const tbody = document.getElementById('league-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    const sorted = [...state.league].sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+
+    sorted.forEach((t, i) => {
+        const isUserClass = t.isUser ? 'user-row' : '';
+        const badgeObj = t.isUser ? state.team : (t.badge || AI_TEAMS[0]);
+        const miniBadge = getBadgeHTML(t.name, badgeObj.shape, badgeObj.c1, badgeObj.c2, "w-6 h-8 text-[8px] mx-auto border border-white/10", badgeObj.pattern, badgeObj.icon);
+
+        tbody.innerHTML += `
+        <tr class="${isUserClass}">
+            <td class="text-center font-bold">${i + 1}</td>
+            <td class="text-center p-1">${miniBadge}</td>
+            <td class="text-white">${t.name}</td>
+            <td>${t.pld}</td>
+            <td>${t.w}</td>
+            <td>${t.d}</td>
+            <td>${t.l}</td>
+            <td>${t.gf}</td>
+            <td>${t.ga}</td>
+            <td>${t.gf - t.ga}</td>
+            <td class="text-white font-bold text-sm bg-slate-800/50 text-center">${t.pts}</td>
+        </tr>`;
+    });
+}
+
+function updateTeamStats(team, gf, ga) {
+    if (!team) return;
+    team.pld++; team.gf += gf; team.ga += ga;
+    if (gf > ga) { team.w++; team.pts += 3; }
+    else if (gf === ga) { team.d++; team.pts += 1; }
+    else { team.l++; }
+}
+
+/* =========================================================================
+   ENTRENAMIENTO Y VESTUARIO
+   ========================================================================= */
+function renderTrainStatus() {
+    const st = document.getElementById('train-status');
+    if (st) st.textContent = state.flags.canTrain ? "PROGRAMACIÓN DISPONIBLE" : "SESIÓN COMPLETADA. JUEGA PARA AVANZAR.";
+}
+
+window.executeWeeklyTraining = function () {
+    if (!state.flags.canTrain) return showAlert("Los jugadores están agotados. Juega la jornada de liga para avanzar de semana.");
+    if (state.roster.length === 0) return showAlert("No tienes jugadores.");
+
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+    days.forEach(d => {
+        let type = document.getElementById(`train-${d}`).value;
+        state.roster.forEach(p => {
+            if (type !== 'rest') {
+                if (p.pos === 'POR') {
+                    if (type === 'atk') { p.saq++; p.sal++; }
+                    if (type === 'def') { p.par++; p.ref++; }
+                    if (type === 'phy') { p.vel++; p.posi++; }
+                } else {
+                    if (type === 'atk' && (p.pos === 'DEL' || p.pos === 'MED')) { p.sho++; p.pas++; }
+                    if (type === 'def' && (p.pos !== 'DEL')) { p.def++; p.phy++; }
+                    if (type === 'phy') { p.pac++; p.phy++; }
+                }
+                p.con = Math.max(10, p.con - 6);
+            } else {
+                p.con = Math.min(100, p.con + 15);
+            }
+            p.ovr = calcPlayerOVR(p);
+        });
+    });
+
+    state.flags.canTrain = false; saveState(); renderTrainStatus(); updateUI();
+    showAlert("Programa completado. Atributos y Condición Física actualizados.");
+}
+
+function renderTalkStatus() {
+    const st = document.getElementById('talk-status');
+    if (st) st.textContent = state.flags.canTalk ? "DISPONIBLE" : "COMPLETADO";
+}
+
+window.executeTalk = function (tone) {
+    if (!state.flags.canTalk) return showAlert("Ya has dado la charla pre-partido.");
+    let xi = getStartingXI();
+    let bench = state.roster.filter(p => !state.lineup.includes(p.id));
+
+    if (tone === 'calm') {
+        state.roster.forEach(p => p.morale = Math.min(100, p.morale + 5));
+        showAlert("Toda la plantilla sube +5 de Moral.");
+    } else if (tone === 'aggressive') {
+        if (Math.random() < 0.7) {
+            state.roster.forEach(p => p.morale = Math.min(100, p.morale + 20));
+            showAlert("¡La bronca ha funcionado! (+20 Moral).");
+        } else {
+            state.roster.forEach(p => p.morale = Math.max(0, p.morale - 15));
+            showAlert("Te has pasado. El equipo está presionado (-15 Moral).");
+        }
+    } else if (tone === 'passionate') {
+        state.roster.forEach(p => { if (Math.random() < 0.5) p.morale = Math.min(100, p.morale + 15); });
+        showAlert("El discurso ha calado en parte de la plantilla (+15 Moral).");
+    } else if (tone === 'assertive') {
+        xi.forEach(p => p.morale = Math.min(100, p.morale + 10));
+        bench.forEach(p => p.morale = Math.max(0, p.morale - 5));
+        showAlert("Titulares suben (+10 Moral), suplentes bajan (-5 Moral).");
+    }
+
+    state.flags.canTalk = false; saveState(); renderTalkStatus();
+}
+
+/* =========================================================================
+   PLANTILLA Y TÁCTICAS (ARRASTRAR Y SOLTAR)
+   ========================================================================= */
+function getAttrClass(val) {
+    if (val >= 85) return 'bg-[#10b981] text-white';
+    if (val >= 70) return 'bg-[#eab308] text-black';
+    if (val >= 50) return 'bg-[#f97316] text-white';
+    return 'bg-[#ef4444] text-white';
+}
+
+window.executeTraining = function () {
+    let injuredCount = 0;
+    let recoveredCount = 0;
+
+    state.roster.forEach(p => {
+        if (p.injuryMatches && p.injuryMatches > 0) return; // Injured players can't train
+
+        if (p.con < 85) {
+            p.con = Math.min(100, p.con + 15);
+            recoveredCount++;
+        } else {
+            // Risk of overtraining
+            if (Math.random() < 0.3) {
+                p.con = 30;
+                p.injuryMatches = Math.floor(Math.random() * 3) + 1; // 1 to 3 matches
+                injuredCount++;
+            } else {
+                p.con = 100;
+            }
+        }
+    });
+
+    saveState();
+    renderSquad();
+    renderTactics();
+
+    if (injuredCount > 0) {
+        showConfirm(`Entrenamiento finalizado. ¡CUIDADO! ${injuredCount} jugador(es) se han lesionado por sobrecarga física. Revisa la Enfermería.`, () => { });
+    } else {
+        showAlert("Entrenamiento completado. La plantilla ha recuperado condición física.");
+    }
+};
+
+window.showInjuries = function () {
+    const listEl = document.getElementById('injuries-list');
+    const modal = document.getElementById('modal-injuries');
+    if (!listEl || !modal) return;
+
+    listEl.innerHTML = '';
+    const injured = state.roster.filter(p => p.injuryMatches && p.injuryMatches > 0);
+
+    if (injured.length === 0) {
+        listEl.innerHTML = '<div class="text-center text-slate-400 py-6 text-sm">No hay jugadores en la enfermería. ¡Plantilla sana! ðŸ</div>';
+    } else {
+        injured.forEach(p => {
+            listEl.innerHTML += `
+            <div class="flex justify-between items-center bg-[#1c1c28] p-3 rounded border border-red-900/50">
+                <div class="flex items-center gap-3">
+                    <img src="${p.img}" class="w-8 h-8 rounded-full border border-red-500">
+                    <div>
+                        <p class="text-white font-bold text-sm">${p.name}</p>
+                        <p class="text-xs text-slate-400">OVR: ${p.ovr} &bull; POS: ${p.pos}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-red-500 font-bold text-lg leading-none mb-1">ðŸ¤• ${p.injuryMatches}</p>
+                    <p class="text-[9px] text-slate-400 uppercase tracking-widest leading-none">Partidos de Baja</p>
+                </div>
+            </div>`;
+        });
+    }
+
+    modal.classList.remove('hidden');
+};
+
+function renderSquad() {
+    const tbody = document.getElementById('squad-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const posOrder = { 'POR': 1, 'DEF': 2, 'MED': 3, 'DEL': 4 };
+    const sorted = [...state.roster].sort((a, b) => posOrder[a.pos] - posOrder[b.pos] || b.ovr - a.ovr);
+
+    const htmlRows = sorted.map(p => {
+        let pClass = `pos-${p.pos.toLowerCase()}`;
+        let conIcon = p.con >= 85 ? '🟢' : p.con >= 60 ? '🟡' : '🔴';
+        let moralColor = p.morale >= 80 ? '#10b981' : p.morale >= 40 ? '#f59e0b' : '#ef4444';
+
+        let conDisplay = `${conIcon} ${p.con}%`;
+        let nameDisplay = p.name;
+        if (p.injuryMatches && p.injuryMatches > 0) {
+            conDisplay = `<span class="text-red-500 text-xs">🤕 ${p.injuryMatches}P</span>`;
+            nameDisplay = `<span class="text-red-400">${p.name}</span>`;
+        }
+
+        return `
+        <tr>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Portero' : p.pos === 'DEF' ? 'Defensa' : p.pos === 'MED' ? 'Mediocampista' : 'Delantero'}"><span class="pos-badge ${pClass}">${p.pos}</span></td>
+            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="hidden sm:block w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
+            <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conDisplay}</td>
+            <td title="Moral: ${p.morale}%">
+                <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
+            </td>
+            <td class="font-bold text-white text-sm bg-slate-800/50 text-center" title="Overall: ${p.ovr}">${p.ovr}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Salida' : 'Velocidad'}: ${p.pos === 'POR' ? p.sal : p.pac}">${p.pos === 'POR' ? p.sal : p.pac}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Paradas' : 'Tiro'}: ${p.pos === 'POR' ? p.par : p.sho}">${p.pos === 'POR' ? p.par : p.sho}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Saque' : 'Pase'}: ${p.pos === 'POR' ? p.saq : p.pas}">${p.pos === 'POR' ? p.saq : p.pas}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Reflejos' : 'Defensa'}: ${p.pos === 'POR' ? p.ref : p.def}">${p.pos === 'POR' ? p.ref : p.def}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Posicionamiento' : 'Físico'}: ${p.pos === 'POR' ? p.posi : p.phy}">${p.pos === 'POR' ? p.posi : p.phy}</td>
+        </tr>`;
+    });
+    tbody.innerHTML = htmlRows.join('');
+    const ovrTag = document.getElementById('squad-ovr');
+    if (ovrTag) ovrTag.textContent = getTeamOvr();
+}
+
+let dragSrc = { id: null, slot: null };
+window.dragStart = function (e, pId, slotIndex) {
+    dragSrc = { id: pId, slot: slotIndex };
+
+    // Crear ghost personalizado: solo la bola con la imagen del jugador
+    const player = state.roster.find(p => p.id === pId);
+    const ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    if (player) {
+        ghost.style.backgroundImage = `url(${player.img})`;
+    }
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, 22, 22);
+    // Limpiar ghost después de que el navegador lo capture
+    setTimeout(() => { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 100);
+
+    setTimeout(() => e.target.classList.add('opacity-50'), 0);
+};
+window.dragEnd = function (e) { e.target.classList.remove('opacity-50'); };
+window.allowDrop = function (e) { e.preventDefault(); };
+
+window.dropOnPitch = function (e, targetSlotIndex) {
+    e.preventDefault(); if (!dragSrc.id) return;
+
+    const dragPlayer = state.roster.find(p => p.id === dragSrc.id);
+    if (dragPlayer && dragPlayer.injuryMatches > 0) {
+        showAlert("No puedes alinear a un jugador lesionado.");
+        return;
+    }
+
+    // Prevención de clonado en UI si se arrastra muy rápido:
+    let originSlot = dragSrc.slot;
+    if (originSlot === null) {
+        const existingIdx = state.lineup.findIndex(id => id === dragSrc.id);
+        if (existingIdx !== -1) originSlot = existingIdx;
+    }
+
+    if (originSlot === targetSlotIndex) return; // Mismo slot, nada que hacer
+
+    const targetPlayerId = state.lineup[targetSlotIndex];
+    if (originSlot !== null) {
+        state.lineup[originSlot] = targetPlayerId;
+        state.lineup[targetSlotIndex] = dragSrc.id;
+    } else {
+        state.lineup[targetSlotIndex] = dragSrc.id;
+    }
+    saveState(); renderTactics();
+};
+
+window.dropOnBench = function (e) {
+    e.preventDefault();
+    if (dragSrc.slot !== null) { state.lineup[dragSrc.slot] = null; saveState(); renderTactics(); }
+};
+
+window.changeFormation = function () { state.formation = document.getElementById('tactics-formation').value; saveState(); renderTactics(); }
+
+window.autoFillLineup = function () {
+    const posMap = {
+        '4-4-2': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL'],
+        '4-3-3': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'DEL', 'DEL', 'DEL'],
+        '5-3-2': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'DEL', 'DEL'],
+        '3-4-3': ['POR', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL', 'DEL'],
+        '4-2-3-1': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'MED', 'DEL'],
+        '5-4-1': ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL']
+    };
+    const targetLayout = posMap[state.formation];
+    let newLineup = new Array(11).fill(null);
+    let availableRoster = [...state.roster].filter(p => !p.injuryMatches || p.injuryMatches <= 0).sort((a, b) => b.ovr - a.ovr);
+
+    for (let i = 0; i < 11; i++) {
+        let neededPos = targetLayout[i];
+        let bestPlayerIndex = availableRoster.findIndex(p => p.pos === neededPos);
+        if (bestPlayerIndex !== -1) {
+            newLineup[i] = availableRoster[bestPlayerIndex].id;
+            availableRoster.splice(bestPlayerIndex, 1);
+        }
+    }
+    for (let i = 0; i < 11; i++) {
+        if (newLineup[i] === null && availableRoster.length > 0) {
+            newLineup[i] = availableRoster[0].id;
+            availableRoster.splice(0, 1);
+        }
+    }
+    state.lineup = newLineup; saveState(); renderTactics();
+};
+
+function renderTactics() {
+    const formSelect = document.getElementById('tactics-formation');
+    if (formSelect) formSelect.value = state.formation;
+    const pitch = document.getElementById('pitch-players');
+    const benchContainer = document.getElementById('bench-list');
+    if (!pitch || !benchContainer) return;
+    pitch.innerHTML = ''; benchContainer.innerHTML = '';
+
+    const layouts = {
+        '4-4-2': [{ x: 50, y: 92 }, { x: 20, y: 65 }, { x: 40, y: 70 }, { x: 60, y: 70 }, { x: 80, y: 65 }, { x: 20, y: 35 }, { x: 40, y: 40 }, { x: 60, y: 40 }, { x: 80, y: 35 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
+        '4-3-3': [{ x: 50, y: 92 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 30, y: 45 }, { x: 50, y: 40 }, { x: 70, y: 45 }, { x: 20, y: 20 }, { x: 50, y: 15 }, { x: 80, y: 20 }],
+        '5-3-2': [{ x: 50, y: 92 }, { x: 10, y: 65 }, { x: 30, y: 72 }, { x: 50, y: 75 }, { x: 70, y: 72 }, { x: 90, y: 65 }, { x: 30, y: 40 }, { x: 50, y: 45 }, { x: 70, y: 40 }, { x: 40, y: 15 }, { x: 60, y: 15 }],
+        '3-4-3': [{ x: 50, y: 92 }, { x: 25, y: 70 }, { x: 50, y: 75 }, { x: 75, y: 70 }, { x: 15, y: 45 }, { x: 38, y: 40 }, { x: 62, y: 40 }, { x: 85, y: 45 }, { x: 25, y: 20 }, { x: 50, y: 15 }, { x: 75, y: 20 }],
+        '4-2-3-1': [{ x: 50, y: 92 }, { x: 20, y: 70 }, { x: 40, y: 75 }, { x: 60, y: 75 }, { x: 80, y: 70 }, { x: 35, y: 50 }, { x: 65, y: 50 }, { x: 20, y: 30 }, { x: 50, y: 25 }, { x: 80, y: 30 }, { x: 50, y: 10 }],
+        '5-4-1': [{ x: 50, y: 92 }, { x: 10, y: 70 }, { x: 30, y: 72 }, { x: 50, y: 75 }, { x: 70, y: 72 }, { x: 90, y: 70 }, { x: 20, y: 45 }, { x: 40, y: 50 }, { x: 60, y: 50 }, { x: 80, y: 45 }, { x: 50, y: 20 }]
+    };
+
+    layouts[state.formation].forEach((pos, index) => {
+        const player = state.roster.find(p => p.id === state.lineup[index]);
+        let innerHTML = '';
+        if (player) {
+            let conColor = player.con >= 85 ? '#10b981' : player.con >= 60 ? '#eab308' : '#ef4444';
+            let injuryBadge = '';
+            if (player.injuryMatches && player.injuryMatches > 0) {
+                conColor = '#ef4444';
+                injuryBadge = `<div class="absolute -top-1 -right-1 bg-red-600 rounded-full text-[10px] w-4 h-4 flex items-center justify-center">ðŸ¤•</div>`;
+            }
+            innerHTML = `
+                <div class="pitch-ovr-tag">${player.ovr}</div>
+                <div class="pitch-shirt relative" style="background-image:url(${player.img}); border-color: ${conColor}" draggable="true" ondragstart="dragStart(event, ${player.id}, ${index})" ondragend="dragEnd(event)">${injuryBadge}</div>
+                <div class="pitch-name">${player.name.split(' ').pop()}</div>
+            `;
+        } else {
+            innerHTML = `<div class="pitch-shirt border-dashed bg-black/50 text-slate-400">+</div>`;
+        }
+        pitch.innerHTML += `<div class="pitch-player" data-slot="${index}" style="left:${pos.x}%; top:${pos.y}%;" ondragover="allowDrop(event)" ondrop="dropOnPitch(event, ${index})">${innerHTML}</div>`;
+    });
+
+    const benchPlayers = state.roster.filter(p => !state.lineup.includes(p.id));
+    benchPlayers.forEach(p => {
+        let pClass = `pos-${p.pos.toLowerCase()}`;
+        let nameDisplay = p.name;
+        let conDisplay = `Con: ${p.con}%`;
+        if (p.injuryMatches && p.injuryMatches > 0) {
+            nameDisplay = `<span class="text-red-400">${p.name} ðŸ¤•</span>`;
+            conDisplay = `<span class="text-red-500">${p.injuryMatches}P</span>`;
+        }
+        benchContainer.innerHTML += `
+        <div class="bench-player" data-pid="${p.id}" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
+            <div class="flex items-center gap-2">
+                <img src="${p.img}" class="w-6 h-6 rounded-full object-cover border border-[#313145]">
+                <span class="pos-badge ${pClass} text-[8px] w-auto px-1">${p.pos}</span>
+                <span class="text-white text-[10px] font-bold truncate max-w-[80px] block">${nameDisplay}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-[9px] text-slate-400">${conDisplay}</span>
+                <span class="text-yellow-400 font-bold bg-[#111119] px-1.5 py-0.5 rounded text-[10px] border border-[#313145]">${p.ovr}</span>
+            </div>
+        </div>`;
+    });
+
+    // Init touch drag for mobile
+    initTouchDrag();
+}
+
+/* Touch drag support for mobile tactics */
+let touchDragData = { id: null, slot: null, ghost: null };
+
+function initTouchDrag() {
+    const pitch = document.getElementById('pitch-players');
+    const bench = document.getElementById('bench-list');
+    if (!pitch || !bench) return;
+
+    pitch.querySelectorAll('.pitch-player').forEach(el => {
+        const shirt = el.querySelector('.pitch-shirt[draggable="true"]');
+        if (!shirt) return;
+        shirt.addEventListener('touchstart', handleTouchStart, { passive: false });
+        shirt.addEventListener('touchmove', handleTouchMove, { passive: false });
+        shirt.addEventListener('touchend', handleTouchEnd, { passive: false });
+    });
+
+    bench.querySelectorAll('.bench-player').forEach(el => {
+        el.addEventListener('touchstart', handleTouchStart, { passive: false });
+        el.addEventListener('touchmove', handleTouchMove, { passive: false });
+        el.addEventListener('touchend', handleTouchEnd, { passive: false });
+    });
+}
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    const el = e.currentTarget;
+    const pitchPlayer = el.closest('.pitch-player');
+
+    if (pitchPlayer) {
+        const slotIndex = parseInt(pitchPlayer.dataset.slot);
+        const playerId = state.lineup[slotIndex];
+        if (!playerId) return;
+        touchDragData = { id: playerId, slot: slotIndex };
+    } else {
+        const benchPlayer = el.closest('.bench-player');
+        if (!benchPlayer) return;
+        const pid = parseInt(benchPlayer.dataset.pid);
+        touchDragData = { id: pid, slot: null };
+    }
+
+    const player = state.roster.find(p => p.id === touchDragData.id);
+    const ghost = document.createElement('div');
+    ghost.id = 'touch-drag-ghost';
+    ghost.style.cssText = 'position:fixed;z-index:9999;width:44px;height:44px;border-radius:50%;border:2px solid #facc15;background-size:cover;background-position:center;pointer-events:none;opacity:0.9;box-shadow:0 0 15px rgba(250,204,21,0.5);';
+    if (player) ghost.style.backgroundImage = `url(${player.img})`;
+    document.body.appendChild(ghost);
+    touchDragData.ghost = ghost;
+
+    const touch = e.touches[0];
+    ghost.style.left = (touch.clientX - 22) + 'px';
+    ghost.style.top = (touch.clientY - 22) + 'px';
+    el.classList.add('opacity-50');
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    if (!touchDragData.ghost) return;
+    const touch = e.touches[0];
+    touchDragData.ghost.style.left = (touch.clientX - 22) + 'px';
+    touchDragData.ghost.style.top = (touch.clientY - 22) + 'px';
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    if (!touchDragData.id) return;
+
+    if (touchDragData.ghost) { touchDragData.ghost.remove(); touchDragData.ghost = null; }
+    document.querySelectorAll('.opacity-50').forEach(el => el.classList.remove('opacity-50'));
+
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!dropTarget) { touchDragData = { id: null, slot: null, ghost: null }; return; }
+
+    const pitchSlot = dropTarget.closest('.pitch-player');
+    if (pitchSlot) {
+        const targetSlot = parseInt(pitchSlot.dataset.slot);
+        
+        // Prevención de clonado en UI si se arrastra muy rápido:
+        let originSlot = touchDragData.slot;
+        if (originSlot === null) {
+            const existingIdx = state.lineup.findIndex(id => id === touchDragData.id);
+            if (existingIdx !== -1) originSlot = existingIdx;
+        }
+
+        if (originSlot === targetSlot) {
+            touchDragData = { id: null, slot: null, ghost: null };
+            return;
+        }
+
+        const targetPlayerId = state.lineup[targetSlot];
+        if (originSlot !== null) {
+            state.lineup[originSlot] = targetPlayerId;
+            state.lineup[targetSlot] = touchDragData.id;
+        } else {
+            state.lineup[targetSlot] = touchDragData.id;
+        }
+        saveState(); renderTactics();
+    } else if (dropTarget.closest('#bench-list') || dropTarget.closest('#tactics-bench')) {
+        let originSlot = touchDragData.slot;
+        if (originSlot === null) {
+            const existingIdx = state.lineup.findIndex(id => id === touchDragData.id);
+            if (existingIdx !== -1) originSlot = existingIdx;
+        }
+        if (originSlot !== null) {
+            state.lineup[originSlot] = null;
+            saveState(); renderTactics();
+        }
+    }
+
+    touchDragData = { id: null, slot: null, ghost: null };
+}
+
+/* =========================================================================
+   MERCADO Y BUSCADOR CENTRADO SIN LUPA
+   ========================================================================= */
+let marketMode = 'buy';
+let currentMarketFilter = 'ALL';
+
+window.setMarketMode = function (mode) {
+    marketMode = mode;
+    document.getElementById('mode-buy').className = mode === 'buy' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
+    document.getElementById('mode-sell').className = mode === 'sell' ? "text-white font-bold border-b-2 border-red-500 pb-1 uppercase tracking-widest text-xs" : "text-slate-500 hover:text-white font-bold pb-1 cursor-pointer uppercase tracking-widest text-xs transition";
+    document.getElementById('market-th-rep').style.display = mode === 'buy' ? "table-cell" : "none";
+    document.getElementById('market-th-prem').style.display = mode === 'buy' ? "table-cell" : "none";
+
+    // Change "Precio" header text to fit the context
+    const thPrecio = document.getElementById('market-th-price');
+    if (thPrecio) thPrecio.textContent = mode === 'buy' ? "Precio" : "Valor Venta";
+
+    // Adjust column widths for each mode so separators stay aligned
+    const table = document.getElementById('market-table');
+    if (table) {
+        const ths = table.querySelectorAll('thead th');
+        if (mode === 'buy') {
+            // 7 columns: Jugador 30%, Pos 8%, OVR 8%, Rep 10%, Precio 14%, Premium 12%, Gestion 18%
+            if (ths[0]) ths[0].style.width = '30%';
+            if (ths[1]) ths[1].style.width = '8%';
+            if (ths[2]) ths[2].style.width = '8%';
+            if (ths[3]) ths[3].style.width = '10%';
+            if (ths[4]) ths[4].style.width = '14%';
+            if (ths[5]) ths[5].style.width = '12%';
+            if (ths[6]) ths[6].style.width = '18%';
+        } else {
+            // 5 visible columns: Jugador 35%, Pos 10%, OVR 10%, Valor Venta 20%, Gestion 25%
+            if (ths[0]) ths[0].style.width = '35%';
+            if (ths[1]) ths[1].style.width = '10%';
+            if (ths[2]) ths[2].style.width = '10%';
+            if (ths[4]) ths[4].style.width = '20%';
+            if (ths[6]) ths[6].style.width = '25%';
+        }
+    }
+
+    // Clear search when switching modes
+    const searchInput = document.getElementById('market-search');
+    if (searchInput) searchInput.value = '';
+
+    filterMarket();
+};
+
+window.filterMarket = function (pos) {
+    if (pos) currentMarketFilter = pos;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById(`filter-${currentMarketFilter}`);
+    if (btn) btn.classList.add('active');
+
+    const formatM = (num) => (num / 1000000).toFixed(1) + 'M';
+    document.getElementById('market-funds').textContent = `€${formatM(state.economy.coins)}`;
+    document.getElementById('market-prem').textContent = `◈${state.economy.premium.toLocaleString()}`;
+
+    const searchInput = document.getElementById('market-search');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const tbody = document.getElementById('market-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    let items = marketMode === 'buy' ? PLAYERS_DB.filter(db_p => !state.roster.find(rp => rp.id === db_p.id)) : state.roster;
+    if (currentMarketFilter !== 'ALL') items = items.filter(p => p.pos === currentMarketFilter);
+    if (searchTerm) items = items.filter(p => p.name.toLowerCase().includes(searchTerm));
+
+    const colSpan = marketMode === 'buy' ? 7 : 5;
+    if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center text-slate-500 py-6 text-xs">Sin resultados de búsqueda.</td></tr>`;
+        return;
+    }
+
+    items.forEach(p => {
+        let pClass = `pos-${p.pos.toLowerCase()}`;
+        if (marketMode === 'buy') {
+            const canRep = state.stats.rep >= p.rep;
+            const canBuyBasic = canRep && state.economy.coins >= p.priceBasic;
+            const canBuyPrem = state.economy.premium >= p.pricePrem;
+            
+            const btnBasicAttr = canBuyBasic ? `class="btn-action px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')"` : `class="bg-slate-700 text-slate-400 font-bold border border-slate-600 rounded px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'basic')"`;
+            const btnPremAttr = canBuyPrem ? `class="btn-buy premium px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')"` : `class="bg-slate-700 text-slate-400 font-bold border border-slate-600 rounded px-2 py-1 text-[9px]" onclick="buyPlayer(${p.id}, 'premium')"`;
+            
+            tbody.innerHTML += `
+            <tr>
+                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
+                <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
+                <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
+                <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
+                <td class="font-mono text-green-400 text-right pr-4">€${formatM(p.priceBasic)}</td>
+                <td class="font-mono text-yellow-400 text-right pr-4">◈${p.pricePrem.toLocaleString()}</td>
+                <td class="text-center"><div class="flex gap-1 justify-center"><button ${btnBasicAttr}>FICHAR</button><button ${btnPremAttr}>PREMIUM</button><button class="text-xs bg-slate-700 px-1.5 py-1 rounded hover:bg-slate-600 text-white cursor-pointer" onclick="showPlayerInfo(${p.id})">ℹ</button></div></td>
+            </tr>`;
+        } else {
+            const sellValue = Math.floor(p.priceBasic * 0.6);
+            tbody.innerHTML += `
+            <tr>
+                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
+                <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
+                <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
+                <td class="font-mono text-green-400 text-right pr-4 font-bold">+ €${formatM(sellValue)}</td>
+                <td class="text-center"><div class="flex gap-2 justify-center"><button class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 px-4 rounded text-xs shadow-lg transition" onclick="sellPlayer(${p.id}, ${sellValue})">VENDER</button><button class="text-xs bg-slate-700 px-2 py-1.5 rounded hover:bg-slate-600 text-white cursor-pointer transition" onclick="showPlayerInfo(${p.id})">ℹ INFO</button></div></td>
+            </tr>`;
+        }
+    });
+}
+
+window.buyPlayer = function (id, curr) {
+    const p = PLAYERS_DB.find(x => x.id === id);
+
+    // Only verify reputation for 'basic' purchases. Premium skips reputation block!
+    if (curr === 'basic' && state.stats.rep < p.rep) {
+        return showAlert(`Reputación Insuficiente para Fichaje Estándar (Req: ★ ${p.rep}).`);
+    }
+
+    if (curr === 'basic') {
+        if (state.economy.coins < p.priceBasic) return showAlert("Presupuesto del club insuficiente.");
+        state.economy.coins -= p.priceBasic;
+    } else {
+        if (state.economy.premium < p.pricePrem) return showAlert("Moneda Premium insuficiente.");
+        state.economy.premium -= p.pricePrem;
+    }
+
+    let newPlayer = JSON.parse(JSON.stringify(p));
+    newPlayer.con = 100;
+    newPlayer.morale = 100;
+
+    state.roster.push(newPlayer);
+    const emptySlot = state.lineup.findIndex(slot => slot === null);
+    if (emptySlot !== -1) state.lineup[emptySlot] = p.id;
+
+    addEmail('Director Deportivo', `Fichaje Cerrado: ${p.name}`, `Hemos llegado a un acuerdo y el jugador se incorpora al club.`);
+    saveState(); filterMarket();
+}
+
+window.sellPlayer = function (id, sellValue) {
+    showConfirm(`¿Vender al jugador y añadir €${(sellValue / 1000000).toFixed(1)}M al club?`, () => {
+        state.economy.coins += sellValue;
+        state.roster = state.roster.filter(p => p.id !== id);
+        for (let i = 0; i < state.lineup.length; i++) { if (state.lineup[i] === id) state.lineup[i] = null; }
+        saveState(); filterMarket();
+    });
+}
+
+window.buyIAP = function () { document.getElementById('modal-store').classList.remove('hidden'); renderCart(); }
+
+/* =========================================================================
+   CARRITO DE COMPRA Y METODO DE PAGO (1 PACK A LA VEZ CON PRECIOS EUR)
+   ========================================================================= */
+let selectedPack = null; // { amount: number, price: number } o null
+
+window.selectPack = function (amount, price) {
+    // Solo un paquete a la vez: si ya está seleccionado el mismo, deseleccionar
+    if (selectedPack && selectedPack.amount === amount) {
+        selectedPack = null;
+    } else {
+        selectedPack = { amount, price };
+    }
+    renderCart();
+}
+
+window.addToCart = function (amount) {
+    // Legacy compat - mapear a selectPack
+    const priceMap = { 500: 0.99, 2000: 3.99, 5000: 7.99, 10000: 14.99, 25000: 34.99, 50000: 59.99 };
+    selectPack(amount, priceMap[amount] || 0.99);
+}
+
+window.clearCart = function () {
+    selectedPack = null;
+    renderCart();
+}
+
+window.removeFromCart = function () {
+    selectedPack = null;
+    renderCart();
+}
+
+function showMatchPost(isHome, myMatch, hG, aG, hXG, aXG) {
+    document.getElementById('match-modal').classList.add('hidden');
+    document.getElementById('match-post').classList.remove('hidden');
+
+    const titleEl = document.getElementById('post-title');
+    const msgEl = document.getElementById('post-message');
+    const bgEl = document.getElementById('post-bg');
+
+    let isWin = false, isDraw = false;
+    if (isHome) {
+        if (hG > aG) isWin = true;
+        else if (hG === aG) isDraw = true;
+    } else {
+        if (aG > hG) isWin = true;
+        else if (hG === aG) isDraw = true;
+    }
+
+    if (isWin) {
+        titleEl.textContent = "VICTORIA";
+        titleEl.className = "text-5xl font-gaming text-green-400 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]";
+        msgEl.innerHTML = "Excelente planteamiento táctico.<br>Sumamos 3 puntos clave.";
+        bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-green-500 shadow-[0_0_80px_rgba(74,222,128,0.2)]";
+        playSFX('win');
+    } else if (isDraw) {
+        titleEl.textContent = "EMPATE";
+        titleEl.className = "text-5xl font-gaming text-yellow-500 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(234,179,8,0.8)]";
+        msgEl.innerHTML = "Reparto de puntos.<br>Hay margen de mejora.";
+        bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-yellow-500 shadow-[0_0_80px_rgba(234,179,8,0.2)]";
+    } else {
+        titleEl.textContent = "DERROTA";
+        titleEl.className = "text-5xl font-gaming text-red-500 mb-4 uppercase tracking-widest drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]";
+        msgEl.innerHTML = "El equipo no estuvo a la altura.<br>Toca revisar la táctica.";
+        bgEl.className = "glass-panel p-12 rounded-2xl max-w-2xl w-full text-center border-t-8 border-red-500 shadow-[0_0_80px_rgba(239,68,68,0.2)]";
+        playSFX('lose');
+    }
+}
+
+function renderCart() {
+    const listEl = document.getElementById('cart-items-list');
+    const totalEl = document.getElementById('cart-total');
+    const totalEurEl = document.getElementById('cart-total-eur');
+    const btnPayAmount = document.getElementById('btn-pay-amount');
+    if (!listEl || !totalEl) return;
+
+    // Actualizar selección visual de packs
+    document.querySelectorAll('.store-pack').forEach(el => {
+        el.classList.remove('selected');
+        if (selectedPack && el.dataset.pack == selectedPack.amount) {
+            el.classList.add('selected');
+        }
+    });
+
+    if (!selectedPack) {
+        listEl.innerHTML = '<div class="text-sky-500 text-xs text-center italic">Ningún paquete seleccionado</div>';
+        totalEl.textContent = '0';
+        if (totalEurEl) totalEurEl.textContent = '0,00 €';
+        if (btnPayAmount) btnPayAmount.textContent = '0,00 €';
+        updatePaymentButton();
+        return;
+    }
+
+    const priceStr = selectedPack.price.toFixed(2).replace('.', ',');
+    listEl.innerHTML = `
+    <div class="flex justify-between items-center bg-[#132a4a] p-3 rounded border border-yellow-500/30">
+        <div>
+            <span class="text-sm text-yellow-400 font-mono font-bold">${selectedPack.amount.toLocaleString()} Monedas</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-green-400 font-bold text-sm font-mono">${priceStr} €</span>
+            <button onclick="removeFromCart()" class="text-red-400 hover:text-red-300 text-xs font-bold cursor-pointer px-2">âœ•</button>
+        </div>
+    </div>`;
+
+    totalEl.textContent = selectedPack.amount.toLocaleString();
+    if (totalEurEl) totalEurEl.textContent = priceStr + ' €';
+    if (btnPayAmount) btnPayAmount.textContent = priceStr + ' €';
+    updatePaymentButton();
+}
+
+function updatePaymentButton() {
+    const payBtn = document.getElementById('btn-process-payment');
+    const payMethod = document.getElementById('payment-method');
+    if (!payBtn || !payMethod) return;
+
+    const hasPack = selectedPack !== null;
+    const hasMethod = payMethod.value !== '';
+
+    if (hasPack && hasMethod) {
+        payBtn.disabled = false;
+        payBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        payBtn.disabled = true;
+        payBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+window.closeStore = function () {
+    document.getElementById('modal-store').classList.add('hidden');
+    selectedPack = null;
+    renderCart();
+    const payMethod = document.getElementById('payment-method');
+    if (payMethod) payMethod.value = '';
+    const cardForm = document.getElementById('payment-card-form');
+    if (cardForm) cardForm.classList.add('hidden');
+}
+
+window.processPayment = function () {
+    if (!selectedPack) return showAlert("Selecciona un paquete de monedas.");
+    const payMethod = document.getElementById('payment-method');
+    if (!payMethod || payMethod.value === '') return showAlert("Selecciona un metodo de pago.");
+
+    // Validar datos de tarjeta si es visa/mastercard
+    if (payMethod.value === 'visa' || payMethod.value === 'mastercard') {
+        const cardNum = document.getElementById('card-number').value.replace(/\s/g, '').trim();
+        const cardExpiry = document.getElementById('card-expiry').value.trim();
+        const cardCvv = document.getElementById('card-cvv').value.trim();
+        const cardName = document.getElementById('card-name').value.trim();
+        if (!cardNum || !cardExpiry || !cardCvv || !cardName) {
+            return showAlert("Completa todos los datos de la tarjeta.");
+        }
+        if (cardNum.length !== 16 || !/^\d{16}$/.test(cardNum)) {
+            return showAlert("El número de tarjeta debe tener 16 dígitos.");
+        }
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry)) {
+            return showAlert("El formato de caducidad debe ser MM/AA.");
+        }
+        if (!/^\d{3}$/.test(cardCvv)) {
+            return showAlert("El CVV debe tener 3 dígitos.");
+        }
+    }
+
+    const amount = selectedPack.amount;
+    const priceStr = selectedPack.price.toFixed(2).replace('.', ',');
+    state.economy.premium += amount;
+    selectedPack = null;
+    saveState();
+    closeStore();
+    showAlert(`Pago de ${priceStr} € procesado correctamente. +${amount.toLocaleString()} Monedas Premium añadidas.`);
+}
+
+window.confirmIAP = function () {
+    // Legacy - kept for compatibility
+    processPayment();
+}
+
+/* =========================================================================
+   MOTOR DE PARTIDO AVANZADO FM â€” ESTILO FOOTBALL MANAGER
+   ========================================================================= */
+let matchState = {
+    mG: 0, oG: 0, min: 0, myProb: 0, oppProb: 0, interval: null, talkMod: 0, isHome: true,
+    stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 },
+    events: [], pitchTokens: [], pitchInterval: null
+};
+let currentOpponent = null;
+
+/* ---------- Formation rendering helpers ---------- */
+function getFormationPositions442() {
+    return [
+        { row: 'POR', slots: [{ x: 50, y: 92 }] },
+        { row: 'DEF', slots: [{ x: 15, y: 72 }, { x: 38, y: 72 }, { x: 62, y: 72 }, { x: 85, y: 72 }] },
+        { row: 'MED', slots: [{ x: 15, y: 45 }, { x: 38, y: 45 }, { x: 62, y: 45 }, { x: 85, y: 45 }] },
+        { row: 'DEL', slots: [{ x: 35, y: 18 }, { x: 65, y: 18 }] }
+    ];
+}
+
+function renderFormationPanel(containerId, players, teamColor) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    const sorted = [];
+    const posOrder = { POR: 0, DEF: 1, MED: 2, DEL: 3 };
+    players.sort((a, b) => (posOrder[a.pos] || 0) - (posOrder[b.pos] || 0));
+
+    players.forEach((p, i) => {
+        const ovr = p.ovr || calcPlayerOVR(p);
+        const ratingClass = ovr >= 80 ? 'fm-rating-good' : ovr >= 65 ? 'fm-rating-avg' : 'fm-rating-bad';
+        const div = document.createElement('div');
+        div.className = 'fm-formation-player';
+        div.innerHTML = `
+            <div class="fm-formation-shirt" style="background-image:url('${p.img || ''}');background-color:${teamColor || '#1e293b'}">
+                <span class="fm-formation-ovr">${ovr}</span>
+            </div>
+            <div class="fm-formation-info">
+                <div class="fm-formation-name">${p.name}</div>
+                <div class="fm-formation-pos">${p.pos}</div>
+            </div>
+            <span class="fm-formation-rating ${ratingClass}">${(6 + Math.random() * 2.5).toFixed(1)}</span>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function generateAIPlayers(teamName, ovr) {
+    const positions = ['POR', 'DEF', 'DEF', 'DEF', 'DEF', 'MED', 'MED', 'MED', 'MED', 'DEL', 'DEL'];
+    const players = [];
+    const usedIds = new Set();
+    for (let i = 0; i < 11; i++) {
+        const pos = positions[i];
+        const candidates = PLAYERS_DB.filter(p => p.pos === pos && !usedIds.has(p.id));
+        if (candidates.length > 0) {
+            const pick = candidates[Math.floor(Math.random() * candidates.length)];
+            usedIds.add(pick.id);
+            const pOvr = pick.ovr || calcPlayerOVR(pick);
+            players.push({ name: pick.name, pos: pick.pos, ovr: pOvr, img: pick.img || '' });
+        } else {
+            const allPos = PLAYERS_DB.filter(p => !usedIds.has(p.id));
+            if (allPos.length > 0) {
+                const pick = allPos[Math.floor(Math.random() * allPos.length)];
+                usedIds.add(pick.id);
+                const pOvr = pick.ovr || calcPlayerOVR(pick);
+                players.push({ name: pick.name, pos: pos, ovr: pOvr, img: pick.img || '' });
+            } else {
+                const pOvr = Math.max(40, ovr + Math.floor(Math.random() * 15) - 7);
+                players.push({ name: 'Jugador ' + (i + 1), pos: pos, ovr: pOvr, img: '' });
+            }
+        }
+    }
+    return players;
+}
+
+/* ---------- Match Events Tabs ---------- */
+window.fmEvtTab = function (team) {
+    document.getElementById('fm-evt-tab-home').className = 'fm-evt-tab' + (team === 'home' ? ' active' : '');
+    document.getElementById('fm-evt-tab-away').className = 'fm-evt-tab' + (team === 'away' ? ' active' : '');
+    renderMatchEvents(team);
+};
+
+function renderMatchEvents(filter) {
+    const list = document.getElementById('fm-events-list');
+    if (!list) return;
+    const filtered = matchState.events.filter(e => filter === 'home' ? e.side === 'home' : e.side === 'away');
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-slate-600 text-[10px] text-center mt-4 italic">Sin eventos aún</div>';
+        return;
+    }
+    list.innerHTML = filtered.map(e => `
+        <div class="fm-event-item">
+            <span class="fm-event-icon">${e.icon}</span>
+            <span class="fm-event-text">${e.text}</span>
+            <span class="fm-event-min">${e.min}'</span>
+        </div>
+    `).join('');
+}
+
+/* ---------- Dugout toggle ---------- */
+window.toggleDugout = function () {
+    const content = document.getElementById('fm-dugout-content');
+    if (content) content.classList.toggle('expanded');
+};
+
+/* ---------- Mini Pitch Token Animation ---------- */
+function initPitchTokens() {
+    const tokensDiv = document.getElementById('fm-pitch-tokens');
+    if (!tokensDiv) return;
+    tokensDiv.innerHTML = '';
+    matchState.pitchTokens = [];
+
+    // Home team tokens (left side)
+    const homePositions = [
+        { x: 5, y: 50 }, // GK
+        { x: 15, y: 20 }, { x: 15, y: 40 }, { x: 15, y: 60 }, { x: 15, y: 80 }, // DEF
+        { x: 30, y: 25 }, { x: 30, y: 45 }, { x: 30, y: 55 }, { x: 30, y: 75 }, // MID
+        { x: 42, y: 35 }, { x: 42, y: 65 } // FWD
+    ];
+    // Away team tokens (right side)
+    const awayPositions = [
+        { x: 95, y: 50 },
+        { x: 85, y: 20 }, { x: 85, y: 40 }, { x: 85, y: 60 }, { x: 85, y: 80 },
+        { x: 70, y: 25 }, { x: 70, y: 45 }, { x: 70, y: 55 }, { x: 70, y: 75 },
+        { x: 58, y: 35 }, { x: 58, y: 65 }
+    ];
+
+    homePositions.forEach((pos, i) => {
+        const token = document.createElement('div');
+        token.className = 'fm-pitch-token fm-pitch-token-home';
+        token.innerHTML = `<span class="fm-pitch-token-number">${i + 1}</span>`;
+        token.style.left = pos.x + '%';
+        token.style.top = pos.y + '%';
+        tokensDiv.appendChild(token);
+        matchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'home' });
+    });
+
+    awayPositions.forEach((pos, i) => {
+        const token = document.createElement('div');
+        token.className = 'fm-pitch-token fm-pitch-token-away';
+        token.innerHTML = `<span class="fm-pitch-token-number">${i + 1}</span>`;
+        token.style.left = pos.x + '%';
+        token.style.top = pos.y + '%';
+        tokensDiv.appendChild(token);
+        matchState.pitchTokens.push({ el: token, baseX: pos.x, baseY: pos.y, side: 'away' });
+    });
+}
+
+/* Current tactical situation for pitch animation */
+let pitchPhase = 'neutral'; // 'neutral', 'home-attack', 'away-attack', 'home-goal', 'away-goal', 'home-corner', 'away-corner'
+let pitchPhaseTimer = 0;
+
+function setPitchPhase(phase, duration) {
+    pitchPhase = phase;
+    pitchPhaseTimer = duration || 3;
+}
+
+function animatePitchTokens() {
+    if (matchState.pitchInterval) clearInterval(matchState.pitchInterval);
+    matchState.pitchInterval = setInterval(() => {
+        const ball = document.getElementById('fm-pitch-ball');
+
+        // Decay phase timer
+        if (pitchPhaseTimer > 0) pitchPhaseTimer--;
+        if (pitchPhaseTimer <= 0 && pitchPhase !== 'neutral') pitchPhase = 'neutral';
+
+        // Decide ball zone based on possession and phase
+        let ballX, ballY;
+        const hPoss = matchState.stats.hPoss || 50;
+
+        if (pitchPhase === 'home-goal') {
+            // Ball IN the away goal net (far right)
+            ballX = 96 + Math.random() * 3;
+            ballY = 44 + Math.random() * 12;
+        } else if (pitchPhase === 'away-goal') {
+            // Ball IN the home goal net (far left)
+            ballX = 1 + Math.random() * 3;
+            ballY = 44 + Math.random() * 12;
+        } else if (pitchPhase === 'home-attack') {
+            ballX = 62 + Math.random() * 28;
+            ballY = 20 + Math.random() * 60;
+        } else if (pitchPhase === 'away-attack') {
+            ballX = 10 + Math.random() * 28;
+            ballY = 20 + Math.random() * 60;
+        } else if (pitchPhase === 'home-corner') {
+            ballX = 94 + Math.random() * 4;
+            ballY = Math.random() < 0.5 ? 3 + Math.random() * 6 : 91 + Math.random() * 6;
+        } else if (pitchPhase === 'away-corner') {
+            ballX = 2 + Math.random() * 4;
+            ballY = Math.random() < 0.5 ? 3 + Math.random() * 6 : 91 + Math.random() * 6;
+        } else {
+            // Neutral - possession-weighted drift
+            const possWeight = (hPoss - 50) / 50;
+            ballX = 50 + possWeight * 25 + (Math.random() - 0.5) * 28;
+            ballY = 15 + Math.random() * 70;
+        }
+        ballX = Math.max(1, Math.min(99, ballX));
+        ballY = Math.max(3, Math.min(97, ballY));
+
+        if (ball) {
+            ball.style.left = ballX + '%';
+            ball.style.top = ballY + '%';
+        }
+
+        // Compute team block shifts based on phase and possession
+        let homeBlockX = 0, awayBlockX = 0;
+        const possShift = (hPoss - 50) * 0.18;
+        homeBlockX += possShift;
+        awayBlockX -= possShift;
+
+        const isGoalPhase = pitchPhase === 'home-goal' || pitchPhase === 'away-goal';
+
+        if (pitchPhase === 'home-attack' || pitchPhase === 'home-goal' || pitchPhase === 'home-corner') {
+            homeBlockX += 15;
+            awayBlockX -= 8;
+        } else if (pitchPhase === 'away-attack' || pitchPhase === 'away-goal' || pitchPhase === 'away-corner') {
+            awayBlockX -= 15;
+            homeBlockX += 8;
+        }
+
+        matchState.pitchTokens.forEach((t, idx) => {
+            const isGK = t.baseY === 50 && (t.baseX === 5 || t.baseX === 95);
+            const isAttacker = t.side === 'home' ? (t.baseX >= 42) : (t.baseX <= 58);
+
+            let newX, newY;
+
+            // Goalkeepers stay near their goal
+            if (isGK) {
+                if (t.side === 'home') {
+                    newX = 4 + (Math.random() - 0.5) * 3;
+                    newY = 45 + Math.random() * 10;
+                } else {
+                    newX = 96 + (Math.random() - 0.5) * 3;
+                    newY = 45 + Math.random() * 10;
+                }
+                // GK dives toward ball when goal phase targets their goal
+                if ((pitchPhase === 'away-goal' && t.side === 'home') || (pitchPhase === 'home-goal' && t.side === 'away')) {
+                    newY += (ballY - newY) * 0.5;
+                }
+            }
+            // Attackers rush to goal on goal phases
+            else if (isGoalPhase && isAttacker) {
+                const attackingSide = pitchPhase === 'home-goal' ? 'home' : 'away';
+                if (t.side === attackingSide) {
+                    // Rush toward the goal mouth - cluster near ball
+                    newX = ballX + (Math.random() - 0.5) * 12;
+                    newY = ballY + (Math.random() - 0.5) * 18;
+                } else {
+                    // Defending team retreats to own goal area
+                    const goalX = t.side === 'home' ? 10 : 90;
+                    newX = goalX + (Math.random() - 0.5) * 14;
+                    newY = 30 + Math.random() * 40;
+                }
+            }
+            // Normal positioning with block shift
+            else {
+                const shift = t.side === 'home' ? homeBlockX : awayBlockX;
+                const jitterX = (Math.random() - 0.5) * 4;
+                const jitterY = (Math.random() - 0.5) * 5;
+                newX = t.baseX + shift + jitterX;
+                newY = t.baseY + jitterY;
+
+                // Pull towards ball - stronger when closer or during attacks
+                const distToBall = Math.sqrt(Math.pow(newX - ballX, 2) + Math.pow(newY - ballY, 2));
+                let pullFactor;
+                if (pitchPhase.includes('attack') || pitchPhase.includes('corner')) {
+                    pullFactor = distToBall < 25 ? 0.25 : 0.1;
+                } else {
+                    pullFactor = distToBall < 20 ? 0.15 : 0.05;
+                }
+                newX += (ballX - newX) * pullFactor;
+                newY += (ballY - newY) * pullFactor;
+            }
+
+            // Ensure home tokens stay mostly on left half, away on right (soft constraint)
+            if (!isGoalPhase) {
+                if (t.side === 'home') newX = Math.min(newX, 78);
+                else newX = Math.max(newX, 22);
+            }
+
+            // Clamp to pitch
+            newX = Math.max(1, Math.min(99, newX));
+            newY = Math.max(3, Math.min(97, newY));
+
+            t.el.style.left = newX + '%';
+            t.el.style.top = newY + '%';
+        });
+    }, 700);
+}
+
+function stopPitchAnimation() {
+    if (matchState.pitchInterval) {
+        clearInterval(matchState.pitchInterval);
+        matchState.pitchInterval = null;
+    }
+}
+
+/* ---------- Stats UI Update ---------- */
+function updateMatchStatsUI() {
+    const s = matchState.stats;
+
+    // Possession
+    const hp = document.getElementById('fm-stat-poss-home');
+    const ap = document.getElementById('fm-stat-poss-away');
+    if (hp) hp.textContent = s.hPoss + '%';
+    if (ap) ap.textContent = s.aPoss + '%';
+    const bph = document.getElementById('fm-bar-poss-h');
+    const bpa = document.getElementById('fm-bar-poss-a');
+    if (bph) bph.style.width = s.hPoss + '%';
+    if (bpa) bpa.style.width = s.aPoss + '%';
+
+    // Shots
+    const sh = document.getElementById('fm-stat-shots-home');
+    const sa = document.getElementById('fm-stat-shots-away');
+    if (sh) sh.textContent = s.hShots;
+    if (sa) sa.textContent = s.aShots;
+    const totalS = s.hShots + s.aShots || 1;
+    const bsh = document.getElementById('fm-bar-shots-h');
+    const bsa = document.getElementById('fm-bar-shots-a');
+    if (bsh) bsh.style.width = ((s.hShots / totalS) * 100) + '%';
+    if (bsa) bsa.style.width = ((s.aShots / totalS) * 100) + '%';
+
+    // Shots on Target
+    const soth = document.getElementById('fm-stat-sot-home');
+    const sota = document.getElementById('fm-stat-sot-away');
+    if (soth) soth.textContent = s.hSot;
+    if (sota) sota.textContent = s.aSot;
+    const totalSot = s.hSot + s.aSot || 1;
+    const bsoth = document.getElementById('fm-bar-sot-h');
+    const bsota = document.getElementById('fm-bar-sot-a');
+    if (bsoth) bsoth.style.width = ((s.hSot / totalSot) * 100) + '%';
+    if (bsota) bsota.style.width = ((s.aSot / totalSot) * 100) + '%';
+
+    // xG
+    const xgh = document.getElementById('fm-stat-xg-home');
+    const xga = document.getElementById('fm-stat-xg-away');
+    if (xgh) xgh.textContent = s.hXG.toFixed(2);
+    if (xga) xga.textContent = s.aXG.toFixed(2);
+    const totalXG = s.hXG + s.aXG || 1;
+    const bxgh = document.getElementById('fm-bar-xg-h');
+    const bxga = document.getElementById('fm-bar-xg-a');
+    if (bxgh) bxgh.style.width = ((s.hXG / totalXG) * 100) + '%';
+    if (bxga) bxga.style.width = ((s.aXG / totalXG) * 100) + '%';
+
+    // Corners
+    const ch = document.getElementById('fm-stat-corners-home');
+    const ca = document.getElementById('fm-stat-corners-away');
+    if (ch) ch.textContent = s.hCorners;
+    if (ca) ca.textContent = s.aCorners;
+    const totalC = s.hCorners + s.aCorners || 1;
+    const bch = document.getElementById('fm-bar-corners-h');
+    const bca = document.getElementById('fm-bar-corners-a');
+    if (bch) bch.style.width = ((s.hCorners / totalC) * 100) + '%';
+    if (bca) bca.style.width = ((s.aCorners / totalC) * 100) + '%';
+}
+
+window.startMatch = function () {
+    const xi = getStartingXI();
+    if (xi.length < 11) return showAlert(`Plantilla incompleta. Asigna a 11 titulares en Tácticas.`);
+
+    if (!state.nextFixtures || state.nextFixtures.length === 0) generateFixtures(state);
+
+    let myMatch = state.nextFixtures.find(f => f.isUserMatch);
+    if (!myMatch || state.stats.matchday > 38) {
+        endSeason();
+        return;
+    }
+
+    // Show speed selection modal
+    document.getElementById('modal-match-speed').classList.remove('hidden');
+}
+
+window.selectMatchSpeed = function (speed) {
+    simSpeedMs = SIM_SPEED_MAP[speed] || 350;
+    document.getElementById('modal-match-speed').classList.add('hidden');
+    launchMatch();
+}
+
+function launchMatch() {
+    const xi = getStartingXI();
+
+    let myMatch = state.nextFixtures.find(f => f.isUserMatch);
+
+    let isHome = myMatch.home === state.team.name;
+    currentOpponent = state.league.find(t => t.name === (isHome ? myMatch.away : myMatch.home));
+
+    document.getElementById('app-layout').classList.add('hidden');
+    document.getElementById('match-modal').classList.remove('hidden');
+    document.getElementById('match-post').classList.add('hidden');
+    document.getElementById('match-halftime').classList.add('hidden');
+    setNowPlayingVisibility();
+
+    const homeName = isHome ? state.team.name : currentOpponent.name;
+    const awayName = isHome ? currentOpponent.name : state.team.name;
+
+    document.getElementById('sim-home-name').textContent = homeName;
+    document.getElementById('sim-away-name').textContent = awayName;
+
+    // FM panel team labels
+    const statHomeLbl = document.getElementById('fm-stat-home-name');
+    const statAwayLbl = document.getElementById('fm-stat-away-name');
+    if (statHomeLbl) statHomeLbl.textContent = homeName;
+    if (statAwayLbl) statAwayLbl.textContent = awayName;
+    const evtTabHome = document.getElementById('fm-evt-tab-home');
+    const evtTabAway = document.getElementById('fm-evt-tab-away');
+    if (evtTabHome) evtTabHome.textContent = homeName;
+    if (evtTabAway) evtTabAway.textContent = awayName;
+    const pitchLblH = document.getElementById('fm-pitch-label-home');
+    const pitchLblA = document.getElementById('fm-pitch-label-away');
+    if (pitchLblH) pitchLblH.textContent = homeName;
+    if (pitchLblA) pitchLblA.textContent = awayName;
+
+    const hTeam = isHome ? state.team : currentOpponent.badge;
+    const aTeam = isHome ? currentOpponent.badge : state.team;
+
+    document.getElementById('sim-home-shield').innerHTML = getBadgeHTML(homeName, hTeam.shape, hTeam.c1, hTeam.c2, "w-8 h-10 text-[8px]", hTeam.pattern);
+    document.getElementById('sim-away-shield').innerHTML = getBadgeHTML(awayName, aTeam.shape, aTeam.c1, aTeam.c2, "w-8 h-10 text-[8px]", aTeam.pattern);
+
+    const myOvr = getTeamOvr();
+
+    // Cansancio Post Partido
+    state.roster.forEach(p => { if (state.lineup.includes(p.id)) p.con = Math.max(10, p.con - 10); });
+
+    matchState = {
+        mG: 0, oG: 0, min: 0, talkMod: 0, isHome: isHome,
+        myProb: 0.08 + ((myOvr - currentOpponent.ovr) * 0.003),
+        oppProb: 0.08 - ((myOvr - currentOpponent.ovr) * 0.003),
+        interval: null,
+        stats: { hPoss: 50, aPoss: 50, hShots: 0, aShots: 0, hSot: 0, aSot: 0, hCorners: 0, aCorners: 0, hXG: 0, aXG: 0 },
+        events: [], pitchTokens: [], pitchInterval: null, talkDone: false
+    };
+    pitchPhase = 'neutral';
+    pitchPhaseTimer = 0;
+
+    // Re-enable motivar/bronca buttons for the new match
+    const btnM = document.getElementById('btn-talk-motivar');
+    const btnB = document.getElementById('btn-talk-bronca');
+    [btnM, btnB].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.classList.remove('fm-dugout-btn-disabled');
+    });
+    if (btnM) btnM.onclick = function () { matchTalk('animar'); };
+    if (btnB) btnB.onclick = function () { matchTalk('exigir'); };
+
+    document.getElementById('sim-home-score').textContent = "0";
+    document.getElementById('sim-away-score').textContent = "0";
+    document.getElementById('match-progress').style.width = "0%";
+    document.getElementById('match-time').textContent = "0'";
+    document.getElementById('match-narrative').innerHTML = "<div class='text-blue-400 font-bold'>¡El árbitro señala el inicio del partido!</div>";
+
+    // Render FM formation panels
+    const myPlayers = xi.map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
+    const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
+    if (isHome) {
+        renderFormationPanel('fm-formation-home', myPlayers, hTeam.c1 || '#2563eb');
+        renderFormationPanel('fm-formation-away', aiPlayers, aTeam.c1 || '#dc2626');
+    } else {
+        renderFormationPanel('fm-formation-home', aiPlayers, hTeam.c1 || '#2563eb');
+        renderFormationPanel('fm-formation-away', myPlayers, aTeam.c1 || '#dc2626');
+    }
+
+    animatePitchTokens();
+    runMatchLoop(45);
+}
+
+// ==========================================
+// ANIMACIÓN DE GOL (2D + EFFECTS)
+// ==========================================
+// GOAL BROADCAST POPUP  Event-Based Architecture
+// ==========================================
+const goalPopupQueue = [];
+let goalPopupActive = false;
+
+function triggerGoalPopup(payload) {
+    goalPopupQueue.push(payload);
+    if (!goalPopupActive) {
+        _processGoalQueue();
+    }
+}
+
+function _processGoalQueue() {
+    if (goalPopupQueue.length === 0) {
+        goalPopupActive = false;
+        return;
+    }
+    goalPopupActive = true;
+    const payload = goalPopupQueue.shift();
+    _showGoalBroadcast(payload);
+}
+
+function _showGoalBroadcast(payload) {
+    const overlay = document.getElementById('goal-broadcast-popup');
+    const card = document.getElementById('goal-broadcast-card');
+    if (!overlay || !card) { goalPopupActive = false; return; }
+    
+    overlay.style.display = 'flex';
+    overlay.classList.remove('goal-visible', 'goal-fading-out');
+    card.classList.remove('goal-team-home', 'goal-team-away');
+    
+    const teamClass = payload.team === 'home' ? 'goal-team-home' : 'goal-team-away';
+    card.classList.add(teamClass);
+    
+    const badgeEl = document.getElementById('goal-broadcast-badge');
+    const scorerEl = document.getElementById('goal-broadcast-scorer');
+    const assistEl = document.getElementById('goal-broadcast-assist');
+    const scoreEl = document.getElementById('goal-broadcast-score');
+    const minuteEl = document.getElementById('goal-broadcast-minute');
+    
+    if (badgeEl) badgeEl.innerHTML = payload.badgeHTML || '';
+    if (scorerEl) scorerEl.textContent = payload.scorer || 'Jugador';
+    if (assistEl) {
+        assistEl.textContent = payload.assist ? `Asist: ${payload.assist}` : '';
+        assistEl.style.display = payload.assist ? 'block' : 'none';
+    }
+    if (scoreEl) scoreEl.textContent = payload.newScore || '0 - 0';
+    if (minuteEl) minuteEl.textContent = `Min ${payload.minute || 0}'`;
+    
+    document.body.classList.add('camera-shake');
+    setTimeout(() => document.body.classList.remove('camera-shake'), 400);
+    
+    fireGoalConfetti();
+    
+    requestAnimationFrame(() => {
+        overlay.classList.add('goal-visible');
+    });
+    
+    setTimeout(() => {
+        overlay.classList.remove('goal-visible');
+        overlay.classList.add('goal-fading-out');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('goal-fading-out');
+            card.classList.remove('goal-team-home', 'goal-team-away');
+            _processGoalQueue();
+        }, 700);
+    }, 3000);
+}
+
+function fireGoalConfetti() {
+    const canvas = document.getElementById('goal-confetti-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    for(let i = 0; i < 150; i++) {
+        particles.push({
+            x: canvas.width / 2,
+            y: canvas.height,
+            r: Math.random() * 8 + 3,
+            dx: Math.random() * 12 - 6,
+            dy: Math.random() * -20 - 10,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            tilt: Math.floor(Math.random() * 10) - 10,
+            tiltAngleInc: (Math.random() * 0.07) + 0.05,
+            tiltAngle: 0
+        });
+    }
+    
+    function animate() {
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        let active = false;
+        particles.forEach(p => {
+            p.tiltAngle += p.tiltAngleInc;
+            p.y += (Math.cos(p.tiltAngle) + p.dy + p.r / 2) / 2;
+            p.x += Math.sin(p.tiltAngle) * 2 + p.dx;
+            p.dy += 0.3;
+            
+            if (p.y <= canvas.height) active = true;
+            
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+            ctx.stroke();
+        });
+        if (active) requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+function fireConfetti() { fireGoalConfetti(); }
+// ==========================================
+// ADVANCED MATCH ENGINE (MINUTO A MINUTO)
+// ==========================================
+function runMatchLoop(targetMinute) {
+    matchState._targetMinute = targetMinute;
+    const logDiv = document.getElementById('match-narrative');
+    const commentary = [
+        "Control del balón en el centro del campo.",
+        "Cambio de orientación buscando la banda.",
+        "Falta táctica dura para evitar el contraataque.",
+        "Disparo lejano que se marcha por encima del travesaño.",
+        "Intervención espectacular del guardameta enviando a córner.",
+        "Corte providencial de la defensa en el último momento.",
+        "Centro peligroso al área que no encuentra rematador.",
+        "Posesión larga, durmiendo el partido.",
+        "Presión muy intensa del equipo rival, forzando el error.",
+        "Robo crucial en la medular.",
+        "Pase al hueco excelente, pero el delantero estaba en fuera de juego.",
+        "El tiro rebota en la barrera defensiva."
+    ];
+
+    matchState.interval = setInterval(() => {
+        matchState.min++;
+        document.getElementById('match-time').textContent = `${matchState.min}'`;
+        document.getElementById('match-progress').style.width = `${(matchState.min / 90) * 100}%`;
+
+        // Descanso / Medio Tiempo
+        if (matchState.min === 45 && targetMinute === 45) {
+            clearInterval(matchState.interval);
+            stopPitchAnimation();
+            logDiv.innerHTML += `<div class="mt-4 border-t border-slate-700 pt-2"><strong class="text-yellow-400 font-bold">45': Final de la primera mitad. Nos vamos al vestuario.</strong></div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            document.getElementById('match-halftime').classList.remove('hidden');
+            matchState.events.push({ min: 45, icon: '⏱', text: 'Descanso', side: 'home' });
+            updateMatchStatsUI();
+            renderMatchEvents('home');
+            const dugNarr = document.getElementById('fm-dugout-narrative');
+            if (dugNarr) dugNarr.innerHTML = '<div class="text-yellow-400 text-[10px] font-bold">Descanso: Tiempo para ajustes.</div>';
+            return;
+        }
+
+        // Final del Partido
+        if (matchState.min >= 90) {
+            clearInterval(matchState.interval);
+            stopPitchAnimation();
+            finishMatch(matchState.mG, matchState.oG);
+            return;
+        }
+
+        // -- 1. EVALUAR JUGADORES Y CONDICIÓN (FATIGA PROGRESIVA) --
+        const xi = getStartingXI().filter(p => !p.suspension);
+        const aiPlayers = generateAIPlayers(currentOpponent.name, currentOpponent.ovr);
+        
+        // El jugador pierde condición a medida que avanza el partido (Modificado por Stamina/Físico)
+        xi.forEach(p => {
+            const staminaDrop = 0.05 + ((100 - (p.phy || 70)) * 0.002); 
+            p.con = Math.max(5, (p.con || 100) - staminaDrop);
+        });
+
+        // Promedios por sectores (Ataque, Medio, Defensa, Portero)
+        const myAtt = xi.filter(p => p.pos === 'DEL').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'DEL').length || 1);
+        const myMid = xi.filter(p => p.pos === 'MED').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'MED').length || 1);
+        const myDef = xi.filter(p => p.pos === 'DEF').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'DEF').length || 1);
+        const myGk = xi.filter(p => p.pos === 'POR').reduce((acc, p) => acc + calcPlayerOVR(p), 0) / (xi.filter(p => p.pos === 'POR').length || 1);
+        
+        const myAvgCon = xi.reduce((acc, p) => acc + (p.con || 100), 0) / (xi.length || 1);
+        const myFatigueMod = (0.6 + (myAvgCon / 100) * 0.4);
+
+        // Rival promedios
+        const oppAtt = currentOpponent.ovr + (Math.random() * 4 - 2);
+        const oppMid = currentOpponent.ovr + (Math.random() * 4 - 2);
+        const oppDef = currentOpponent.ovr + (Math.random() * 4 - 2);
+        const oppGk = currentOpponent.ovr + (Math.random() * 4 - 2);
+        
+        const oppAvgCon = Math.max(20, 100 - (matchState.min * 0.25));
+        const oppFatigueMod = (0.6 + (oppAvgCon / 100) * 0.4);
+
+        // Charla en el descanso afecta rendimiento
+        const matchTalkBonus = (matchState.talkMod || 0) * 50;
+
+        const activeMyMid = (myMid * myFatigueMod) + matchTalkBonus;
+        const activeOppMid = (oppMid * oppFatigueMod);
+
+        // -- 2. CÁLCULO DE POSESIÓN ESTE MINUTO --
+        const totalMidControl = activeMyMid + activeOppMid;
+        const myControlProb = activeMyMid / totalMidControl;
+        
+        const basePoss = myControlProb * 100;
+        matchState.stats.hPoss = matchState.isHome 
+            ? Math.max(30, Math.min(70, Math.floor(basePoss + (Math.random() * 10 - 5))))
+            : 100 - Math.max(30, Math.min(70, Math.floor(basePoss + (Math.random() * 10 - 5))));
+        matchState.stats.aPoss = 100 - matchState.stats.hPoss;
+
+        const miPosesionActual = Math.random() < myControlProb;
+        let eventText = "";
+
+        // -- 3. RESOLUCIÓN DE ACCIONES OFENSIVAS --
+        if (miPosesionActual) {
+            const attackForce = (myAtt * myFatigueMod) + matchTalkBonus;
+            const defenseForce = (oppDef * oppFatigueMod);
+            
+            // Probabilidad de ocasión (entre 5% y 15% por minuto que haya posesión aprox)
+            const chanceProb = Math.max(0.04, Math.min(0.20, 0.08 + ((attackForce - defenseForce) * 0.003)));
+
+            if (Math.random() < chanceProb) {
+                // Existe Remate
+                let xG = Math.max(0.1, Math.min(0.8, 0.3 + ((attackForce - defenseForce) * 0.01)));
+                if (matchState.isHome) { matchState.stats.hShots++; matchState.stats.hXG += xG; }
+                else { matchState.stats.aShots++; matchState.stats.aXG += xG; }
+
+                // Supera al Portero?
+                const goalProb = xG * (1 - (oppGk / 150));
+                
+                if (Math.random() < goalProb) {
+                    // ¡GOL NUESTRO!
+                    matchState.mG++;
+                    if (matchState.isHome) matchState.stats.hSot++; else matchState.stats.aSot++;
+                    
+                    const attackers = xi.filter(p => ['DEL', 'MED'].includes(p.pos));
+                    const scorer = attackers.length > 0 ? attackers[Math.floor(Math.random() * attackers.length)] : { name: "el jugador", id: 0 };
+                    const assistCands = xi.filter(p => p.id !== scorer.id && p.pos !== 'POR');
+                    const assist = (assistCands.length > 0 && Math.random() > 0.4) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
+                    
+                    eventText = `<span class="text-green-400 font-bold">¡GOL! Excelente finalización de ${scorer.name}.</span>`;
+                    const goalSide = matchState.isHome ? 'home' : 'away';
+                    
+                    matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer.name}`, side: goalSide });
+                    setPitchPhase(matchState.isHome ? 'home-goal' : 'away-goal', 4);
+                    
+                    // Disparar animación en pantalla
+                    // === EVENTO DE GOL (Multiplayer-Ready) ===
+                    const homeScore1 = matchState.isHome ? matchState.mG : matchState.oG;
+                    const awayScore1 = matchState.isHome ? matchState.oG : matchState.mG;
+                    const goalPayload = {
+                        type: 'GOAL',
+                        team: goalSide,
+                        scorer: scorer.name,
+                        assist: assist ? assist.name : null,
+                        minute: matchState.min,
+                        newScore: `${homeScore1} - ${awayScore1}`,
+                        badgeHTML: document.getElementById(goalSide === 'home' ? 'sim-home-shield' : 'sim-away-shield').innerHTML
+                    };
+                    triggerGoalPopup(goalPayload);
+                } else {
+                    // Paradón o Fallo
+                    if (Math.random() < 0.5) {
+                        if (matchState.isHome) matchState.stats.hSot++; else matchState.stats.aSot++;
+                        eventText = `Remate espectacular de ${xi.filter(p => p.pos === 'DEL')[0]?.name || 'nuestro punta'}, pero el portero hace un paradón.`;
+                        setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
+                    } else {
+                        eventText = `Disparo potente que se va desviado por centímetros.`;
+                        setPitchPhase(matchState.isHome ? 'home-attack' : 'away-attack', 2);
+                    }
+                }
+            }
+        } else {
+            // Posesión Rival
+            const attackForce = (oppAtt * oppFatigueMod);
+            const defenseForce = (myDef * myFatigueMod) + matchTalkBonus;
+            
+            const chanceProb = Math.max(0.04, Math.min(0.20, 0.08 + ((attackForce - defenseForce) * 0.003)));
+
+            if (Math.random() < chanceProb) {
+                // Ocasión Rival
+                let xG = Math.max(0.1, Math.min(0.8, 0.3 + ((attackForce - defenseForce) * 0.01)));
+                if (matchState.isHome) { matchState.stats.aShots++; matchState.stats.aXG += xG; }
+                else { matchState.stats.hShots++; matchState.stats.hXG += xG; }
+
+                const goalProb = xG * (1 - (myGk / 150 * myFatigueMod));
+
+                if (Math.random() < goalProb) {
+                    // ¡GOL RIVAL!
+                    matchState.oG++;
+                    if (matchState.isHome) matchState.stats.aSot++; else matchState.stats.hSot++;
+                    
+                    const attackers = aiPlayers.filter(p => ['DEL', 'MED'].includes(p.pos));
+                    const scorer = attackers.length > 0 ? attackers[Math.floor(Math.random() * attackers.length)] : { name: "el delantero", id: 0 };
+                    const assistCands = aiPlayers.filter(p => p.name !== scorer.name);
+                    const assist = (assistCands.length > 0 && Math.random() > 0.4) ? assistCands[Math.floor(Math.random() * assistCands.length)] : null;
+                    
+                    eventText = `<span class="text-red-400 font-bold">¡Gol del equipo rival! Error defensivo letal que culmina ${scorer.name}.</span>`;
+                    const goalSide = matchState.isHome ? 'away' : 'home';
+                    
+                    matchState.events.push({ min: matchState.min, icon: '⚽', text: `GOL — ${scorer.name}`, side: goalSide });
+                    setPitchPhase(matchState.isHome ? 'away-goal' : 'home-goal', 4);
+                    
+                    // === EVENTO DE GOL RIVAL (Multiplayer-Ready) ===
+                    const homeScore2 = matchState.isHome ? matchState.mG : matchState.oG;
+                    const awayScore2 = matchState.isHome ? matchState.oG : matchState.mG;
+                    const goalPayload2 = {
+                        type: 'GOAL',
+                        team: goalSide,
+                        scorer: scorer.name,
+                        assist: assist ? assist.name : null,
+                        minute: matchState.min,
+                        newScore: `${homeScore2} - ${awayScore2}`,
+                        badgeHTML: document.getElementById(goalSide === 'home' ? 'sim-home-shield' : 'sim-away-shield').innerHTML
+                    };
+                    triggerGoalPopup(goalPayload2);
+                } else {
+                    // Parada de nuestro portero o fuera
+                    if (Math.random() < 0.5) {
+                        if (matchState.isHome) matchState.stats.aSot++; else matchState.stats.hSot++;
+                        eventText = `¡Extraordinaria parada de nuestro portero para evitar el gol rival!`;
+                        setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
+                    } else {
+                        eventText = `Susto en nuestra área. El rebote sale fuera por suerte.`;
+                        setPitchPhase(matchState.isHome ? 'away-attack' : 'home-attack', 2);
+                    }
+                }
+            }
+        }
+
+        // -- 4. TARJETAS Y FALTAS (1.5% chance) --
+        if (Math.random() < 0.015 && !eventText) {
+            const cardSide = Math.random() < 0.5 ? 'home' : 'away';
+            let sancionado = "Jugador";
+            let isMiJugador = false;
+            let pId = null;
+
+            if ((cardSide === 'home' && matchState.isHome) || (cardSide === 'away' && !matchState.isHome)) {
+                if (xi.length > 0) {
+                    const pj = xi[Math.floor(Math.random() * xi.length)];
+                    sancionado = pj.name; pId = pj.id; isMiJugador = true;
+                }
+            } else {
+                if (aiPlayers.length > 0) sancionado = aiPlayers[Math.floor(Math.random() * aiPlayers.length)].name;
+            }
+
+            const keyCard = `${cardSide}_${sancionado}`;
+            if (!matchState.playersCards) matchState.playersCards = {};
+
+            if (matchState.playersCards[keyCard] === 'yellow') {
+                matchState.playersCards[keyCard] = 'red';
+                eventText = `<span class="text-red-500 font-bold">¡ROJA DIRECTA! Expulsión por doble amarilla de ${sancionado}.</span>`;
+                matchState.events.push({ min: matchState.min, icon: '🟥', text: `Roja — ${sancionado}`, side: cardSide });
+                if (isMiJugador && state.roster) {
+                    const p = state.roster.find(x => x.id === pId);
+                    if (p) { p.suspension = 2; addEmail('Comité Competición', 'Sanción', `Tu jugador ${p.name} ha sido sancionado con 2 partidos.`); }
+                }
+            } else {
+                matchState.playersCards[keyCard] = 'yellow';
+                eventText = `Tarjeta Amarilla para ${sancionado} por reiteración de faltas.`;
+                matchState.events.push({ min: matchState.min, icon: '🟨', text: `Amarilla — ${sancionado}`, side: cardSide });
+                if (isMiJugador && state.roster) {
+                    const p = state.roster.find(x => x.id === pId);
+                    if (p) {
+                        p.yellowCards = (p.yellowCards || 0) + 1;
+                        if (p.yellowCards >= 5) { p.suspension = 1; p.yellowCards = 0; }
+                    }
+                }
+            }
+        }
+
+        // Textos aleatorios relleno de partido (narrativa)
+        if (!eventText && Math.random() < 0.15) {
+            eventText = commentary[Math.floor(Math.random() * commentary.length)];
+        }
+
+        if (eventText) {
+            logDiv.innerHTML += `<div><span class="text-slate-500 font-mono text-xs">${matchState.min}'</span> <span class="text-white">${eventText}</span></div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Update score and stats
+        document.getElementById('sim-home-score').textContent = matchState.isHome ? matchState.mG : matchState.oG;
+        document.getElementById('sim-away-score').textContent = matchState.isHome ? matchState.oG : matchState.mG;
+        updateMatchStatsUI();
+        renderMatchEvents('home');
+
+    }, simSpeedMs / 3);
+}
+
+window.matchTalk = function (type) {
+    // Prevent selecting more than one talk option per match
+    if (matchState.talkDone) return;
+    matchState.talkDone = true;
+
+    const logDiv = document.getElementById('match-narrative');
+    if (type === 'animar') {
+        matchState.talkMod = 0.01;
+        logDiv.innerHTML += `<div class="text-blue-400 mt-2 text-xs italic">El equipo sale motivado para la 2ª parte.</div>`;
+        matchState.events.push({ min: 45, icon: 'ðŸ“£', text: 'Charla motivacional', side: matchState.isHome ? 'home' : 'away' });
+    } else {
+        if (Math.random() < 0.6) {
+            matchState.talkMod = 0.02;
+            logDiv.innerHTML += `<div class="text-green-400 mt-2 text-xs italic">Los jugadores reaccionan bien a la bronca.</div>`;
+        } else {
+            matchState.talkMod = -0.01;
+            logDiv.innerHTML += `<div class="text-red-400 mt-2 text-xs italic">La plantilla se pone nerviosa tras los gritos.</div>`;
+        }
+        matchState.events.push({ min: 45, icon: 'ðŸ˜¤', text: 'Bronca al equipo', side: matchState.isHome ? 'home' : 'away' });
+    }
+    logDiv.scrollTop = logDiv.scrollHeight;
+
+    // AI opponent also does a halftime talk
+    const oppTalkRand = Math.random();
+    const oppSide = matchState.isHome ? 'away' : 'home';
+    if (oppTalkRand < 0.5) {
+        matchState.events.push({ min: 45, icon: 'ðŸ“£', text: 'Charla motivacional (rival)', side: oppSide });
+        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El técnico rival motiva a su equipo.</div>`;
+    } else {
+        matchState.events.push({ min: 45, icon: 'ðŸ˜¤', text: 'Bronca al equipo (rival)', side: oppSide });
+        logDiv.innerHTML += `<div class="text-orange-400 mt-1 text-xs italic">El técnico rival reprende a sus jugadores.</div>`;
+        matchState.oppProb += (Math.random() < 0.6 ? 0.01 : -0.005);
+    }
+    logDiv.scrollTop = logDiv.scrollHeight;
+    renderMatchEvents('home');
+
+    // Disable both talk buttons permanently for this match
+    const btnM = document.getElementById('btn-talk-motivar');
+    const btnB = document.getElementById('btn-talk-bronca');
+    [btnM, btnB].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('fm-dugout-btn-disabled');
+        btn.onclick = null;
+    });
+
+    // Dugout update
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-green-400 text-[10px]">Charla completada. Pulsa "JUGAR 2ª PARTE" para continuar.</div>';
+}
+
+window.goToTacticsFromMatch = function () {
+    document.getElementById('match-modal').classList.add('hidden');
+    document.getElementById('app-layout').classList.remove('hidden');
+    setNowPlayingVisibility();
+    switchTab('tactics');
+
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'VOLVER AL PARTIDO â±';
+    topBtn.className = "btn-continue shadow-lg bg-yellow-600";
+    topBtn.onclick = returnToMatch;
+}
+
+window.returnToMatch = function () {
+    document.getElementById('app-layout').classList.add('hidden');
+    document.getElementById('match-modal').classList.remove('hidden');
+    setNowPlayingVisibility();
+
+    const topBtn = document.getElementById('top-continue-btn');
+    topBtn.innerHTML = 'CONTINUAR â­';
+    topBtn.className = "btn-continue shadow-lg";
+    topBtn.onclick = startMatch;
+}
+
+window.resumeMatch = function () {
+    document.getElementById('match-halftime').classList.add('hidden');
+
+    const newOvr = getTeamOvr();
+    matchState.myProb = 0.08 + ((newOvr - currentOpponent.ovr) * 0.003);
+
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4"><strong class="text-white">45': Arranca la segunda mitad.</strong></div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+
+    // Dugout update
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-blue-400 text-[10px]">Segunda parte en juego...</div>';
+
+    // Re-render formations in case of lineup changes
+    const xi = getStartingXI();
+    const myPlayers = xi.map(p => ({ name: p.name, pos: p.pos, ovr: calcPlayerOVR(p), img: p.img || '' }));
+    const hTeamBadge = matchState.isHome ? state.team : currentOpponent.badge;
+    const aTeamBadge = matchState.isHome ? currentOpponent.badge : state.team;
+    if (matchState.isHome) {
+        renderFormationPanel('fm-formation-home', myPlayers, hTeamBadge.c1 || '#2563eb');
+    } else {
+        renderFormationPanel('fm-formation-away', myPlayers, aTeamBadge.c1 || '#dc2626');
+    }
+
+    // Restart pitch animation
+    animatePitchTokens();
+
+    runMatchLoop(90);
+}
+
+function finishMatch(mG, oG) {
+    stopPitchAnimation();
+    document.getElementById('match-post').classList.remove('hidden');
+
+    const logDiv = document.getElementById('match-narrative');
+    logDiv.innerHTML += `<div class="mt-4 text-white font-bold uppercase border-t border-[#313145] pt-2">Fin del tiempo reglamentario.</div>`;
+
+    // Dugout update
+    const dugNarr = document.getElementById('fm-dugout-narrative');
+    if (dugNarr) dugNarr.innerHTML = '<div class="text-amber-400 text-[10px] font-bold">Partido finalizado.</div>';
+    logDiv.scrollTop = logDiv.scrollHeight;
+
+    let ptsEarned = 0; let coins = 0; let rep = 0;
+
+    if (mG > oG) { ptsEarned = 3; coins = 5000000; rep = 150; state.stats.wins++; }
+    else if (mG === oG) { ptsEarned = 1; coins = 1500000; rep = 50; state.stats.draws++; }
+    else { ptsEarned = 0; coins = 500000; rep = -10; state.stats.losses++; }
+
+    state.stats.goals += mG;
+
+    // Resolver todos los partidos de la jornada
+    let results = [];
+    state.nextFixtures.forEach(fix => {
+        let hG = 0, aG = 0;
+        if (fix.isUserMatch) {
+            hG = matchState.isHome ? mG : oG;
+            aG = matchState.isHome ? oG : mG;
+        } else {
+            let p = 0.5 + ((fix.homeOvr - fix.awayOvr) * 0.02);
+            hG = Math.random() < p ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+            aG = Math.random() > p ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+        }
+
+        results.push({ home: fix.home, away: fix.away, hG, aG });
+        updateTeamStats(state.league.find(t => t.name === fix.home), hG, aG);
+        updateTeamStats(state.league.find(t => t.name === fix.away), aG, hG);
+    });
+
+    state.history[state.stats.matchday.toString()] = results;
+
+    // Evaluar Apuestas
+    if (!state.betHistory) state.betHistory = [];
+    let betResults = [];
+    state.activeBets.forEach(b => {
+        const actual = results.find(r => r.home === b.home && r.away === b.away);
+        if (actual) {
+            let actualWinner = actual.hG > actual.aG ? 'h' : (actual.aG > actual.hG ? 'a' : 'd');
+            let predictedWinner = b.hG > b.aG ? 'h' : (b.aG > b.hG ? 'a' : 'd');
+            let betRecord = { ...b, realHG: actual.hG, realAG: actual.aG };
+
+            if (actual.hG === b.hG && actual.aG === b.aG) {
+                let winAmt = b.amount * 2;
+                if (b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
+                betResults.push(`Acierto EXACTO (${b.home}): +${winAmt}`);
+                betRecord.result = 'exact'; betRecord.winnings = winAmt;
+            } else if (actualWinner === predictedWinner) {
+                let winAmt = Math.floor(b.amount * 1.5);
+                if (b.currency === 'coins') state.economy.coins += winAmt; else state.economy.premium += winAmt;
+                betResults.push(`Acierto GANADOR (${b.home}): +${winAmt}`);
+                betRecord.result = 'winner'; betRecord.winnings = winAmt;
+            } else {
+                betResults.push(`Fallo (${b.home}): -${b.amount}`);
+                betRecord.result = 'fail'; betRecord.winnings = 0;
+            }
+            state.betHistory.push(betRecord);
+        }
+    });
+    // Keep last 20 bet results
+    if (state.betHistory.length > 20) state.betHistory = state.betHistory.slice(-20);
+
+    if (betResults.length > 0) addEmail('Apuestas Deportivas', 'Boleto de Jornada', betResults.join(' | '));
+    state.activeBets = [];
+
+    state.playedTeams.push(currentOpponent.name);
+    state.stats.matches++;
+    state.stats.matchday++;
+    state.economy.coins += coins;
+    state.stats.rep = Math.max(0, state.stats.rep + rep);
+
+    state.flags.canTrain = true;
+    state.flags.canTalk = true;
+
+    // --- Condición Física y Lesiones Post-Partido (Local) ---
+    state.lineup.forEach(id => {
+        if (!id) return;
+        const p = state.roster.find(x => x.id === id);
+        if (p) p.con = Math.max(30, p.con - 15);
+    });
+    // Reducir suspensiones e injurias de jugadores
+    if (state.roster) {
+        state.roster.forEach(p => {
+            if (p.suspension > 0) p.suspension--;
+            if (p.injuryMatches && p.injuryMatches > 0) {
+                p.injuryMatches--;
+                if (p.injuryMatches <= 0) p.con = 80;
+            }
+        });
+    }
+
+    generateFixtures(state); // Crear siguiente jornada (Para verla en apuestas y demás)
+    saveState();
+
+    document.getElementById('match-coins').textContent = `+€${(coins / 1000000).toFixed(1)}M`;
+    document.getElementById('match-pts').innerHTML = `+${ptsEarned} PTS<br><span class="text-[10px] ${rep > 0 ? 'text-blue-400' : 'text-red-400'}">REP: ${rep > 0 ? '+' : ''}${rep}</span>`;
+}
+
+window.endMatchAndReturn = function () {
+    if (matchState.interval) clearInterval(matchState.interval);
+    if (matchState.pitchInterval) clearInterval(matchState.pitchInterval);
+    document.getElementById('match-modal').classList.add('hidden');
+    document.getElementById('app-layout').classList.remove('hidden');
+    setNowPlayingVisibility();
+
+    if (state.stats.matchday > 38) {
+        endSeason();
+    } else {
+        switchTab('league');
+    }
+}
+
+/* =========================================================================
+   FIN DE TEMPORADA Y TROFEOS
+   ========================================================================= */
+function endSeason() {
+    document.getElementById('modal-season-end').classList.remove('hidden');
+
+    const sorted = [...state.league].sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        return (b.gf - b.ga) - (a.gf - a.ga);
+    });
+
+    const userPos = sorted.findIndex(t => t.isUser) + 1;
+
+    if (userPos === 1) {
+        document.getElementById('season-trophy').classList.remove('hidden');
+        document.getElementById('season-no-trophy').classList.add('hidden');
+        state.stats.trophies++;
+        addEmail('Directiva', '¡CAMPEONES DE LIGA!', 'El club hace historia ganando LaLiga Tussi.');
+    } else {
+        document.getElementById('season-trophy').classList.add('hidden');
+        document.getElementById('season-no-trophy').classList.remove('hidden');
+        document.getElementById('season-pos').textContent = userPos + "º";
+        addEmail('Directiva', 'Revisión de Temporada', `Hemos finalizado en la posición ${userPos}. Debemos mejorar.`);
+    }
+    saveState();
+}
+
+window.startNewSeason = function () {
+    state.stats.matchday = 1;
+    state.playedTeams = [];
+    state.history = {};
+    state.activeBets = [];
+
+    state.league.forEach(t => {
+        t.pld = 0; t.w = 0; t.d = 0; t.l = 0; t.gf = 0; t.ga = 0; t.pts = 0;
+    });
+
+    state.roster.forEach(p => { p.morale = 100; p.con = 100; });
+    generateFixtures(state);
+
+    saveState();
+    document.getElementById('modal-season-end').classList.add('hidden');
+    switchTab('dash');
+    showAlert("¡Arranca una nueva edición de LaLiga Tussi! Dinero y plantilla se conservan.");
+}
+
+/* =========================================================================
+   FUNCIONES ADICIONALES - Nuevas Features
+   ========================================================================= */
+
+// Mobile sidebar toggle
+window.toggleSidebar = function () {
+    const sidebar = document.getElementById('main-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (!sidebar) return;
+    sidebar.classList.toggle('sidebar-open');
+    if (sidebar.classList.contains('sidebar-open')) {
+        overlay.classList.remove('hidden');
+    } else {
+        overlay.classList.add('hidden');
+    }
+}
+
+// Close sidebar when clicking a nav button on mobile
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar) sidebar.classList.remove('sidebar-open');
+            if (overlay) overlay.classList.add('hidden');
+        }
+    });
+});
+
+// Show player info modal
+window.showPlayerInfo = function (id) {
+    const allPlayers = [...(state.roster || []), ...PLAYERS_DB];
+    const p = allPlayers.find(x => x.id === id);
+    if (!p) return;
+
+    const getStatColor = v => v >= 85 ? '#4ade80' : v >= 70 ? '#38bdf8' : v >= 55 ? '#fbbf24' : '#f87171';
+    const statBar = (label, val) => `
+        <div class="stat-row">
+            <span class="stat-label">${label}</span>
+            <div class="stat-bar-container"><div class="stat-bar-fill" style="width:${val}%; background:${getStatColor(val)};"></div></div>
+            <span class="stat-value" style="color:${getStatColor(val)}">${val}</span>
+        </div>`;
+
+    const pClass = `pos-${p.pos.toLowerCase()}`;
+    const content = document.getElementById('player-info-content');
+    content.innerHTML = `
+        <img src="${p.img}" class="w-20 h-20 rounded-full border-4 border-yellow-400 mx-auto mb-3 shadow-lg">
+        <h3 class="text-xl font-bold text-white mb-1">${p.name}</h3>
+        <span class="pos-badge ${pClass} mb-4 inline-block">${p.pos}</span>
+        <div class="text-4xl font-black text-yellow-400 mb-4 font-gaming">${calcPlayerOVR(p)}</div>
+        <div class="text-left px-4 space-y-1">
+            ${p.pos === 'POR' ? `
+                ${statBar('SAL', p.sal)}
+                ${statBar('PAR', p.par)}
+                ${statBar('SAQ', p.saq)}
+                ${statBar('REF', p.ref)}
+                ${statBar('VEL', p.vel)}
+                ${statBar('POS', p.posi)}
+            ` : `
+                ${statBar('PAC', p.pac)}
+                ${statBar('SHO', p.sho)}
+                ${statBar('PAS', p.pas)}
+                ${statBar('DEF', p.def)}
+                ${statBar('PHY', p.phy)}
+            `}
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">Condición</span><br><span class="text-white font-bold">${p.con || 100}%</span></div>
+            <div class="bg-slate-800/50 p-2 rounded"><span class="text-slate-400">Moral</span><br><span class="text-white font-bold">${p.morale || 100}%</span></div>
+        </div>`;
+    document.getElementById('modal-player-info').classList.remove('hidden');
+}
+
+// Bet goal +/- buttons
+window.adjustBetGoal = function (inputId, delta) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    let val = parseInt(input.value) + delta;
+    if (val < 0) val = 0;
+    if (val > 15) val = 15;
+    input.value = val;
+}
+
+// Card number formatting (XXXX XXXX XXXX XXXX)
+window.formatCardNumber = function (el) {
+    let v = el.value.replace(/[^0-9]/g, '').slice(0, 16);
+    el.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+}
+
+// Card expiry formatting (MM/AA)
+window.formatCardExpiry = function (el) {
+    let v = el.value.replace(/[^0-9]/g, '').slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+    el.value = v;
+}
+
+// Payment method change handler
+window.onPaymentMethodChange = function () {
+    const method = document.getElementById('payment-method').value;
+    const cardForm = document.getElementById('payment-card-form');
+    if (method === 'visa' || method === 'mastercard') {
+        cardForm.classList.remove('hidden');
+    } else {
+        cardForm.classList.add('hidden');
+    }
+    updatePaymentButton();
+}
+
+// Legal modal content
+window.showLegalModal = function (type) {
+    const title = document.getElementById('legal-modal-title');
+    const body = document.getElementById('legal-modal-body');
+    if (type === 'cookies') {
+        title.textContent = 'Política de Cookies';
+        body.innerHTML = `
+            <p><strong>¿Qué son las cookies?</strong></p>
+            <p>Las cookies son pequeños archivos de texto que se almacenan en tu navegador cuando visitas un sitio web.</p>
+            <p><strong>Cookies que utilizamos:</strong></p>
+            <ul class="list-disc ml-5 space-y-1">
+                <li><strong>Cookies esenciales:</strong> Necesarias para el funcionamiento de la autenticación y guardado de partida.</li>
+                <li><strong>Cookies de rendimiento:</strong> Nos ayudan a entender cómo interactúas con la aplicación.</li>
+                <li><strong>Cookies de funcionalidad:</strong> Permiten recordar tus preferencias (volumen, idioma, tema).</li>
+            </ul>
+            <p><strong>Control de cookies:</strong> Puedes gestionar las cookies desde la configuración de tu navegador. Si desactivas las cookies esenciales, es posible que algunas funcionalidades no estén disponibles.</p>
+            <p class="text-slate-500 text-[10px] mt-4">Última actualización: Marzo 2026</p>`;
+    } else if (type === 'aviso') {
+        title.textContent = 'Aviso Legal';
+        body.innerHTML = `
+            <p><strong>Titular:</strong> Inafuma & Beben S.L. â€” Simulador de Gestión Deportiva.</p>
+            <p><strong>Objeto:</strong> Esta aplicación web es un simulador de gestión de club de fútbol con fines de entretenimiento. No involucra dinero real ni apuestas reales.</p>
+            <p><strong>Propiedad Intelectual:</strong> Todos los diseños, código y contenido multimedia de esta aplicación son propiedad del equipo de desarrollo.</p>
+            <p><strong>Limitación de Responsabilidad:</strong> El uso de la aplicación se realiza bajo la exclusiva responsabilidad del usuario. No nos hacemos responsables de interrupciones del servicio o pérdida de datos.</p>
+            <p><strong>Datos Personales:</strong> Solo se recopilan datos estrictamente necesarios (nombre de usuario y contraseña cifrada) para la funcionalidad del juego a través de Firebase.</p>
+            <p class="text-slate-500 text-[10px] mt-4">Última actualización: Marzo 2026</p>`;
+    }
+    document.getElementById('modal-legal').classList.remove('hidden');
+}
+
+// League tab switching (Local / Multiplayer)
+window.switchLeagueTab = function (tab) {
+    document.getElementById('league-tab-local').classList.toggle('active', tab === 'local');
+    document.getElementById('league-tab-multi').classList.toggle('active', tab === 'multi');
+    document.getElementById('league-local-content').classList.toggle('hidden', tab !== 'local');
+    document.getElementById('league-multi-content').classList.toggle('hidden', tab !== 'multi');
+    if (tab === 'multi') loadMultiplayerLeaderboard();
+}
+
+// Load multiplayer leaderboard from Firestore (pvpStats only)
+window.loadMultiplayerLeaderboard = function () {
+    const tbody = document.getElementById('league-multi-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">Cargando clasificación multijugador...</td></tr>';
+
+    db.collection('users').get().then(snap => {
+        tbody.innerHTML = '';
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center text-slate-500 py-6 text-xs">No hay jugadores registrados aún.</td></tr>';
+            return;
+        }
+        // Build array, sort by pvpStats.pts desc, then goal difference
+        const rows = [];
+        snap.forEach(doc => {
+            const d = doc.data();
+            const p = d.pvpStats || {};
+            rows.push({
+                uid: doc.id,
+                manager: d.team?.manager || doc.id,
+                club: d.team?.name || 'Sin club',
+                pj: p.matches || 0,
+                w: p.wins || 0,
+                e: p.draws || 0,
+                l: p.losses || 0,
+                gf: p.gf || 0,
+                ga: p.ga || 0,
+                pts: p.pts || 0
+            });
+        });
+        rows.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga));
+        const htmlRows = rows.map((r, i) => {
+            const isMe = auth.currentUser && r.uid === auth.currentUser.uid;
+            const rowClass = isMe ? 'user-row' : '';
+            const dg = r.gf - r.ga;
+            return `
+            <tr class="${rowClass}">
+                <td class="text-center font-bold">${i + 1}</td>
+                <td class="text-white font-bold">${r.manager}</td>
+                <td class="text-slate-300">${r.club}</td>
+                <td class="text-center">${r.pj}</td>
+                <td class="text-center">${r.w}</td>
+                <td class="text-center">${r.e}</td>
+                <td class="text-center">${r.l}</td>
+                <td class="text-center">${r.gf}</td>
+                <td class="text-center">${r.ga}</td>
+                <td class="text-center">${dg}</td>
+                <td class="text-white font-bold text-sm bg-slate-800/50 text-center">${r.pts}</td>
+            </tr>`;
+        });
+        tbody.innerHTML = htmlRows.join('');
+    }).catch(() => {
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-red-400 py-6 text-xs">Error al cargar. Inténtalo de nuevo.</td></tr>';
+    });
+}
+
+// Playlist de canciones
+const MUSIC_PLAYLIST = [
+    { src: 'music/We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (Olodum Mix).mp3', title: 'We Are One (Ole Ola) â€” Pitbull ft. J.Lo' },
+    { src: 'music/John Newman - Love Me Again - JohnNewmanVEVO.mp3', title: 'John Newman â€” Love Me Again' },
+    { src: 'music/Joy Crookes - Feet Don\'t Fail Me Now (Official Video) - JoyCrookesVEVO.mp3', title: 'Joy Crookes â€” Feet Don\'t Fail Me Now' },
+    { src: 'music/Avicii - Levels (Lyrics) - Creative Chaos.mp3', title: 'Avicii â€” Levels' },
+    { src: 'music/Avicii - The Nights (Lyrics) my father told me - Unique Sound.mp3', title: 'Avicii â€” The Nights' },
+    { src: 'music/Glass Animals - Heat Waves - LatinHype.mp3', title: 'Glass Animals â€” Heat Waves' },
+    { src: 'music/Imagine Dragons - On Top Of The World (Official Music Video) - ImagineDragonsVEVO.mp3', title: 'Imagine Dragons â€” On Top Of The World' },
+    { src: 'music/My Type - Saint Motel (Lyrics)  Pop Song - Astro.mp3', title: 'Saint Motel â€” My Type' },
+    { src: 'music/Travis Scott - goosebumps (Official Video) ft. Kendrick Lamar - TravisScottVEVO.mp3', title: 'Travis Scott â€” Goosebumps ft. Kendrick Lamar' },
+    { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons â€” Warriors' },
+    { src: 'music/Somos Carlos Kirk.mp3', title: 'Carlos Kirk â€” Somos' },
+    { src: 'music/Willyrex Canta Paradise-Coldplay (mp3cut.net).mp3', title: 'Willyrex â€” Paradise (Coldplay)' },
+    { src: 'music/Capital Cities - Safe And Sound - Hunter Seth.mp3', title: 'Capital Cities â€” Safe And Sound' },
+    { src: 'music/CHVRCHES - WE SINK - coconutðŸ¤.mp3', title: 'CHVRCHES â€” We Sink' },
+    { src: 'music/FIFA 14 - Amplify Dot - Get Down  Soundtrack - Silvo & Shani.mp3', title: 'Amplify Dot â€” Get Down' },
+    { src: 'music/Skrillex & Damian Jr. Gong Marley - Make It Bun Dem [OFFICIAL VIDEO] - Skrillex.mp3', title: 'Skrillex & Damian Marley â€” Make It Bun Dem' },
+    { src: 'music/Worship You - Vampire Weekend.mp3', title: 'Vampire Weekend â€” Worship You' },
+    { src: 'music/Wretch 32 - 24 Hours (Official Audio) - Wretch 32.mp3', title: 'Wretch 32 â€” 24 Hours' },
+    { src: 'music/Axwell __ Ingrosso, Axwell, Sebastian Ingrosso - More Than You Know - AxwellIngrossoVEVO.mp3', title: 'Axwell Î› Ingrosso â€” More Than You Know' }
+];
+let currentTrackIndex = -1;
+let shuffledQueue = [];
+
+function pickRandomTrack(excludeIndex) {
+    if (MUSIC_PLAYLIST.length <= 1) return 0;
+    // Bag-shuffle: no se repite ninguna canción hasta que se hayan escuchado todas
+    if (shuffledQueue.length === 0) {
+        shuffledQueue = Array.from({ length: MUSIC_PLAYLIST.length }, (_, i) => i)
+            .filter(i => i !== excludeIndex);
+        // Fisher-Yates shuffle
+        for (let i = shuffledQueue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledQueue[i], shuffledQueue[j]] = [shuffledQueue[j], shuffledQueue[i]];
+        }
+    }
+    return shuffledQueue.shift();
+}
+
+// Audio control - start after cookie acceptance, persist across reloads
+function updateNowPlaying() {
+    const titleEl = document.getElementById('now-playing-title');
+    if (titleEl && currentTrackIndex >= 0 && currentTrackIndex < MUSIC_PLAYLIST.length) {
+        titleEl.textContent = MUSIC_PLAYLIST[currentTrackIndex].title;
+    }
+}
+
+function setNowPlayingVisibility() {
+    const bar = document.getElementById('now-playing-bar');
+    if (!bar) return;
+    const matchLocal = document.getElementById('match-modal');
+    const matchPvp = document.getElementById('pvp-match-modal');
+    const inMatch = (matchLocal && !matchLocal.classList.contains('hidden'))
+        || (matchPvp && !matchPvp.classList.contains('hidden'));
+    bar.classList.toggle('hidden', inMatch);
+}
+
+window.skipToNextTrack = function () {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    currentTrackIndex = pickRandomTrack(currentTrackIndex);
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+    localStorage.setItem('inafuma_music_time', '0');
+    updateNowPlaying();
+    audio.play().catch(() => { });
+}
+let bgMusicInterval = null;
+window.initBgMusic = function () {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+
+    // Pick initial random track
+    const savedTrack = parseInt(localStorage.getItem('inafuma_music_track') || '-1');
+    if (savedTrack >= 0 && savedTrack < MUSIC_PLAYLIST.length) {
+        currentTrackIndex = savedTrack;
+    } else {
+        currentTrackIndex = pickRandomTrack(-1);
+    }
+    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+
+    // Restore saved playback position
+    const savedTime = parseFloat(localStorage.getItem('inafuma_music_time') || '0');
+    if (savedTime > 0) audio.currentTime = savedTime;
+
+    audio.volume = (state && state.settings && state.settings.volMusic !== undefined) ? state.settings.volMusic : 0.05;
+
+    // When a song ends, pick a different random song and play it immediately
+    audio.removeEventListener('ended', handleTrackEnded);
+    audio.addEventListener('ended', handleTrackEnded);
+
+    updateNowPlaying();
+    setNowPlayingVisibility();
+
+    // Save position periodically so music resumes after reload
+    if (bgMusicInterval) clearInterval(bgMusicInterval);
+    bgMusicInterval = setInterval(() => {
+        if (!audio.paused) {
+            localStorage.setItem('inafuma_music_time', String(audio.currentTime));
+            localStorage.setItem('inafuma_music_playing', 'true');
+            localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+        }
+    }, 2000);
+
+    const tryPlay = () => {
+        audio.play().catch(() => {
+            // Autoplay blocked - will start on next user interaction
+            document.addEventListener('click', function startMusic() {
+                audio.play().catch(() => { });
+                document.removeEventListener('click', startMusic);
+            }, { once: true });
+        });
+    };
+
+    // Auto-resume if was playing before reload, or if cookies accepted
+    if (localStorage.getItem('inafuma_music_playing') === 'true' || localStorage.getItem('inafuma_cookies')) {
+        tryPlay();
+    }
+
+    // Preload next track proactively
+    preloadNextTrack();
+
+    // Also preload when ~10 seconds remain in current track
+    audio.addEventListener('timeupdate', function () {
+        if (!preloadedNextTrack && audio.duration && audio.duration - audio.currentTime < 10) {
+            preloadNextTrack();
+        }
+    });
+}
+
+let preloadedNextTrack = null;
+
+function preloadNextTrack() {
+    const nextIdx = pickRandomTrack(currentTrackIndex);
+    const preload = new Audio();
+    preload.src = MUSIC_PLAYLIST[nextIdx].src;
+    preload.preload = 'auto';
+    preloadedNextTrack = { index: nextIdx, audio: preload };
+}
+
+function handleTrackEnded() {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    if (preloadedNextTrack) {
+        currentTrackIndex = preloadedNextTrack.index;
+        audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+        preloadedNextTrack = null;
+    } else {
+        currentTrackIndex = pickRandomTrack(currentTrackIndex);
+        audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    }
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+    localStorage.setItem('inafuma_music_time', '0');
+    updateNowPlaying();
+    audio.play().catch(() => { });
+    // Preload the next one right away
+    preloadNextTrack();
+}
+
+/* =========================================================================
+   SISTEMA DE SOBRES / PACKS DE JUGADORES
+   ========================================================================= */
+
+const PACK_CONFIG = {
+    single: { sobres: 1, cardsPerSobre: 4, cost: 5000 },
+    triple: { sobres: 3, cardsPerSobre: 4, cost: 15000 },
+    mega: { sobres: 5, cardsPerSobre: 4, cost: 25000 }
+};
+
+// Rareza: icono 2%, diamante 8%, oro 20%, plata 35%, bronce 35%
+const RARITY_THRESHOLDS = [
+    { rarity: 'icono', chance: 0.02, ovrMin: 94, ovrMax: 99, img: 'images/Icono3.png' },
+    { rarity: 'diamante', chance: 0.08, ovrMin: 88, ovrMax: 93, img: 'images/Diamante3.png' },
+    { rarity: 'oro', chance: 0.20, ovrMin: 82, ovrMax: 87, img: 'images/Oro3.png' },
+    { rarity: 'plata', chance: 0.35, ovrMin: 76, ovrMax: 81, img: 'images/Plata3.png' },
+    { rarity: 'bronce', chance: 0.35, ovrMin: 70, ovrMax: 75, img: 'images/Bronce.png' }
+];
+
+// Jugadores retirados / inactivos (iconos)
+const RETIRED_PLAYER_IDS = new Set([506, 507]); // Neymar, Luis Suarez â€” add more IDs as needed
+
+function getPlayerRarity(p) {
+    const ovr = calcPlayerOVR(p);
+    if (RETIRED_PLAYER_IDS.has(p.id)) return 'icono';
+    if (ovr >= 94) return 'icono';
+    if (ovr >= 88) return 'diamante';
+    if (ovr >= 82) return 'oro';
+    if (ovr >= 76) return 'plata';
+    return 'bronce';
+}
+
+function getCardRarity(ovr) {
+    if (ovr < 70) return 'Fuera de rango';
+    if (ovr >= 94) return 'Icono';
+    if (ovr >= 88) return 'Diamante';
+    if (ovr >= 82) return 'Oro';
+    if (ovr >= 76) return 'Plata';
+    return 'Bronce';
+}
+
+function getRarityCardImage(rarity) {
+    if (rarity === 'icono') return 'images/Icono3.png';
+    if (rarity === 'diamante') return 'images/Diamante3.png';
+    if (rarity === 'oro') return 'images/Oro3.png';
+    if (rarity === 'plata') return 'images/Plata3.png';
+    if (rarity === 'bronce') return 'images/Bronce.png';
+    return 'images/Bronce.png';
+}
+
+function getRarityCSSClass(rarity) {
+    if (rarity === 'icono') return 'rarity-icono';
+    if (rarity === 'diamante') return 'rarity-diamante';
+    if (rarity === 'oro') return 'rarity-oro';
+    if (rarity === 'plata') return 'rarity-plata';
+    if (rarity === 'bronce') return 'rarity-bronce';
+    return 'rarity-bronce';
+}
+
+function rollCardRarity() {
+    const roll = Math.random();
+    let cumulative = 0;
+    for (const tier of RARITY_THRESHOLDS) {
+        cumulative += tier.chance;
+        if (roll < cumulative) return tier;
+    }
+    return RARITY_THRESHOLDS[RARITY_THRESHOLDS.length - 1];
+}
+
+function pickPlayerByRarity(tier, excludeIds) {
+    const allWithOvr = PLAYERS_DB.map(p => ({ ...p, ovr: calcPlayerOVR(p) }));
+    let candidates = allWithOvr.filter(p =>
+        p.ovr >= tier.ovrMin && p.ovr <= tier.ovrMax && !excludeIds.has(p.id)
+    );
+    // If no candidates at this tier, widen the search
+    if (candidates.length === 0) {
+        candidates = allWithOvr.filter(p => !excludeIds.has(p.id));
+    }
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function generateSobreCards(count, excludeIds) {
+    const cards = [];
+    for (let i = 0; i < count; i++) {
+        const tier = rollCardRarity();
+        const player = pickPlayerByRarity(tier, excludeIds);
+        if (player) {
+            excludeIds.add(player.id);
+            const actualRarity = getPlayerRarity(player);
+            cards.push({
+                player: JSON.parse(JSON.stringify(player)),
+                rarity: actualRarity,
+                rarityImg: getRarityCardImage(actualRarity)
+            });
+        }
+    }
+    return cards;
+}
+
+function generateSobreBonus() {
+    const bonuses = [];
+    // 10% chance premium coins (10000)
+    if (Math.random() < 0.10) {
+        bonuses.push({ type: 'premium', amount: 10000 });
+    }
+    // 40% chance normal coins
+    if (Math.random() < 0.40) {
+        const amount = (Math.floor(Math.random() * 10) + 1) * 500000; // 500K to 5M
+        bonuses.push({ type: 'coins', amount: amount });
+    }
+    return bonuses;
+}
+
+// Generate starter pack: 14 players with minimum position requirements
+function generateStarterPackCards() {
+    const excludeIds = new Set();
+    const cards = [];
+
+    // Minimum requirements: 1 POR, 4 DEF, 4 MED, 2 DEL = 11, plus 3 random = 14
+    const requirements = [
+        { pos: 'POR', count: 1 },
+        { pos: 'DEF', count: 4 },
+        { pos: 'MED', count: 4 },
+        { pos: 'DEL', count: 2 }
+    ];
+
+    // For starter pack, use lower tier players (rep 0 or low rep)
+    const starterPool = PLAYERS_DB.filter(p => p.rep <= 800).map(p => ({ ...p, ovr: calcPlayerOVR(p) }));
+
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // Pick required positions
+    for (const req of requirements) {
+        const pool = shuffle(starterPool.filter(p => p.pos === req.pos && !excludeIds.has(p.id)));
+        for (let i = 0; i < req.count && i < pool.length; i++) {
+            excludeIds.add(pool[i].id);
+            const rarity = getPlayerRarity(pool[i]);
+            cards.push({
+                player: JSON.parse(JSON.stringify(pool[i])),
+                rarity: rarity,
+                rarityImg: getRarityCardImage(rarity)
+            });
+        }
+    }
+
+    // Fill remaining 3 random slots
+    const remaining = 14 - cards.length;
+    const leftover = shuffle(starterPool.filter(p => !excludeIds.has(p.id)));
+    for (let i = 0; i < remaining && i < leftover.length; i++) {
+        excludeIds.add(leftover[i].id);
+        const rarity = getPlayerRarity(leftover[i]);
+        cards.push({
+            player: JSON.parse(JSON.stringify(leftover[i])),
+            rarity: rarity,
+            rarityImg: getRarityCardImage(rarity)
+        });
+    }
+
+    // Shuffle the final cards so reveal order is random
+    return shuffle(cards);
+}
+
+/* ---- Pack Reveal State ---- */
+let packRevealState = {
+    allSobres: [],       // Array of arrays of card objects
+    currentSobre: 0,
+    revealedCount: 0,
+    allNewPlayers: [],   // Flat list of all players to add to roster
+    allBonuses: [],      // All bonuses across all sobres
+    isStarterPack: false,
+    onComplete: null     // Callback after all sobres revealed
+};
+
+function buildCardHTML(card, index) {
+    const p = card.player;
+    const ovr = calcPlayerOVR(p);
+    const rarityClass = getRarityCSSClass(card.rarity);
+
+    return `
+    <div class="pack-card" data-index="${index}" onclick="revealCard(this)">
+        <div class="pack-card-inner">
+            <div class="pack-card-front"></div>
+            <div class="pack-card-back ${rarityClass}">
+                <img src="${card.rarityImg}" class="pack-card-bg-img">
+                <div class="pack-card-info-left">
+                    <div class="pack-card-ovr">${ovr}</div>
+                    <div class="pack-card-pos">${p.pos}</div>
+                </div>
+                <img src="${p.img}" class="pack-card-photo" onerror="this.src='${getAvatar(p.name)}'">
+                <div class="pack-card-name">${p.name}</div>
+                <div class="pack-card-stats-fifa">
+                    <div class="pack-stat-col">
+                        ${p.pos === 'POR' ? `
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.sal}</span><span class="pack-stat-lbl">SAL</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.par}</span><span class="pack-stat-lbl">PAR</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.saq}</span><span class="pack-stat-lbl">SAQ</span></div>
+                        ` : `
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.pac}</span><span class="pack-stat-lbl">RIT</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.sho}</span><span class="pack-stat-lbl">TIR</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.pas}</span><span class="pack-stat-lbl">PAS</span></div>
+                        `}
+                    </div>
+                    <div class="pack-stat-col">
+                        ${p.pos === 'POR' ? `
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.ref}</span><span class="pack-stat-lbl">REF</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.vel}</span><span class="pack-stat-lbl">VEL</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.posi}</span><span class="pack-stat-lbl">POS</span></div>
+                        ` : `
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.def}</span><span class="pack-stat-lbl">DEF</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.phy}</span><span class="pack-stat-lbl">FÍS</span></div>
+                        `}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+window.revealCard = function (el) {
+    if (el.classList.contains('revealed')) {
+        // Already revealed â€” zoom in for close-up view
+        zoomCard(el);
+        return;
+    }
+    el.classList.add('revealed');
+    packRevealState.revealedCount++;
+
+    const stage = document.getElementById('pack-reveal-stage');
+    const totalCards = stage.querySelectorAll('.pack-card').length;
+
+    // Check if all cards in this sobre are revealed
+    if (packRevealState.revealedCount >= totalCards) {
+        showSobreCompleteActions();
+    }
+}
+
+function zoomCard(el) {
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'pack-zoom-overlay';
+    const clone = el.cloneNode(true);
+    clone.classList.add('pack-zoom-card');
+    clone.classList.remove('pack-card');
+    clone.style.animation = 'none';
+    clone.style.opacity = '1';
+    clone.style.transform = 'none';
+    clone.onclick = function (e) { e.stopPropagation(); };
+    overlay.appendChild(clone);
+    overlay.onclick = function () {
+        overlay.classList.add('pack-zoom-closing');
+        setTimeout(() => overlay.remove(), 250);
+    };
+    document.getElementById('modal-pack-reveal').appendChild(overlay);
+}
+
+function showSobreCompleteActions() {
+    const actions = document.getElementById('pack-reveal-actions');
+    actions.classList.remove('hidden');
+
+    const isLastSobre = packRevealState.currentSobre >= packRevealState.allSobres.length - 1;
+    const nextBtn = document.getElementById('pack-reveal-next-btn');
+    const doneBtn = document.getElementById('pack-reveal-done-btn');
+
+    if (isLastSobre) {
+        nextBtn.classList.add('hidden');
+        doneBtn.classList.remove('hidden');
+    } else {
+        nextBtn.classList.remove('hidden');
+        doneBtn.classList.add('hidden');
+    }
+
+    // Show bonuses for this sobre
+    const bonuses = packRevealState.allBonuses[packRevealState.currentSobre];
+    if (bonuses && bonuses.length > 0) {
+        const bonusEl = document.getElementById('pack-reveal-bonus');
+        bonusEl.classList.remove('hidden');
+        let bonusHTML = '';
+        bonuses.forEach(b => {
+            if (b.type === 'premium') {
+                bonusHTML += `<div class="pack-bonus-premium text-xl">¡BONUS! +${b.amount.toLocaleString()} Monedas Premium ◈</div>`;
+            } else {
+                bonusHTML += `<div class="pack-bonus-coins text-xl">¡BONUS! +€${(b.amount / 1000000).toFixed(1)}M</div>`;
+            }
+        });
+        document.getElementById('pack-bonus-text').innerHTML = bonusHTML;
+    }
+}
+
+window.packRevealNext = function () {
+    packRevealState.currentSobre++;
+    packRevealState.revealedCount = 0;
+    document.getElementById('pack-reveal-actions').classList.add('hidden');
+    document.getElementById('pack-reveal-bonus').classList.add('hidden');
+    document.getElementById('pack-reveal-stage').classList.add('hidden');
+    renderCurrentSobre();
+}
+
+window.packRevealClose = function () {
+    // Add all new players to roster
+    packRevealState.allNewPlayers.forEach(p => {
+        // Check if player already in roster
+        if (!state.roster.find(r => r.id === p.id)) {
+            p.con = 100;
+            p.morale = 100;
+            p.ovr = calcPlayerOVR(p);
+            state.roster.push(p);
+        }
+    });
+
+    // Apply all bonuses
+    packRevealState.allBonuses.flat().forEach(b => {
+        if (b.type === 'premium') {
+            state.economy.premium += b.amount;
+        } else {
+            state.economy.coins += b.amount;
+        }
+    });
+
+    saveState();
+    document.getElementById('modal-pack-reveal').classList.add('hidden');
+
+    if (packRevealState.isStarterPack && packRevealState.onComplete) {
+        packRevealState.onComplete();
+    } else {
+        updateUI();
+        if (document.getElementById('tab-sobres') && document.getElementById('tab-sobres').style.display !== 'none') {
+            renderSobresTab();
+        }
+    }
+}
+
+function renderCurrentSobre() {
+    const sobre = packRevealState.allSobres[packRevealState.currentSobre];
+    const stage = document.getElementById('pack-reveal-stage');
+    const title = document.getElementById('pack-reveal-title');
+    const subtitle = document.getElementById('pack-reveal-subtitle');
+    const envelope = document.getElementById('pack-envelope');
+
+    if (packRevealState.allSobres.length > 1) {
+        title.textContent = `Sobre ${packRevealState.currentSobre + 1} de ${packRevealState.allSobres.length}`;
+    } else {
+        title.textContent = packRevealState.isStarterPack ? 'Sobre Inicial del Club' : 'Abriendo Sobre';
+    }
+    subtitle.textContent = `${sobre.length} cartas â€” Desliza hacia abajo para abrir`;
+
+    // Pre-build card HTML but keep stage hidden
+    stage.innerHTML = '';
+    sobre.forEach((card, i) => {
+        stage.innerHTML += buildCardHTML(card, i);
+    });
+
+    // Show envelope, hide cards
+    stage.classList.add('hidden');
+    stage.classList.remove('cards-entering');
+    envelope.classList.remove('hidden', 'opening', 'tearing');
+    const inner = envelope.querySelector('.pack-envelope-inner');
+    if (inner) { inner.style.transform = ''; inner.style.transition = ''; }
+}
+
+/* ---- Pack swipe-to-tear logic ---- */
+(function () {
+    let startY = 0;
+    let isDragging = false;
+    const SWIPE_THRESHOLD = 80;
+
+    function getEnvelope() { return document.getElementById('pack-envelope'); }
+
+    function onPointerDown(e) {
+        const env = getEnvelope();
+        if (!env || env.classList.contains('opening') || env.classList.contains('tearing') || env.classList.contains('hidden')) return;
+        isDragging = true;
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        env.style.transition = 'none';
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) return;
+        const env = getEnvelope();
+        if (!env) return;
+        const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+        const delta = currentY - startY;
+        if (delta > 0) {
+            const progress = Math.min(delta / SWIPE_THRESHOLD, 1);
+            const inner = env.querySelector('.pack-envelope-inner');
+            if (inner) inner.style.transform = `translateY(${delta * 0.15}px) scale(${1 + progress * 0.04})`;
+            const tearLine = env.querySelector('.pack-tear-line');
+            if (tearLine) tearLine.style.borderColor = `rgba(250, 204, 21, ${0.4 + progress * 0.6})`;
+        }
+    }
+
+    function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        const env = getEnvelope();
+        if (!env) return;
+        const endY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+        const delta = endY - startY;
+
+        const inner = env.querySelector('.pack-envelope-inner');
+        if (inner) { inner.style.transform = ''; inner.style.transition = ''; }
+        env.style.transition = '';
+
+        if (delta >= SWIPE_THRESHOLD) {
+            openEnvelopeNow();
+        }
+    }
+
+    document.addEventListener('mousedown', (e) => { if (e.target.closest('#pack-envelope')) onPointerDown(e); });
+    document.addEventListener('mousemove', onPointerMove);
+    document.addEventListener('mouseup', onPointerUp);
+    document.addEventListener('touchstart', (e) => { if (e.target.closest('#pack-envelope')) onPointerDown(e); }, { passive: true });
+    document.addEventListener('touchmove', (e) => { onPointerMove(e); }, { passive: true });
+    document.addEventListener('touchend', (e) => { onPointerUp(e); });
+})();
+
+function openEnvelopeNow() {
+    const envelope = document.getElementById('pack-envelope');
+    const stage = document.getElementById('pack-reveal-stage');
+    const subtitle = document.getElementById('pack-reveal-subtitle');
+
+    if (!envelope || envelope.classList.contains('opening')) return;
+
+    envelope.classList.add('tearing');
+    setTimeout(() => {
+        envelope.classList.add('opening');
+    }, 150);
+
+    setTimeout(() => {
+        envelope.classList.add('hidden');
+        stage.classList.remove('hidden');
+        stage.classList.add('cards-entering');
+        subtitle.textContent = `${packRevealState.allSobres[packRevealState.currentSobre].length} cartas â€” Toca cada carta para revelarla`;
+    }, 1000);
+}
+
+function startPackReveal(sobres, bonusesPerSobre, isStarter, onComplete) {
+    packRevealState = {
+        allSobres: sobres,
+        currentSobre: 0,
+        revealedCount: 0,
+        allNewPlayers: sobres.flat().map(c => c.player),
+        allBonuses: bonusesPerSobre,
+        isStarterPack: isStarter,
+        onComplete: onComplete || null
+    };
+
+    document.getElementById('pack-reveal-actions').classList.add('hidden');
+    document.getElementById('pack-reveal-bonus').classList.add('hidden');
+    document.getElementById('pack-reveal-next-btn').classList.add('hidden');
+    document.getElementById('pack-reveal-done-btn').classList.add('hidden');
+    document.getElementById('pack-reveal-stage').classList.add('hidden');
+
+    renderCurrentSobre();
+    document.getElementById('modal-pack-reveal').classList.remove('hidden');
+}
+
+/* ---- Buy Pack from Sobres tab ---- */
+window.buyPack = function (packType) {
+    if (!state) return;
+    const config = PACK_CONFIG[packType];
+    if (!config) return;
+
+    if (state.economy.premium < config.cost) {
+        return showAlert(`No tienes suficientes monedas premium. Necesitas ◈${config.cost.toLocaleString()} y tienes ◈${state.economy.premium.toLocaleString()}.`);
+    }
+
+    // Deduct premium
+    state.economy.premium -= config.cost;
+
+    // Generate all sobres
+    const excludeIds = new Set(state.roster.map(p => p.id));
+    const sobres = [];
+    const bonuses = [];
+
+    for (let s = 0; s < config.sobres; s++) {
+        const cards = generateSobreCards(config.cardsPerSobre, excludeIds);
+        sobres.push(cards);
+        bonuses.push(generateSobreBonus());
+    }
+
+    saveState();
+    startPackReveal(sobres, bonuses, false, null);
+}
+
+/* ---- Render Sobres Tab ---- */
+function renderSobresTab() {
+    const premEl = document.getElementById('sobres-premium');
+    const coinsEl = document.getElementById('sobres-coins');
+    if (premEl) premEl.textContent = (state.economy.premium || 0).toLocaleString();
+    if (coinsEl) coinsEl.textContent = `${((state.economy.coins || 0) / 1000000).toFixed(1)}M`;
+}
+
+
+/* =========================================================================
+
+   SISTEMA DE AMIGOS Y 1VS1 PRIVADO
+
+   ========================================================================= */
+
+
+
+// --- NUEVO SISTEMA DE B�SQUEDA DE AMIGOS ---
+window.searchFriends = async function () {
+    if (!state || !auth.currentUser) return;
+    const searchInput = document.getElementById('friend-search-input');
+    const searchName = searchInput.value.trim().toLowerCase();
+    const btn = document.getElementById('btn-search-friends');
+    const resultsContainer = document.getElementById('friend-search-results');
+
+    if (!searchName) return showAlert("Introduce parte del nombre para buscar.");
+    
+    // UI Loading state
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="animate-pulse">BUSCANDO...</span>';
+    btn.disabled = true;
+    resultsContainer.innerHTML = '';
+    resultsContainer.classList.remove('hidden');
+
+    try {
+        // Obtenemos todos los usuarios (en apps enormes de producci�n esto ser�a una Cloud Function o Algolia, pero aqu� es suficiente)
+        const snapshot = await db.collection('users').get();
+        if (snapshot.empty) {
+            resultsContainer.innerHTML = '<div class="text-[10px] text-red-400 p-2 text-center">No hay usuarios registrados.</div>';
+            return;
+        }
+
+        let matches = [];
+        snapshot.forEach(doc => {
+            if (doc.id === auth.currentUser.uid) return; // No nosotros mismos
+            const data = doc.data();
+            if (data && data.auth && data.auth.user) {
+                if (data.auth.user.toLowerCase().includes(searchName)) {
+                    matches.push({ id: doc.id, username: data.auth.user, myFriendsRow: data.friends || [], myReqRow: data.friendRequests || [] });
+                }
+            }
+        });
+
+        if (matches.length === 0) {
+            resultsContainer.innerHTML = '<div class="text-[10px] text-slate-400 p-2 text-center">No se encontr� a nadie con ese nombre.</div>';
+        } else {
+            // Render results
+            // Solo mostramos hasta 5 para no saturar la UI
+            matches.slice(0, 5).forEach(targetUser => {
+                const isFriend = targetUser.myFriendsRow.some(f => f.uid === auth.currentUser.uid);
+                const hasSentReq = targetUser.myReqRow.some(r => r.uid === auth.currentUser.uid);
+                
+                let actionBtnHTML = '';
+                if (isFriend) {
+                    actionBtnHTML = '<span class="text-[9px] text-green-400 font-bold tracking-widest">AMIGOS</span>';
+                } else if (hasSentReq) {
+                    actionBtnHTML = '<span class="text-[9px] text-yellow-500 font-bold tracking-widest">PENDIENTE</span>';
+                } else {
+                    actionBtnHTML = `<button onclick="sendFriendRequest('${targetUser.id}', '${targetUser.username}')" class="bg-blue-600 hover:bg-blue-500 text-white text-[9px] px-2 py-1 rounded tracking-widest shadow-md transition">A�ADIR</button>`;
+                }
+
+                resultsContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded bg-[#161622] border border-[#313145] shadow hover:border-blue-500/50 transition">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] uppercase font-bold text-slate-400">${targetUser.username.substring(0,2)}</div>
+                            <span class="text-[11px] font-bold text-white truncate">${targetUser.username}</span>
+                        </div>
+                        <div id="req-action-${targetUser.id}">
+                            ${actionBtnHTML}
+                        </div>
+                    </div>
+                `;
+            });
+            if (matches.length > 5) {
+                resultsContainer.innerHTML += `<div class="text-[9px] text-slate-500 text-center italic pt-1">+ ${matches.length - 5} resultados m�s ocultos. S� m�s espec�fico.</div>`;
+            }
+        }
+    } catch (err) {
+        console.error("Error buscando usuarios:", err);
+        resultsContainer.innerHTML = '<div class="text-[10px] text-red-500 p-2 text-center">Error de conexi�n.</div>';
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
+window.sendFriendRequest = async function (targetId, targetUsername) {
+    if (!state || !auth.currentUser) return;
+    
+    const actionContainer = document.getElementById(`req-action-${targetId}`);
+    if (actionContainer) {
+        actionContainer.innerHTML = '<span class="text-[9px] text-yellow-500 font-bold tracking-widest animate-pulse">ENVIANDO...</span>';
+    }
+
+    try {
+        const newReq = { uid: auth.currentUser.uid, username: state.auth.user, timestamp: Date.now() };
+        await db.collection('users').doc(targetId).update({
+            friendRequests: firebase.firestore.FieldValue.arrayUnion(newReq)
+        });
+        
+        showAlert(`Solicitud de amistad enviada a ${targetUsername}.`);
+        if (actionContainer) actionContainer.innerHTML = '<span class="text-[9px] text-yellow-500 font-bold tracking-widest">PENDIENTE</span>';
+    } catch (err) {
+        console.error("Error enviando solicitud:", err);
+        showAlert("Error al enviar solicitud.");
+        if (actionContainer) actionContainer.innerHTML = '<span class="text-[9px] text-red-500 font-bold">ERROR</span>';
+    }
+}
+
+// Permitir borrar amigos (se borrar� mutuamente)
+window.removeFriend = async function(friendUid, friendUsername) {
+    if (!confirm(`�Seguro que quieres eliminar a ${friendUsername} de tu lista de amigos?`)) return;
+    
+    try {
+        // Removerlo de nuestra lista local
+        state.friends = state.friends.filter(f => f.uid !== friendUid);
+        await db.collection('users').doc(auth.currentUser.uid).update({
+            friends: state.friends
+        });
+        
+        // Removernos de su lista
+        const targetDoc = await db.collection('users').doc(friendUid).get();
+        if (targetDoc.exists) {
+            const tData = targetDoc.data();
+            if (tData.friends) {
+                const updatedTargetFriends = tData.friends.filter(f => f.uid !== auth.currentUser.uid);
+                await db.collection('users').doc(friendUid).update({
+                    friends: updatedTargetFriends
+                });
+            }
+        }
+        
+        showAlert(`${friendUsername} eliminado de amigos.`);
+        renderFriendsTab();
+    } catch (err) {
+        console.error("Error eliminando amigo:", err);
+        showAlert("Hubo un error al eliminar al amigo.");
+    }
+}
 
 window.acceptFriendRequest = async function (reqUid, reqUsername) {
 

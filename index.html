@@ -1675,6 +1675,28 @@
         </div>
     </div>
 
+    <!-- ========== GOAL BROADCAST POPUP (Overlay) ========== -->
+    <div id="goal-broadcast-popup" class="goal-broadcast-overlay" style="display:none;">
+        <canvas id="goal-confetti-canvas" class="goal-confetti-canvas"></canvas>
+        <div class="goal-broadcast-card" id="goal-broadcast-card">
+            <!-- Top accent bar (color set by JS) -->
+            <div class="goal-broadcast-accent" id="goal-broadcast-accent"></div>
+            <!-- Badge + GOLAZO -->
+            <div class="goal-broadcast-header">
+                <div class="goal-broadcast-badge" id="goal-broadcast-badge"></div>
+                <div class="goal-broadcast-title-group">
+                    <div class="goal-broadcast-golazo" id="goal-broadcast-golazo">¡GOLAZO!</div>
+                    <div class="goal-broadcast-minute" id="goal-broadcast-minute"></div>
+                </div>
+            </div>
+            <!-- Scorer + Assist -->
+            <div class="goal-broadcast-scorer" id="goal-broadcast-scorer"></div>
+            <div class="goal-broadcast-assist" id="goal-broadcast-assist"></div>
+            <!-- Updated Score -->
+            <div class="goal-broadcast-score" id="goal-broadcast-score"></div>
+        </div>
+    </div>
+
     <div id="page-settings" class="subpage-container hidden">
         <div
             class="glass-panel max-w-2xl mx-auto w-full p-10 shadow-[0_0_50px_rgba(0,0,0,0.8)] border-t-4 border-slate-500 relative">
@@ -1807,12 +1829,16 @@
                 <div class="w-1/3 flex flex-col gap-6">
                     <div class="bg-[#111119] p-5 rounded-xl border border-[#313145]">
                         <h3 class="text-xs text-blue-400 font-bold uppercase mb-3 tracking-widest">Añadir Mánager</h3>
-                        <div class="flex flex-col gap-2">
+                        <div class="flex flex-col gap-2 relative">
                             <input type="text" id="friend-search-input" class="input-fm text-xs"
-                                placeholder="Nombre completo de usuario...">
-                            <button onclick="sendFriendRequest()"
-                                class="btn-action w-full py-2 text-[10px] tracking-widest bg-blue-600 hover:bg-blue-500">ENVIAR
-                                SOLICITUD</button>
+                                placeholder="Nombre de usuario a buscar...">
+                            <button onclick="searchFriends()" id="btn-search-friends"
+                                class="btn-action w-full py-2 text-[10px] tracking-widest bg-blue-600 hover:bg-blue-500 transition">
+                                BUSCAR MÁNAGER
+                            </button>
+                            <!-- Search Results Container -->
+                            <div id="friend-search-results" class="hidden mt-2 p-2 bg-[#0e0e15] border border-[#313145] rounded-xl max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-2">
+                            </div>
                         </div>
                     </div>
                     <div class="bg-[#111119] p-5 rounded-xl border border-[#313145] flex-1 flex flex-col min-h-0">
