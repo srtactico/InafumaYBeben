@@ -196,19 +196,26 @@
                     Perfil</button>
             </div>
 
-            <form id="login-form" class="space-y-4" onsubmit="return false;">
+            <form id="login-form" class="space-y-4">
                 <input type="text" id="log-user" class="input-fm" placeholder="Nombre de Mánager" required>
-                <input type="password" id="log-pass" class="input-fm" placeholder="Contraseña de Seguridad" required>
-                <button type="submit" class="w-full btn-action py-4 mt-2 text-sm tracking-widest">ENTRAR AL
-                    JUEGO</button>
+                <div class="relative flex items-center">
+                    <input type="password" id="log-pass" class="input-fm w-full pr-10" placeholder="Contraseña" required>
+                    <button type="button" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none z-10" onclick="togglePasswordVisibility('log-pass', this)">
+                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </button>
+                </div>
+                <button type="submit" class="w-full btn-action py-4 mt-2 text-sm tracking-widest">ENTRAR AL JUEGO</button>
             </form>
 
-            <form id="register-form" class="space-y-4 hidden" onsubmit="return false;">
+            <form id="register-form" class="space-y-4 hidden">
                 <input type="text" id="reg-user" class="input-fm" placeholder="Nuevo Mánager (Usuario)" required>
-                <input type="password" id="reg-pass" class="input-fm" placeholder="Contraseña Segura" required>
-                <button type="submit"
-                    class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded mt-2 text-sm uppercase tracking-widest transition">Registrar
-                    Cuenta</button>
+                <div class="relative flex items-center">
+                    <input type="password" id="reg-pass" class="input-fm w-full pr-10" placeholder="Contraseña" required>
+                    <button type="button" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none z-10" onclick="togglePasswordVisibility('reg-pass', this)">
+                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </button>
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded mt-2 text-sm uppercase tracking-widest transition">Registrar Cuenta</button>
             </form>
         </div>
     </main>
