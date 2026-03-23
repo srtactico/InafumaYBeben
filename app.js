@@ -14,18 +14,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 /* =========================================================================
 
-/* Password Visibility Toggle */
-window.togglePasswordVisibility = function(inputId, btn) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.innerHTML = '<svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>';
-    } else {
-        input.type = 'password';
-        btn.innerHTML = '<svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>';
-    }
-};
 
    BASE DE DATOS: JUGADORES Y AVATARES
    ========================================================================= */
@@ -607,8 +595,9 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
             routeView();
         })
         .catch((err) => {
-            if (err.code === 'auth/user-not-found') showAlert("No existe ninguna cuenta con este usuario.");
-            else if (err.code === 'auth/wrong-password') showAlert("Contraseña incorrecta.");
+            if (err.code === 'auth/user-not-found') showAlert("Usuario o contraseña incorrectos.");
+            else if (err.code === 'auth/wrong-password') showAlert("Usuario o contraseña incorrectos.");
+            else if (err.code === 'auth/invalid-credential') showAlert("Usuario o contraseña incorrectos.");
             else showAlert("Error al iniciar sesión: " + err.message);
         });
 });
@@ -2107,7 +2096,7 @@ window.showInjuries = function () {
             listEl.innerHTML += `
             <div class="flex justify-between items-center bg-[#1c1c28] p-3 rounded border border-red-900/50">
                 <div class="flex items-center gap-3">
-                    <img src="${p.img}" class="w-8 h-8 rounded-full border border-red-500">
+                    <img loading="lazy" src="${p.img}" class="w-8 h-8 rounded-full border border-red-500">
                     <div>
                         <p class="text-white font-bold text-sm">${p.name}</p>
                         <p class="text-xs text-slate-400">OVR: ${p.ovr} &bull; POS: ${p.pos}</p>
@@ -2147,7 +2136,7 @@ function renderSquad() {
         return `
         <tr>
             <td class="text-center" title="${p.pos === 'POR' ? 'Portero' : p.pos === 'DEF' ? 'Defensa' : p.pos === 'MED' ? 'Mediocampista' : 'Delantero'}"><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img src="${p.img}" class="hidden sm:block w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
+            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img loading="lazy" src="${p.img}" class="hidden sm:block w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
             <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conDisplay}</td>
             <td title="Moral: ${p.morale}%">
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
@@ -2301,7 +2290,7 @@ function renderTactics() {
         benchContainer.innerHTML += `
         <div class="bench-player" data-pid="${p.id}" draggable="true" ondragstart="dragStart(event, ${p.id}, null)" ondragend="dragEnd(event)">
             <div class="flex items-center gap-2">
-                <img src="${p.img}" class="w-6 h-6 rounded-full object-cover border border-[#313145]">
+                <img loading="lazy" src="${p.img}" class="w-6 h-6 rounded-full object-cover border border-[#313145]">
                 <span class="pos-badge ${pClass} text-[8px] w-auto px-1">${p.pos}</span>
                 <span class="text-white text-[10px] font-bold truncate max-w-[80px] block">${nameDisplay}</span>
             </div>
@@ -2513,7 +2502,7 @@ window.filterMarket = function (pos) {
             
             tbody.innerHTML += `
             <tr>
-                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
+                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img loading="lazy" src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="${canRep ? 'text-slate-400' : 'text-red-500 font-bold'} text-center">★ ${p.rep}</td>
@@ -2525,7 +2514,7 @@ window.filterMarket = function (pos) {
             const sellValue = Math.floor(p.priceBasic * 0.6);
             tbody.innerHTML += `
             <tr>
-                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
+                <td class="pl-4"><div class="flex items-center gap-2 font-bold text-white"><img loading="lazy" src="${p.img}" class="w-6 h-6 rounded-full border border-slate-600 flex-shrink-0">${p.name}</div></td>
                 <td class="text-center"><span class="pos-badge ${pClass}">${p.pos}</span></td>
                 <td class="font-bold text-white text-sm bg-slate-800/50 text-center">${p.ovr}</td>
                 <td class="font-mono text-green-400 text-right pr-4 font-bold">+ €${formatM(sellValue)}</td>
@@ -3926,7 +3915,7 @@ window.showPlayerInfo = function (id) {
     const pClass = `pos-${p.pos.toLowerCase()}`;
     const content = document.getElementById('player-info-content');
     content.innerHTML = `
-        <img src="${p.img}" class="w-20 h-20 rounded-full border-4 border-yellow-400 mx-auto mb-3 shadow-lg">
+        <img loading="lazy" src="${p.img}" class="w-20 h-20 rounded-full border-4 border-yellow-400 mx-auto mb-3 shadow-lg">
         <h3 class="text-xl font-bold text-white mb-1">${p.name}</h3>
         <span class="pos-badge ${pClass} mb-4 inline-block">${p.pos}</span>
         <div class="text-4xl font-black text-yellow-400 mb-4 font-gaming">${calcPlayerOVR(p)}</div>
@@ -4434,12 +4423,12 @@ function buildCardHTML(card, index) {
         <div class="pack-card-inner">
             <div class="pack-card-front"></div>
             <div class="pack-card-back ${rarityClass}">
-                <img src="${card.rarityImg}" class="pack-card-bg-img">
+                <img loading="lazy" src="${card.rarityImg}" class="pack-card-bg-img">
                 <div class="pack-card-info-left">
                     <div class="pack-card-ovr">${ovr}</div>
                     <div class="pack-card-pos">${p.pos}</div>
                 </div>
-                <img src="${p.img}" class="pack-card-photo" onerror="this.src='${getAvatar(p.name)}'">
+                <img loading="lazy" src="${p.img}" class="pack-card-photo" onerror="this.src='${getAvatar(p.name)}'">
                 <div class="pack-card-name">${p.name}</div>
                 <div class="pack-card-stats-fifa">
                     <div class="pack-stat-col">
@@ -5229,7 +5218,7 @@ function renderFriendsTab() {
 
                     <div class="flex items-center gap-3">
 
-                        <img src="${getAvatar(f.username)}" class="w-8 h-8 rounded-full border border-[#313145]">
+                        <img loading="lazy" src="${getAvatar(f.username)}" class="w-8 h-8 rounded-full border border-[#313145]">
 
                         <div class="text-xs font-bold text-white uppercase tracking-widest">${f.username}</div>
 

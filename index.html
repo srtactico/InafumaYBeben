@@ -183,7 +183,7 @@
 
         <div class="relative z-10 glass-panel p-6 md:p-10 rounded-2xl max-w-md w-full mx-3 md:mx-auto shadow-[0_0_50px_rgba(250,204,21,0.15)] border-t-4 border-yellow-400"
             style="max-height:90vh;overflow-y:auto;pointer-events:auto;">
-            <img src="images/logo2.png" alt="Inafuma & Beben" class="login-logo-big">
+            <img loading="lazy" src="images/logo2.png" alt="Inafuma & Beben" class="login-logo-big">
             <p class="text-center text-sky-300 mb-8 text-xs font-mono uppercase tracking-widest">Football Manager Engine
             </p>
 
@@ -201,7 +201,7 @@
                 <div class="relative flex items-center">
                     <input type="password" id="log-pass" class="input-fm w-full pr-10" placeholder="Contraseña" required>
                     <button type="button" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none z-10" onclick="togglePasswordVisibility('log-pass', this)">
-                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     </button>
                 </div>
                 <button type="submit" class="w-full btn-action py-4 mt-2 text-sm tracking-widest">ENTRAR AL JUEGO</button>
@@ -212,7 +212,7 @@
                 <div class="relative flex items-center">
                     <input type="password" id="reg-pass" class="input-fm w-full pr-10" placeholder="Contraseña" required>
                     <button type="button" class="absolute right-3 text-slate-400 hover:text-white focus:outline-none z-10" onclick="togglePasswordVisibility('reg-pass', this)">
-                        <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                     </button>
                 </div>
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded mt-2 text-sm uppercase tracking-widest transition">Registrar Cuenta</button>
@@ -578,7 +578,7 @@
                 </div>
                 <div id="pvp-match-narrative" class="fm-narrative-list"></div>
                 <div class="fm-logo-watermark">
-                    <img src="images/logo1.png" alt="Inafuma & Beben" class="fm-logo-bottom">
+                    <img loading="lazy" src="images/logo1.png" alt="Inafuma & Beben" class="fm-logo-bottom">
                 </div>
             </div>
 
@@ -1254,7 +1254,7 @@
                             <!-- Pack 1: 1 Sobre (4 cartas) -->
                             <div class="glass-panel p-6 rounded-xl border-t-4 border-blue-400 text-center hover:scale-105 transition-transform cursor-pointer"
                                 onclick="buyPack('single')">
-                                <img src="images/Sobres.png" alt="Sobre" class="w-20 h-auto mx-auto mb-3">
+                                <img loading="lazy" src="images/Sobres.png" alt="Sobre" class="w-20 h-auto mx-auto mb-3">
                                 <h3 class="text-lg font-gaming text-blue-400 uppercase tracking-widest mb-2">Sobre
                                     Básico</h3>
                                 <p class="text-xs text-slate-400 mb-4">1 sobre — 4 cartas</p>
@@ -1264,7 +1264,7 @@
                             <!-- Pack 2: 3 Sobres (12 cartas) -->
                             <div class="glass-panel p-6 rounded-xl border-t-4 border-yellow-400 text-center hover:scale-105 transition-transform cursor-pointer"
                                 onclick="buyPack('triple')">
-                                <img src="images/Sobres.png" alt="Sobre" class="w-20 h-auto mx-auto mb-3">
+                                <img loading="lazy" src="images/Sobres.png" alt="Sobre" class="w-20 h-auto mx-auto mb-3">
                                 <h3 class="text-lg font-gaming text-yellow-400 uppercase tracking-widest mb-2">Pack
                                     Triple</h3>
                                 <p class="text-xs text-slate-400 mb-4">3 sobres — 12 cartas</p>
@@ -1276,7 +1276,7 @@
                             <!-- Pack 3: 5 Sobres (20 cartas) -->
                             <div class="glass-panel p-6 rounded-xl border-t-4 border-purple-400 text-center hover:scale-105 transition-transform cursor-pointer"
                                 onclick="buyPack('mega')">
-                                <img src="images/Sobres.png" alt="Sobre" class="w-20 h-auto mx-auto mb-3">
+                                <img loading="lazy" src="images/Sobres.png" alt="Sobre" class="w-20 h-auto mx-auto mb-3">
                                 <h3 class="text-lg font-gaming text-purple-400 uppercase tracking-widest mb-2">Mega Pack
                                 </h3>
                                 <p class="text-xs text-slate-400 mb-4">5 sobres — 20 cartas</p>
@@ -1292,31 +1292,31 @@
                                 Probabilidades por carta</h3>
                             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-xs">
                                 <div class="bg-[#111119] p-3 rounded border border-[#313145]">
-                                    <img src="images/Bronce.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
+                                    <img loading="lazy" src="images/Bronce.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
                                     <div class="text-amber-600 font-bold">Bronce</div>
                                     <div class="text-white font-mono text-lg">35%</div>
                                     <div class="text-slate-500 text-[10px]">OVR 70-75</div>
                                 </div>
                                 <div class="bg-[#111119] p-3 rounded border border-[#313145]">
-                                    <img src="images/Plata3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
+                                    <img loading="lazy" src="images/Plata3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
                                     <div class="text-slate-300 font-bold">Plata</div>
                                     <div class="text-white font-mono text-lg">35%</div>
                                     <div class="text-slate-500 text-[10px]">OVR 76-81</div>
                                 </div>
                                 <div class="bg-[#111119] p-3 rounded border border-yellow-500/30">
-                                    <img src="images/Oro3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
+                                    <img loading="lazy" src="images/Oro3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
                                     <div class="text-yellow-400 font-bold">Oro</div>
                                     <div class="text-white font-mono text-lg">20%</div>
                                     <div class="text-slate-500 text-[10px]">OVR 82-87</div>
                                 </div>
                                 <div class="bg-[#111119] p-3 rounded border border-purple-500/30">
-                                    <img src="images/Diamante3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
+                                    <img loading="lazy" src="images/Diamante3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
                                     <div class="text-purple-400 font-bold">Diamante</div>
                                     <div class="text-white font-mono text-lg">8%</div>
                                     <div class="text-slate-500 text-[10px]">OVR 88-93</div>
                                 </div>
                                 <div class="bg-[#111119] p-3 rounded border border-cyan-500/30">
-                                    <img src="images/Icono3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
+                                    <img loading="lazy" src="images/Icono3.png" class="w-12 h-16 mx-auto mb-2 rounded object-cover">
                                     <div class="text-cyan-400 font-bold">Icono</div>
                                     <div class="text-white font-mono text-lg">2%</div>
                                     <div class="text-slate-500 text-[10px]">OVR 94+</div>
@@ -1675,7 +1675,7 @@
                 </div>
                 <div id="match-narrative" class="fm-narrative-list"></div>
                 <div class="fm-logo-watermark">
-                    <img src="images/logo1.png" alt="Inafuma & Beben" class="fm-logo-bottom">
+                    <img loading="lazy" src="images/logo1.png" alt="Inafuma & Beben" class="fm-logo-bottom">
                 </div>
             </div>
 
@@ -2274,7 +2274,7 @@
             <div id="pack-envelope" class="pack-envelope">
                 <div class="pack-envelope-inner">
                     <div class="pack-envelope-body">
-                        <img src="images/Sobres.png" alt="Sobre" class="pack-envelope-img">
+                        <img loading="lazy" src="images/Sobres.png" alt="Sobre" class="pack-envelope-img">
                     </div>
                 </div>
                 <div class="pack-swipe-hint">
@@ -2325,7 +2325,7 @@
             <!-- Panel de información del jugador -->
             <div class="goal-info-box glass-panel">
                 <div class="goal-player-image-container">
-                    <img id="goal-scorer-avatar" src="images/players/default.jpg" alt="Jugador" class="goal-player-img">
+                    <img loading="lazy" id="goal-scorer-avatar" src="images/players/default.jpg" alt="Jugador" class="goal-player-img">
                 </div>
                 <div class="goal-text-details">
                     <div class="goal-minute-badge" id="goal-min-display">42'</div>
@@ -2341,7 +2341,20 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-    <script src="app.js?v=1774257315656"></script>
+    <script src="app.js?v=1774258067185"></script>
+
+    <script>
+    function togglePasswordVisibility(inputId, btn) {
+        var input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = '<svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>';
+        } else {
+            input.type = 'password';
+            btn.innerHTML = '<svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>';
+        }
+    }
+    </script>
 </body>
 
 </html>
