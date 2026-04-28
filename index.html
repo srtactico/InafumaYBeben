@@ -1116,6 +1116,7 @@
                                         <th class="text-center" title="PAS / SAQ (porteros)" style="width:50px">PAS</th>
                                         <th class="text-center" title="DEF / REF (porteros)" style="width:50px">DEF</th>
                                         <th class="text-center" title="PHY / POS (porteros)" style="width:50px">PHY</th>
+                                        <th class="text-center" title="REG / VEL (porteros)" style="width:50px">REG</th>
                                     </tr>
                                 </thead>
                                 <tbody id="squad-tbody"></tbody>
@@ -1836,12 +1837,16 @@
                 <div class="w-1/3 flex flex-col gap-6">
                     <div class="bg-[#111119] p-5 rounded-xl border border-[#313145]">
                         <h3 class="text-xs text-blue-400 font-bold uppercase mb-3 tracking-widest">Añadir Mánager</h3>
+                        <div class="mb-4 text-center border-b border-[#313145] pb-3">
+                            <div class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Tu Código de Amigo</div>
+                            <div id="my-friend-code" class="text-xl font-mono text-yellow-400 font-bold select-all cursor-pointer" onclick="navigator.clipboard.writeText(this.innerText); showAlert('Código copiado');">--------</div>
+                        </div>
                         <div class="flex flex-col gap-2 relative">
-                            <input type="text" id="friend-search-input" class="input-fm text-xs"
-                                placeholder="Nombre de usuario a buscar...">
+
+                            <input type="text" id="friend-search-input" class="input-fm text-xs text-center font-mono uppercase" placeholder="CÓDIGO (8 CARACT.)" maxlength="8">
                             <button onclick="searchFriends()" id="btn-search-friends"
                                 class="btn-action w-full py-2 text-[10px] tracking-widest bg-blue-600 hover:bg-blue-500 transition">
-                                BUSCAR MÁNAGER
+                                AÑADIR POR CÓDIGO
                             </button>
                             <!-- Search Results Container -->
                             <div id="friend-search-results" class="hidden mt-2 p-2 bg-[#0e0e15] border border-[#313145] rounded-xl max-h-48 overflow-y-auto custom-scrollbar flex flex-col gap-2">
@@ -2341,6 +2346,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="players_db.js"></script>
     <script src="app.js?v=1774258067185"></script>
 
     <script>

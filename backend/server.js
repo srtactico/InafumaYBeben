@@ -9,9 +9,20 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const admin = require('firebase-admin');
+
+// Inicializar Firebase Admin
+const serviceAccount = require('./key/serviceaccountkey.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+const db = admin.firestore();
+
+const { PLAYERS_DB } = require('../players_db.js');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -704,6 +715,155 @@ io.on('connection', (socket) => {
             }
         }
     });
+});
+
+/* =========================================================================
+   ECONOMÍA — Endpoints seguros
+   ========================================================================= */
+app.post('/api/buy-pack', async (req, res) => {
+    try {
+        const { userId, packType } = req.body;
+        // Require auth header for production:
+        const token = req.headers.authorization?.split('Bearer ')[1];
+        if (!token) return res.status(401).json({ error: "No token provided" });
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        if (decodedToken.uid !== userId) return res.status(403).json({ error: "Unauthorized" });
+        
+        if (!userId || !packType) {
+            return res.status(400).json({ error: "Missing parameters" });
+        }
+
+        const packPrices = {
+            'basic': 15000000,
+            'premium': 1500
+        };
+
+        if (packPrices[packType] === undefined) {
+            return res.status(400).json({ error: "Invalid pack type" });
+        }
+
+        const cost = packPrices[packType];
+        
+        const result = await db.runTransaction(async (transaction) => {
+            const economyRef = db.collection('users').doc(userId).collection('data').doc('economy');
+            const doc = await transaction.get(economyRef);
+            
+            if (!doc.exists) {
+                throw new Error("Economy data not found");
+            }
+            
+            const economyData = doc.data();
+            let coins = economyData.coins || 0;
+            let prem = economyData.prem || 0;
+            
+            if (packType === 'basic') {
+                if (coins < cost) throw new Error("Not enough coins");
+                coins -= cost;
+            } else if (packType === 'premium') {
+                if (prem < cost) throw new Error("Not enough premium coins");
+                prem -= cost;
+            }
+            
+            const drawnPlayers = [];
+            for (let i = 0; i < 3; i++) {
+                const randomPlayer = PLAYERS_DB[Math.floor(Math.random() * PLAYERS_DB.length)];
+                drawnPlayers.push(randomPlayer.id);
+            }
+            
+            transaction.update(economyRef, { coins, prem });
+            
+            const squadRef = db.collection('users').doc(userId).collection('data').doc('squad');
+            const squadDoc = await transaction.get(squadRef);
+            
+            let roster = [];
+            if (squadDoc.exists) {
+                roster = squadDoc.data().roster || [];
+            }
+            
+            const newPlayers = drawnPlayers.map(id => {
+                const p = PLAYERS_DB.find(x => x.id === id);
+                return { ...p, uniqueId: p.id + '_' + Date.now() + Math.random().toString(36).substr(2, 5) };
+            });
+            
+            roster.push(...newPlayers);
+            transaction.set(squadRef, { roster }, { merge: true });
+            
+            return { drawnPlayers: newPlayers, coins, prem };
+        });
+        
+        res.json({ success: true, ...result });
+
+    } catch (error) {
+        console.error("Pack error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/buy-player', async (req, res) => {
+    try {
+        const { userId, playerId, currency } = req.body;
+        const token = req.headers.authorization?.split('Bearer ')[1];
+        if (!token) return res.status(401).json({ error: "No token provided" });
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        if (decodedToken.uid !== userId) return res.status(403).json({ error: "Unauthorized" });
+
+        if (!userId || !playerId || !currency) {
+            return res.status(400).json({ error: "Missing parameters" });
+        }
+
+        const playerToBuy = PLAYERS_DB.find(p => p.id === playerId);
+        if (!playerToBuy) {
+            return res.status(404).json({ error: "Player not found" });
+        }
+
+        const cost = currency === 'basic' ? playerToBuy.priceBasic : playerToBuy.pricePrem;
+
+        const result = await db.runTransaction(async (transaction) => {
+            const economyRef = db.collection('users').doc(userId).collection('data').doc('economy');
+            const doc = await transaction.get(economyRef);
+            
+            if (!doc.exists) {
+                throw new Error("Economy data not found");
+            }
+            
+            const economyData = doc.data();
+            let coins = economyData.coins || 0;
+            let prem = economyData.prem || 0;
+            
+            if (currency === 'basic') {
+                if (coins < cost) throw new Error("Not enough coins");
+                coins -= cost;
+            } else if (currency === 'premium') {
+                if (prem < cost) throw new Error("Not enough premium coins");
+                prem -= cost;
+            } else {
+                throw new Error("Invalid currency");
+            }
+            
+            transaction.update(economyRef, { coins, prem });
+            
+            const squadRef = db.collection('users').doc(userId).collection('data').doc('squad');
+            const squadDoc = await transaction.get(squadRef);
+            
+            let roster = [];
+            if (squadDoc.exists) {
+                roster = squadDoc.data().roster || [];
+            }
+            
+            const newPlayer = { ...playerToBuy, uniqueId: playerToBuy.id + '_' + Date.now() + Math.random().toString(36).substr(2, 5) };
+            roster.push(newPlayer);
+            
+            transaction.set(squadRef, { roster }, { merge: true });
+            
+            return { player: newPlayer, coins, prem };
+        });
+        
+        res.json({ success: true, ...result });
+
+    } catch (error) {
+        console.error("Buy player error:", error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 /* =========================================================================

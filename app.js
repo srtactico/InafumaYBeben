@@ -12,156 +12,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-/* =========================================================================
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    console.error('Global Error:', msg, 'at', lineNo, ':', columnNo);
+    return false;
+};
 
 
-   BASE DE DATOS: JUGADORES Y AVATARES
-   ========================================================================= */
 function getAvatar(name) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true`; }
+function escapeHTML(str) {
+    if (!str || typeof str !== 'string') return str;
+    const p = document.createElement('p');
+    p.textContent = str;
+    return p.innerHTML;
+}
 
-const PLAYERS_DB = [
-    { id: 101, name: "Lionel Messi", pos: "DEL", pac: 80, sho: 93, pas: 94, def: 30, phy: 65, rep: 5000, priceBasic: 150000000, pricePrem: 12000, img: "https://us-tuna-sounds-images.voicemod.net/f0a3dd8a-eea8-4f46-9e4b-26637d97899c-1682820619597.jpeg" },
-    { id: 102, name: "Cristiano Ronaldo", pos: "DEL", pac: 82, sho: 95, pas: 80, def: 35, phy: 85, rep: 5000, priceBasic: 140000000, pricePrem: 11000, img: "https://i.pinimg.com/236x/fc/16/9c/fc169c4de125f69c56bf67c9ef03d931.jpg" },
-    { id: 103, name: "Kylian Mbappé", pos: "DEL", pac: 99, sho: 92, pas: 85, def: 35, phy: 78, rep: 4500, priceBasic: 135000000, pricePrem: 10000, img: "https://pbs.twimg.com/media/FUMiCSJXEAAHdvH.jpg" },
-    { id: 201, name: "Kevin De Bruyne", pos: "MED", pac: 72, sho: 85, pas: 98, def: 65, phy: 75, rep: 4800, priceBasic: 110000000, pricePrem: 9000, img: "https://i.redd.it/ekbnqb2za2y51.jpg" },
-    { id: 301, name: "Virgil van Dijk", pos: "DEF", pac: 78, sho: 60, pas: 75, def: 95, phy: 90, rep: 4500, priceBasic: 95000000, pricePrem: 7800, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGWdbul4YolKhJhyNFg6s3G57zUScIbryrtw&s" },
-    { id: 401, name: "Thibaut Courtois", pos: "POR", sal: 87, par: 93, saq: 84, ref: 92, vel: 84, posi: 94, rep: 4000, priceBasic: 85000000, pricePrem: 6500, img: "https://www.clarin.com/2022/05/28/-h5dvaCni_360x240__1.jpg" },
-    { id: 104, name: "Vini", pos: "DEL", pac: 95, sho: 86, pas: 85, def: 30, phy: 70, rep: 3500, priceBasic: 95000000, pricePrem: 7500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt8XM1bPlLnxJiwtXA-dRI0m2_JFiF06AOCw&s" },
-    { id: 202, name: "Jude Bellingham", pos: "MED", pac: 82, sho: 85, pas: 88, def: 78, phy: 85, rep: 4500, priceBasic: 105000000, pricePrem: 8500, img: "https://img.asmedia.epimg.net/resizer/v2/A43ZCIYQ45GOPD6RSU4BMQDJKA.jpg?auth=28955647f8c2746ddacbcaef794724da6461afeb5818292923b1c8266be15a5e&width=360" },
-    { id: 302, name: "Antonio Rüdiger", pos: "DEF", pac: 85, sho: 40, pas: 70, def: 90, phy: 92, rep: 3500, priceBasic: 75000000, pricePrem: 6000, img: "https://images7.memedroid.com/images/UPLOADED575/652d60841d73b.jpeg" },
-    { id: 402, name: "Alisson Becker", pos: "POR", sal: 90, par: 91, saq: 88, ref: 90, vel: 85, posi: 90, rep: 3000, priceBasic: 65000000, pricePrem: 5000, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUODxT9kUGcLFOAQG-xYCweQphUsebWt7whg&s" },
-    { id: 105, name: "A. Griezmann", pos: "DEL", pac: 80, sho: 85, pas: 88, def: 50, phy: 70, rep: 2000, priceBasic: 55000000, pricePrem: 4500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6Xl8wrodmxAQjKIMaHo8yXTA_1r23KaTsuw&s" },
-    { id: 203, name: "Pedri González", pos: "MED", pac: 78, sho: 70, pas: 92, def: 68, phy: 65, rep: 3000, priceBasic: 75000000, pricePrem: 6000, img: "https://esportbase.valenciaplaza.com/wp-content/uploads/2021/08/E8MPi_LWUAY2YvY.jpg" },
-    { id: 304, name: "Dani Carvajal", pos: "DEF", pac: 80, sho: 50, pas: 80, def: 82, phy: 80, rep: 800, priceBasic: 20000000, pricePrem: 1500, img: "https://pbs.twimg.com/media/GSeKCF4XMAAILjg.jpg" },
-    { id: 403, name: "Unai Simón", pos: "POR", sal: 82, par: 84, saq: 85, ref: 83, vel: 80, posi: 84, rep: 400, priceBasic: 12000000, pricePrem: 900, img: "https://assets.goal.com/images/v3/blt58f6b3a15aac644b/0b605ad106ff7459d79745dd71267d9de5783cb3.png?auto=webp&format=pjpg&width=3840&quality=60" },
-    { id: 506, name: "Neymar", pos: "DEL", pac: 88, sho: 90, pas: 90, def: 40, phy: 80, rep: 5000, priceBasic: 135000000, pricePrem: 10500, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTaVXm4MJpY-0VUq-dOIU0Bhqa8kXb_0489Q&s" },
-    { id: 507, name: "Luis Suarez", pos: "DEL", pac: 85, sho: 88, pas: 85, def: 50, phy: 85, rep: 5000, priceBasic: 130000000, pricePrem: 10000, img: "https://i.pinimg.com/736x/37/04/b0/3704b045926c5754515afcb51bc5cb37.jpg" },
-    { id: 106, name: "Joselu", pos: "DEL", pac: 65, sho: 82, pas: 68, def: 40, phy: 82, rep: 800, priceBasic: 5000000, pricePrem: 400, img: "https://estaticos-cdn.prensaiberica.es/clip/916e8357-aa8e-450f-95d7-0fd46b11ccf1_source-aspect-ratio_default_0.jpg" },
-    { id: 107, name: "Borja Iglesias", pos: "DEL", pac: 60, sho: 80, pas: 65, def: 35, phy: 85, rep: 500, priceBasic: 4000000, pricePrem: 300, img: "https://static.eldiario.es/clip/dc7c24bc-4e9b-46fa-b0d7-bd9080e2986a_16-9-discover-aspect-ratio_default_1134172.jpg" },
-    { id: 108, name: "Hugo Duro", pos: "DEL", pac: 75, sho: 75, pas: 65, def: 40, phy: 75, rep: 500, priceBasic: 3000000, pricePrem: 200, img: "https://image.ondacero.es/clipping/cmsimages02/2024/01/23/BA3CE66A-7976-4522-95D4-3B094E6A5BCB/hugo-duro_103.jpg?crop=600,450,x137,y0&width=1200&height=900&optimize=low&format=webply" },
-    { id: 204, name: "Sergi Darder", pos: "MED", pac: 68, sho: 75, pas: 80, def: 70, phy: 70, rep: 600, priceBasic: 4000000, pricePrem: 300, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEyOd-ScVKgWFmy4Uwuf5Q20jDrEOFvmHi4w&s" },
-    { id: 205, name: "Isco Alarcón", pos: "MED", pac: 62, sho: 78, pas: 85, def: 45, phy: 60, rep: 700, priceBasic: 5000000, pricePrem: 400, img: "https://www.mundodeportivo.com/files/og_thumbnail/uploads/2021/01/20/60e70648d9fe5.jpeg" },
-    { id: 206, name: "Pepelu", pos: "MED", pac: 60, sho: 65, pas: 78, def: 75, phy: 75, rep: 600, priceBasic: 2500000, pricePrem: 150, img: "https://www.valenciacf.com/public/Image/2023/12/nr30b5l0gsuquemyeyxbqsuc2g74drmjrmwvgont4jasseos8edirodhdhuwssn8.jpg" },
-    { id: 207, name: "Óscar Trejo", pos: "MED", pac: 65, sho: 70, pas: 78, def: 50, phy: 60, rep: 500, priceBasic: 1500000, pricePrem: 100, img: "https://killerasturias.com/sites/default/files/2021-12/trejo.jpeg" },
-    { id: 305, name: "Pau Cubarsí", pos: "DEF", pac: 75, sho: 40, pas: 78, def: 80, phy: 75, rep: 800, priceBasic: 8000000, pricePrem: 600, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHJk1Gw8cjNu4w5mlv3kCZFNJi3wZhCeMj8g&s" },
-    { id: 306, name: "David García", pos: "DEF", pac: 65, sho: 45, pas: 60, def: 82, phy: 85, rep: 400, priceBasic: 4500000, pricePrem: 350, img: "https://img.a.transfermarkt.technology/portrait/big/298589-1740664950.jpg?lm=1" },
-    { id: 307, name: "Pablo Maffeo", pos: "DEF", pac: 82, sho: 55, pas: 70, def: 75, phy: 78, rep: 550, priceBasic: 2500000, pricePrem: 200, img: "https://i.pinimg.com/474x/16/3c/ff/163cffab021629302f8314665c2c1582.jpg" },
-    { id: 308, name: "Jesús Navas", pos: "DEF", pac: 75, sho: 60, pas: 80, def: 70, phy: 60, rep: 600, priceBasic: 1500000, pricePrem: 100, img: "https://pbs.twimg.com/media/Fwgt6PSXwAEvYWv.jpg" },
-    { id: 309, name: "Harry Maguire", pos: "DEF", pac: 48, sho: 50, pas: 65, def: 78, phy: 85, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-13/fd5957a5268b45d4b5b0640c78980701.webp" },
-    { id: 404, name: "David Soria", pos: "POR", sal: 78, par: 82, saq: 76, ref: 81, vel: 79, posi: 84, rep: 650, priceBasic: 3000000, pricePrem: 200, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRE2H0vymmNHD9tmRyLPodRo7GwSRBne7pUg&s" },
-    { id: 405, name: "P. Gazzaniga", pos: "POR", sal: 80, par: 83, saq: 78, ref: 82, vel: 79, posi: 84, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/97/b5/a397b5f830894abb925a36ae74652e35.jpg" },
-    { id: 601, name: "Ximo Navarro", pos: "DEF", pac: 74, sho: 55, pas: 62, def: 70, phy: 72, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/G61mZWUXMAAC_RV.jpg" },
-    { id: 602, name: "Arnau Comas", pos: "DEF", pac: 68, sho: 34, pas: 55, def: 68, phy: 72, rep: 400, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTSykN3Bo3xa42HvnRRxbZTyCiUGkYYDBTGQ&s" },
-    { id: 603, name: "Julian Alvarez", pos: "DEL", pac: 86, sho: 88, pas: 82, def: 58, phy: 80, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://fotos.perfil.com//2024/08/12/900/0/meme-julian-1852788.jpg" },
-    { id: 604, name: "G. Donnarumma", pos: "POR", sal: 85, par: 89, saq: 82, ref: 90, vel: 84, posi: 92, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhXZqkSPTOqr5S0Vk7--yubJNZCF-SQU7vmg&s" },
-    { id: 605, name: "David Raya", pos: "POR", sal: 90, par: 86, saq: 89, ref: 85, vel: 84, posi: 88, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/GxRQV1cXIAMBRVr.jpg" },
-    { id: 606, name: "Dibu Martinez", pos: "POR", sal: 86, par: 92, saq: 84, ref: 90, vel: 83, posi: 93, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://fastly.restofworld.org/uploads/2023/04/Meme-2-scaled.jpg?width=800&dpr=2&crop=16:9" },
-    { id: 607, name: "Diogo Costa", pos: "POR", sal: 84, par: 87, saq: 82, ref: 86, vel: 83, posi: 88, rep: 1700, priceBasic: 2000000, pricePrem: 150, img: "https://img.iol.pt/image/id/66846a39d34ebf9bbb3f59cc/" },
-    { id: 608, name: "Iker Casillas", pos: "POR", sal: 89, par: 93, saq: 82, ref: 95, vel: 90, posi: 97, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/6d/b3/50/6db3509b016a26789e3825a9da183acf.jpg" },
-    { id: 609, name: "Buffon", pos: "POR", sal: 90, par: 95, saq: 84, ref: 93, vel: 87, posi: 97, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCawnsEmsDOD-7UAN_XKWACheyi7RCdPT8yg&s" },
-    { id: 610, name: "D. Maradona", pos: "MED", pac: 92, sho: 96, pas: 97, def: 42, phy: 75, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://images3.memedroid.com/images/UPLOADED166/5fbe899a8ba4c.jpeg" },
-    { id: 611, name: "Pele", pos: "DEL", pac: 96, sho: 96, pas: 94, def: 60, phy: 78, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://imgcdn.stablediffusionweb.com/2024/11/15/1c9b5037-d3ff-4163-8105-b6db827f44a8.jpg" },
-    { id: 612, name: "Samuel Eto'o", pos: "DEL", pac: 94, sho: 92, pas: 82, def: 45, phy: 80, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAB-RUzgcKTmaQGj0GSU2Pfoo4TcLgLpBqLQ&s" },
-    { id: 613, name: "A. Hakimi", pos: "DEF", pac: 91, sho: 76, pas: 80, def: 78, phy: 79, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FH3edrtWYAYX_zZ.jpg" },
-    { id: 614, name: "M. Cucurella", pos: "DEF", pac: 82, sho: 64, pas: 75, def: 78, phy: 76, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXD9oA8nNKRBVPEXqWMJFM1bB_Seuplqw7xA&s" },
-    { id: 615, name: "Nuno Mendes", pos: "DEF", pac: 88, sho: 70, pas: 77, def: 79, phy: 78, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://www.francebleu.fr/pikapi/images/cb910f4d-158e-474c-939c-18dc563d5e15/1200x680?webp=false" },
-    { id: 616, name: "Pedro Porro", pos: "DEF", pac: 85, sho: 72, pas: 78, def: 75, phy: 74, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJmvlEqLdo_RCce7P8HotGGl_WC5wvjVtq5A&s" },
-    { id: 617, name: "Willian Pancho", pos: "DEF", pac: 76, sho: 40, pas: 62, def: 82, phy: 83, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/661171-1696508666.jpg?lm=1" },
-    { id: 618, name: "Vitinha", pos: "MED", pac: 82, sho: 74, pas: 86, def: 74, phy: 70, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCT13H1TMBGYJ1rMl_35jZqUxr3o_PmmDn0g&s" },
-    { id: 619, name: "M. Merino", pos: "MED", pac: 71, sho: 78, pas: 82, def: 82, phy: 84, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5_1m1nTPpKD11pwCMHAqWn6zesv7iup5YAg&s" },
-    { id: 620, name: "B. Fernandes", pos: "MED", pac: 75, sho: 86, pas: 89, def: 66, phy: 74, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1pNq4eEDxBqaqFjtuBRtdzaWT-NHWWsau2Q&s" },
-    { id: 621, name: "E. Fernandez", pos: "MED", pac: 74, sho: 74, pas: 85, def: 80, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThu830lfg-Hvon71p40_8eLFLN5X4QhCkD9w&s" },
-    { id: 622, name: "D. Rice", pos: "MED", pac: 72, sho: 72, pas: 82, def: 87, phy: 86, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShw-iupY_AGXerLPmfcy1bJcrOk-SDYGXRbw&s" },
-    { id: 623, name: "Lamine Yamal", pos: "DEL", pac: 90, sho: 80, pas: 82, def: 40, phy: 60, rep: 0, priceBasic: 2000000, pricePrem: 150, img: "https://www.ole.us/2025/10/26/3hcMxXdOM_720x0__1.jpg" },
-    { id: 624, name: "Raphinha", pos: "DEL", pac: 88, sho: 82, pas: 80, def: 48, phy: 70, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxwmPw0vkp_b51TfFMkfTn3mCC82APOp42iw&s" },
-    { id: 625, name: "M. Salah", pos: "DEL", pac: 89, sho: 88, pas: 86, def: 45, phy: 76, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgFt3Vsmv0QAT3X_BOT1_zNjHetnPPF7p1dA&s" },
-    { id: 626, name: "H. Kane", pos: "DEL", pac: 65, sho: 93, pas: 84, def: 49, phy: 82, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQ5uQoutLKwD97-lw0wm-p_2ZmSSsAYudeHA&s" },
-    { id: 627, name: "E. Haaland", pos: "DEL", pac: 88, sho: 92, pas: 70, def: 45, phy: 88, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/36/0f/24/360f24adf34c1bedcf2a29e8e85788e7.jpg" },
-    { id: 628, name: "Lautaro", pos: "DEL", pac: 83, sho: 89, pas: 78, def: 50, phy: 85, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-PXpk7GSC6rXrdXJDrPpMqQhhu4o1GtQGCQ&s" },
-    { id: 629, name: "K. Kvaratskhelia", pos: "DEL", pac: 89, sho: 84, pas: 82, def: 45, phy: 72, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://witty-images.s3.amazonaws.com/Z/G/K/703ef693-1f62-4f29-b6da-4da53fb29981-board.jpg" },
-    { id: 630, name: "Désiré Doué", pos: "DEL", pac: 88, sho: 80, pas: 78, def: 50, phy: 74, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/tSFkSorTlbUAAAAe/dou%C3%A9-d%C3%A9sir%C3%A9.png" },
-    { id: 631, name: "Falcao", pos: "DEL", pac: 82, sho: 94, pas: 72, def: 40, phy: 86, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F57dq38WMAAEmcj.jpg" },
-    { id: 632, name: "Benzema", pos: "DEL", pac: 82, sho: 92, pas: 87, def: 45, phy: 82, rep: 1000, priceBasic: 2000000, pricePrem: 150, img: "https://media.tycsports.com/files/2022/03/09/400134/benzema-meme-residente-_862x485.jpg?v=1" },
-    { id: 633, name: "G. Bale", pos: "DEL", pac: 95, sho: 91, pas: 85, def: 62, phy: 86, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/e9/ff/49/e9ff49d248ac43b973451802b01093c0.jpg" },
-    { id: 634, name: "Lewandowski", pos: "DEL", pac: 75, sho: 88, pas: 79, def: 44, phy: 84, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/3f/74/d0/3f74d078c7086bddeba9780da7ed550a.jpg" },
-    { id: 635, name: "SzczÄ™sny", pos: "POR", sal: 86, par: 89, saq: 83, ref: 88, vel: 84, posi: 92, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.diez.hn/binrepository/465x444/0c0/0d0/none/3014757/VVNE/screenshot-20250305-152209_10084737_20250305165700.jpg" },
-    { id: 636, name: "Rodri", pos: "MED", pac: 66, sho: 80, pas: 86, def: 87, phy: 85, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://s1.abcstatics.com/abc/www/multimedia/gente/2024/06/15/rodri-espana-kYNG-U603206132602BCB-1024x512@diario_abc.jpg" },
-    { id: 637, name: "O. Dembélé", pos: "DEL", pac: 92, sho: 84, pas: 80, def: 45, phy: 65, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://i.ytimg.com/vi/JFp4iIMjnXk/oardefault.jpg?sqp=-oaymwEiCJwEENAFSFqQAgHyq4qpAxEIARUAAAAAJQAAyEI9AICiQw==&rs=AOn4CLCCQbFaofMRWdfxkdBUpu4KCDzNRA&usqp=CCk" },
-    { id: 638, name: "Kepa", pos: "POR", sal: 82, par: 83, saq: 80, ref: 82, vel: 81, posi: 84, rep: 800, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/09/6a/b1/096ab18fd2ee6cd6b22dadb3a067d9ae.jpg" },
-    { id: 639, name: "J. Musiala", pos: "MED", pac: 88, sho: 83, pas: 86, def: 62, phy: 70, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://pics.craiyon.com/2023-09-19/999ca101a2a64d088ca1cbef7e92a44b.webp" },
-    { id: 640, name: "A. Mac Allister", pos: "MED", pac: 74, sho: 80, pas: 86, def: 72, phy: 78, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/yWz8WZejSBD6u6YZwEB4srTKIXB.jpg" },
-    { id: 641, name: "F. Valverde", pos: "MED", pac: 88, sho: 82, pas: 84, def: 80, phy: 82, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/0tyxnnjccfq81.png" },
-    { id: 642, name: "J. Kimmich", pos: "MED", pac: 70, sho: 76, pas: 88, def: 87, phy: 79, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0717.jpg/960px-20180602_FIFA_Friendly_Match_Austria_vs._Germany_Joshua_Kimmich_850_0717.jpg" },
-    { id: 643, name: "N. Barella", pos: "MED", pac: 81, sho: 78, pas: 84, def: 83, phy: 80, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://sempreinter.com/wp-content/uploads/2021/10/Nicolo-Barella-3-1-scaled-e1633615982244.jpg" },
-    { id: 644, name: "Marquinhos", pos: "DEF", pac: 79, sho: 56, pas: 74, def: 88, phy: 82, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCshNm3OJ3zVFJV6peJeERZjQAH2h_tfJa-Q&s" },
-    { id: 645, name: "P. Foden", pos: "MED", pac: 86, sho: 86, pas: 85, def: 57, phy: 63, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/originals/30/8b/84/308b846c2e56ef02f9b18696256cc99e.jpg" },
-    { id: 646, name: "C. Palmer", pos: "MED", pac: 79, sho: 84, pas: 85, def: 55, phy: 65, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://i.kym-cdn.com/photos/images/newsfeed/002/838/629/39b.jpg" },
-    { id: 647, name: "G. Rodrygo", pos: "DEL", pac: 91, sho: 83, pas: 81, def: 40, phy: 68, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/d907b94d69c2ab52af28b044525c2111.jpg" },
-    { id: 648, name: "N. Williams", pos: "DEL", pac: 94, sho: 79, pas: 77, def: 40, phy: 65, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5YAsrMJ6pG4jOObFRxvCkqMXDKVpNmH5hSA&s" },
-    { id: 649, name: "I. Williams", pos: "DEL", pac: 93, sho: 82, pas: 72, def: 45, phy: 80, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/FFjNDgrXwAUaFsi.jpg" },
-    { id: 650, name: "R. Leão", pos: "DEL", pac: 94, sho: 85, pas: 78, def: 35, phy: 78, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/F3LB8dmXIAAfxwg.jpg" },
-    { id: 651, name: "Mamardashvili", pos: "POR", sal: 83, par: 90, saq: 78, ref: 91, vel: 84, posi: 90, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzZ_d0xvOOYRimgMMepoOivPoYEmSCQ7dFDg&s" },
-    { id: 652, name: "F. de Jong", pos: "MED", pac: 82, sho: 72, pas: 88, def: 80, phy: 78, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2022/09/23/16639478284639.jpg" },
-    { id: 653, name: "Sergio Ramos", pos: "DEF", pac: 78, sho: 70, pas: 75, def: 90, phy: 88, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2n297NFs8qOJeCSars9pa81ZkOrHc-pniKg&s" },
-    { id: 654, name: "Varane", pos: "DEF", pac: 84, sho: 49, pas: 68, def: 89, phy: 84, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/profile_images/1426617019928129537/Hq5_AcCB_400x400.jpg" },
-    { id: 655, name: "Puyol", pos: "DEF", pac: 72, sho: 50, pas: 65, def: 92, phy: 88, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.rodneypikeart.com/wp-content/uploads/2017/06/Carles-Puyol-1024x768.jpg" },
-    { id: 656, name: "Marcelo", pos: "DEF", pac: 83, sho: 75, pas: 84, def: 82, phy: 78, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://static.wikia.nocookie.net/memes-pedia/images/6/6a/Marselo.png/revision/latest?cb=20200108165346&path-prefix=es" },
-    { id: 657, name: "Xavi Alonso", pos: "MED", pac: 65, sho: 78, pas: 92, def: 86, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://estaticos-cdn.prensaiberica.es/clip/bc2feed5-654c-41c7-b3fe-c272f4b34e89_alta-libre-aspect-ratio_default_0.jpg" },
-    { id: 658, name: "Xavi Hernandez", pos: "MED", pac: 70, sho: 75, pas: 96, def: 83, phy: 73, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://phantom-marca.unidadeditorial.es/2bdef96b9027219076a397ae474ba34b/resize/640/assets/multimedia/imagenes/2023/04/27/16825702042066.jpg" },
-    { id: 659, name: "Iniesta", pos: "MED", pac: 82, sho: 81, pas: 94, def: 72, phy: 68, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI9TnfBVTllJGY4zv9P6sezGHd0PHv2HQSsg&s" },
-    { id: 660, name: "Ronaldo", pos: "DEL", pac: 96, sho: 96, pas: 90, def: 45, phy: 85, rep: 6000, priceBasic: 2000000, pricePrem: 150, img: "https://images.meme-arsenal.com/a4ef20509403920815bbf03d9eb0aa37.jpg" },
-    { id: 661, name: "R. Carlos", pos: "DEF", pac: 92, sho: 82, pas: 86, def: 85, phy: 83, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Ne75q2lCt7jwRD5qduInCr1-y7as-9LllA&s" },
-    { id: 662, name: "Casemiro", pos: "MED", pac: 60, sho: 75, pas: 80, def: 91, phy: 90, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTG-RxJKaO-o1-0QYIshQ_6eHZC8j7oK-l90w&s" },
-    { id: 663, name: "L. Modric", pos: "MED", pac: 76, sho: 80, pas: 92, def: 82, phy: 70, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/tiny-lukita-modric-10-v0-1pmpht7peql81.jpg?width=1080&format=pjpg&auto=webp&s=d066323331a19f7c6d45835386f58fc6c576ce52" },
-    { id: 664, name: "T. Kroos", pos: "MED", pac: 65, sho: 86, pas: 94, def: 78, phy: 74, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRGgkk2_6qgedwmN_EBqV9qI3MyfPf5PiJ_Q&s" },
-    { id: 665, name: "S. Busquets", pos: "MED", pac: 58, sho: 70, pas: 88, def: 90, phy: 82, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQe8BkkQGlAtcr2FFmWrFZYdsdksAFbAunnVA&s" },
-    { id: 666, name: "Pique", pos: "DEF", pac: 67, sho: 61, pas: 74, def: 90, phy: 84, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4GCkYabKHAotXda3YmdbNY_rtkBQvcnWKfQ&s" },
-    { id: 667, name: "Mascherano", pos: "DEF", pac: 72, sho: 64, pas: 78, def: 89, phy: 86, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg/330px-Javier_Mascherano_NE_Revolution_Inter_Miami_7.9.25-040_%28cropped%29.jpg" },
-    { id: 668, name: "Dybala", pos: "DEL", pac: 82, sho: 84, pas: 85, def: 45, phy: 65, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTn0mgIG9lOBdjb2v_MNS3Wsl1HtUI_YXZrYQ&s" },
-    { id: 669, name: "Jordi Alba", pos: "DEF", pac: 90, sho: 69, pas: 82, def: 84, phy: 75, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUzYS01Drh0XErHlv_yaYphbhO22aW2th2nw&s-" },
-    { id: 670, name: "Kun Agüero", pos: "DEL", pac: 88, sho: 92, pas: 85, def: 40, phy: 78, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRb9WAhXRvqZsH3Z9OXXS4kZxu5Jg09MB13qw&s" },
-    { id: 671, name: "Ter Stegen", pos: "POR", sal: 91, par: 88, saq: 94, ref: 87, vel: 84, posi: 90, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://barcauniversal.com/wp-content/uploads/2025/08/fc-barcelona-v-ssc-napoli-round-of-16-second-leg-uefa-champions-league-2023-24-scaled.jpg" },
-    { id: 672, name: "Joan Garcia", pos: "POR", sal: 79, par: 81, saq: 77, ref: 80, vel: 80, posi: 83, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfzQMiGiz4Wo3cnv-1PB4oIHgSOg_GNwDIzw&s" },
-    { id: 673, name: "Godin", pos: "DEF", pac: 64, sho: 52, pas: 65, def: 90, phy: 87, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://media.themoviedb.org/t/p/w235_and_h235_face/gE5FVq48t1SIwOIwPtXwPWBCbBU.jpg" },
-    { id: 674, name: "Filipe Luis", pos: "DEF", pac: 78, sho: 65, pas: 76, def: 84, phy: 79, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/21725-1447152742.jpg?lm=1" },
-    { id: 675, name: "Koke", pos: "MED", pac: 70, sho: 75, pas: 85, def: 75, phy: 75, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://album.mediaset.es/eimg/2025/11/11/koke-okkkkjpg-jpg-16-9-aspect-ratio-default-0_da39.jpg" },
-    { id: 676, name: "A. Correa", pos: "DEL", pac: 86, sho: 82, pas: 78, def: 45, phy: 70, rep: 1500, priceBasic: 2000000, pricePrem: 150, img: "https://media.tenor.com/N__bujihGRsAAAAe/angel-correa.png" },
-    { id: 677, name: "Joao Felix", pos: "DEL", pac: 83, sho: 82, pas: 82, def: 40, phy: 68, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://phantom.estaticos-marca.com/dc91d80f711c73e0b796c35691b638b2/resize/828/f/jpg/assets/multimedia/imagenes/2023/09/19/16951604567922.jpg" },
-    { id: 678, name: "De Paul", pos: "MED", pac: 75, sho: 78, pas: 84, def: 70, phy: 80, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://www.rosario3.com/__export/1684933220601/sites/rosario3/img/2023/05/24/rodrigo_de_paul_crop1684933129163.jpg_682626441.jpg" },
-    { id: 679, name: "Carrasco", pos: "MED", pac: 88, sho: 80, pas: 78, def: 50, phy: 72, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://e00-marca.uecdn.es/assets/multimedia/imagenes/2023/08/04/16911571971081.jpg" },
-    { id: 680, name: "Llorente", pos: "MED", pac: 88, sho: 82, pas: 80, def: 78, phy: 84, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/SOB3XOY3WRAERMRK3MJH7U7YFU.jpg?auth=ef732fc6e1d37995e68a1a1befdcdccd698270be953d1df424d96604f800e362&width=1200&height=1200&smart=true" },
-    { id: 681, name: "Oblak", pos: "POR", sal: 84, par: 93, saq: 80, ref: 90, vel: 83, posi: 98, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://ctxt.es/images/cache/800x540/nocrop/images%7Ccms-image-000023026.jpg" },
-    { id: 682, name: "Savic", pos: "DEF", pac: 62, sho: 40, pas: 60, def: 85, phy: 84, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://www.sportyou.es/blog/wp-content/uploads/2018/05/savic.jpg" },
-    { id: 683, name: "P. Maldini", pos: "DEF", pac: 84, sho: 66, pas: 77, def: 95, phy: 88, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/0a/3b/f5/0a3bf59885969a05c60c999faddd67d0.jpg" },
-    { id: 684, name: "Yashin", pos: "POR", sal: 93, par: 95, saq: 86, ref: 96, vel: 90, posi: 98, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://www.panenka.org/wp-content/uploads/2021/08/Captura-de-pantalla-2021-08-30-a-las-10.31.42-768x432.png" },
-    { id: 685, name: "Cafu", pos: "DEF", pac: 91, sho: 67, pas: 82, def: 90, phy: 86, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://objetos-xlk.estaticos-marca.com/uploads/2025/04/20/680536007f5c8.jpeg" },
-    { id: 686, name: "J. Cruyff", pos: "DEL", pac: 91, sho: 92, pas: 94, def: 50, phy: 75, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/a3/d1/39/a3d1398a01087c93146fd4676c0ef5fe.jpg" },
-    { id: 687, name: "Victor Valdes", pos: "POR", sal: 90, par: 90, saq: 88, ref: 91, vel: 86, posi: 89, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://www.aupaathletic.com/comun/jugadores_fotos/foto_jugador-111.jpg" },
-    { id: 688, name: "Di Stefano", pos: "DEL", pac: 90, sho: 93, pas: 90, def: 65, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://www.tiempoar.com.ar/wp-content/uploads/2024/07/Di-Stefano-como-jugador-en-el-Madrid-500x333.jpg" },
-    { id: 689, name: "F. Hierro", pos: "DEF", pac: 70, sho: 76, pas: 78, def: 91, phy: 86, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://www.footballdatabase.eu/images/photos/players/1998-1999/a_0/380.jpg" },
-    { id: 690, name: "Eusebio", pos: "DEL", pac: 94, sho: 96, pas: 90, def: 42, phy: 80, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://revistalibero.com/cdn/shop/articles/Eusebio.jpg?v=1638445765" },
-    { id: 691, name: "Rooney", pos: "DEL", pac: 82, sho: 91, pas: 88, def: 55, phy: 88, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/CwC0-8cWAAYL-vH.jpg" },
-    { id: 692, name: "A. di Maria", pos: "MED", pac: 91, sho: 86, pas: 89, def: 48, phy: 70, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNvI-TU1G0ikjlwyECWPURX8tdhE35JRp6Rg&s" },
-    { id: 693, name: "Robben", pos: "DEL", pac: 93, sho: 92, pas: 88, def: 40, phy: 75, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/4360-1719545379.jpg?lm=1" },
-    { id: 694, name: "Neuer", pos: "POR", sal: 96, par: 90, saq: 94, ref: 89, vel: 87, posi: 90, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://pbs.twimg.com/media/Gt7lBlbWYAAtHkU.jpg" },
-    { id: 695, name: "R. Gonzalez", pos: "DEL", pac: 85, sho: 92, pas: 84, def: 45, phy: 78, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://fotografias.lasexta.com/clipping/cmsimages01/2020/08/11/6F67F8B9-58F1-469A-9D5B-ACC709494524/104.jpg?crop=500,500,x85,y0&width=1200&height=1200&optimize=low&format=webply" },
-    { id: 696, name: "Roberto Baggio", pos: "DEL", pac: 88, sho: 92, pas: 94, def: 45, phy: 70, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfeFsDWdblOqe9jFlohT500ciFlAmwACd6oA&s" },
-    { id: 697, name: "Thierry Henry", pos: "DEL", pac: 94, sho: 93, pas: 86, def: 50, phy: 82, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/a9/e8/44a9e8e9984c0938dc703c9aa06b8967.jpg" },
-    { id: 698, name: "Ronaldinho", pos: "MED", pac: 91, sho: 93, pas: 95, def: 50, phy: 80, rep: 6000, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCWZ8pH70yhFCCrH20IQhdx-522HpgLVxW5w&s" },
-    { id: 699, name: "F. Puskas", pos: "DEL", pac: 90, sho: 96, pas: 88, def: 40, phy: 78, rep: 4500, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/736x/44/ad/48/44ad4874969ef11e7ecd1024f30a7699.jpg" },
-    { id: 700, name: "Kaká", pos: "MED", pac: 89, sho: 90, pas: 91, def: 60, phy: 75, rep: 3000, priceBasic: 2000000, pricePrem: 150, img: "https://media.printler.com/media/photo/145625-1.jpg?rmode=crop&width=638&height=900" },
-    { id: 701, name: "Ibrahimovic", pos: "DEL", pac: 78, sho: 94, pas: 86, def: 40, phy: 90, rep: 4000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/236x/d1/84/83/d18483dbf5325f469aa715d7d5242afb.jpg" },
-    { id: 702, name: "F. Totti", pos: "DEL", pac: 75, sho: 91, pas: 92, def: 45, phy: 78, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/YXZXGY25YFLJXGLIPSQZMJYZAI.jpg?auth=b6a1ee2164a31bbaf7a7f31029bee76a62f93d1b735978cac1f0c657f9e947f9&width=1472&height=1104&smart=true" },
-    { id: 703, name: "Gundogan", pos: "MED", pac: 69, sho: 80, pas: 88, def: 73, phy: 71, rep: 3500, priceBasic: 2000000, pricePrem: 150, img: "https://i.redd.it/i2ury833z4me1.jpeg" },
-    { id: 704, name: "Camavinga", pos: "MED", pac: 78, sho: 70, pas: 80, def: 82, phy: 82, rep: 2000, priceBasic: 2000000, pricePrem: 150, img: "https://i.pinimg.com/474x/79/7f/60/797f60c83743e3fa97e68665309eb540.jpg" },
-    { id: 705, name: "Grealish", pos: "MED", pac: 76, sho: 78, pas: 85, def: 50, phy: 70, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://media.bolavip.com/wp-content/uploads/sites/18/2024/06/07085826/GettyImages-2155984484-scaled-e1719767995850-714x535.webp" },
-    { id: 706, name: "Endrick", pos: "DEL", pac: 88, sho: 83, pas: 70, def: 30, phy: 72, rep: 2500, priceBasic: 2000000, pricePrem: 150, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQB9gFTaAXauJ8L4rpJtwbpSg5UC4y4-8S-Nw&s" },
-    { id: 707, name: "Guti", pos: "MED", pac: 70, sho: 84, pas: 91, def: 60, phy: 69, rep: 5000, priceBasic: 2000000, pricePrem: 150, img: "https://www.shutterstock.com/editorial/image-editorial/N1zeQe41NaTfgez9NzI3MA==/jose-maria-guti--real-madrid-captain-440nw-7436431bh.jpg" },
-    { id: 708, name: "M. Soriano", pos: "MED", pac: 75, sho: 70, pas: 76, def: 55, phy: 60, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.asmedia.epimg.net/resizer/v2/NZW5M7PSTNGHFDX3XVAOJ3VJZM.jpg?auth=46b53182d8d8c4f71e873ec2e7514488c43b1fc4072f0b11eaea7d705885fbd5&width=1200&height=1200&smart=true" },
-    { id: 709, name: "José Ángel", pos: "MED", pac: 72, sho: 60, pas: 68, def: 74, phy: 72, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://www.bdfutbol.com/i/j/401089h.jpg?v=1717578381" },
-    { id: 710, name: "Mella", pos: "DEL", pac: 85, sho: 65, pas: 65, def: 40, phy: 60, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://assets.laliga.com/squad/2025/t180/p554651/2048x2225/p554651_t180_2025_1_001_000.png" },
-    { id: 711, name: "Luismi Cruz", pos: "DEL", pac: 82, sho: 68, pas: 66, def: 38, phy: 62, rep: 500, priceBasic: 2000000, pricePrem: 150, img: "https://img.a.transfermarkt.technology/portrait/big/610461-1647594517.jpg?lm=1" },
-];
+// PLAYERS_DB is now imported from players_db.js
 
 // === COMPETITIVE RANK CONSTANTS & LOGIC ===
 const RANK_NAMES = [
@@ -514,12 +379,19 @@ window.onload = () => {
 };
 
 function saveState() {
-    if (!state) return;
+    if (!state || !state.team) return;
     const user = auth.currentUser;
     if (user) {
-        // Subir el estado completo a Firestore
-        db.collection('users').doc(user.uid).set(JSON.parse(JSON.stringify(state)))
-            .catch(err => console.error('Error al guardar en Firestore:', err));
+        try {
+            // Verify integrity before saving
+            if (isNaN(state.economy.coins) || state.economy.coins < 0) state.economy.coins = 0;
+            if (isNaN(state.economy.premium) || state.economy.premium < 0) state.economy.premium = 0;
+            
+            db.collection('users').doc(user.uid).set(JSON.parse(JSON.stringify(state)))
+                .catch(err => console.error('Error al guardar en Firestore:', err));
+        } catch (e) {
+            console.error("Critical error in saveState:", e);
+        }
     }
     updateUI();
 }
@@ -628,7 +500,7 @@ window.updatePreviewBadge = function () {
 
     badgeEl.className = `w-24 h-28 club-badge text-sm shadow-lg ${shape}`;
     badgeEl.style.background = bg;
-    badgeEl.innerHTML = name.substring(0, 4).toUpperCase();
+    badgeEl.textContent = name.substring(0, 4).toUpperCase();
 }
 
 const teamInput = document.getElementById('set-team');
@@ -2136,7 +2008,7 @@ function renderSquad() {
         return `
         <tr>
             <td class="text-center" title="${p.pos === 'POR' ? 'Portero' : p.pos === 'DEF' ? 'Defensa' : p.pos === 'MED' ? 'Mediocampista' : 'Delantero'}"><span class="pos-badge ${pClass}">${p.pos}</span></td>
-            <td class="font-bold text-white" title="${p.name}"><div class="flex items-center gap-2"><img loading="lazy" src="${p.img}" class="hidden sm:block w-6 h-6 rounded-full border border-slate-600">${nameDisplay}</div></td>
+            <td class="font-bold text-white" title="${escapeHTML(p.name)}"><div class="flex items-center gap-2"><img loading="lazy" src="${p.img}" class="hidden sm:block w-6 h-6 rounded-full border border-slate-600">${escapeHTML(nameDisplay)}</div></td>
             <td class="font-bold text-[10px] text-center" title="Condición Física: ${p.con}%">${conDisplay}</td>
             <td title="Moral: ${p.morale}%">
                 <div class="w-full h-1.5 bg-slate-700 rounded overflow-hidden"><div class="h-full" style="width:${p.morale}%; background:${moralColor};"></div></div>
@@ -2147,6 +2019,7 @@ function renderSquad() {
             <td class="text-center" title="${p.pos === 'POR' ? 'Saque' : 'Pase'}: ${p.pos === 'POR' ? p.saq : p.pas}">${p.pos === 'POR' ? p.saq : p.pas}</td>
             <td class="text-center" title="${p.pos === 'POR' ? 'Reflejos' : 'Defensa'}: ${p.pos === 'POR' ? p.ref : p.def}">${p.pos === 'POR' ? p.ref : p.def}</td>
             <td class="text-center" title="${p.pos === 'POR' ? 'Posicionamiento' : 'Físico'}: ${p.pos === 'POR' ? p.posi : p.phy}">${p.pos === 'POR' ? p.posi : p.phy}</td>
+            <td class="text-center" title="${p.pos === 'POR' ? 'Velocidad' : 'Regate'}: ${p.pos === 'POR' ? p.vel : (p.reg || Math.round((p.pac + p.pas) / 2))}">${p.pos === 'POR' ? p.vel : (p.reg || Math.round((p.pac + p.pas) / 2))}</td>
         </tr>`;
     });
     tbody.innerHTML = htmlRows.join('');
@@ -3585,7 +3458,8 @@ function runMatchLoop(targetMinute) {
         }
 
         if (eventText) {
-            logDiv.innerHTML += `<div><span class="text-slate-500 font-mono text-xs">${matchState.min}'</span> <span class="text-white">${eventText}</span></div>`;
+            const safeText = eventText.includes('<span') ? eventText : escapeHTML(eventText);
+            logDiv.innerHTML += `<div><span class="text-slate-500 font-mono text-xs">${matchState.min}'</span> <span class="text-white">${safeText}</span></div>`;
             logDiv.scrollTop = logDiv.scrollHeight;
         }
 
@@ -3997,7 +3871,7 @@ window.showLegalModal = function (type) {
     } else if (type === 'aviso') {
         title.textContent = 'Aviso Legal';
         body.innerHTML = `
-            <p><strong>Titular:</strong> Inafuma & Beben S.L. â€” Simulador de Gestión Deportiva.</p>
+            <p><strong>Titular:</strong> Inafuma & Beben S.L. — Simulador de Gestión Deportiva.</p>
             <p><strong>Objeto:</strong> Esta aplicación web es un simulador de gestión de club de fútbol con fines de entretenimiento. No involucra dinero real ni apuestas reales.</p>
             <p><strong>Propiedad Intelectual:</strong> Todos los diseños, código y contenido multimedia de esta aplicación son propiedad del equipo de desarrollo.</p>
             <p><strong>Limitación de Responsabilidad:</strong> El uso de la aplicación se realiza bajo la exclusiva responsabilidad del usuario. No nos hacemos responsables de interrupciones del servicio o pérdida de datos.</p>
@@ -4074,25 +3948,25 @@ window.loadMultiplayerLeaderboard = function () {
 
 // Playlist de canciones
 const MUSIC_PLAYLIST = [
-    { src: 'music/We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (Olodum Mix).mp3', title: 'We Are One (Ole Ola) â€” Pitbull ft. J.Lo' },
-    { src: 'music/John Newman - Love Me Again - JohnNewmanVEVO.mp3', title: 'John Newman â€” Love Me Again' },
-    { src: 'music/Joy Crookes - Feet Don\'t Fail Me Now (Official Video) - JoyCrookesVEVO.mp3', title: 'Joy Crookes â€” Feet Don\'t Fail Me Now' },
-    { src: 'music/Avicii - Levels (Lyrics) - Creative Chaos.mp3', title: 'Avicii â€” Levels' },
-    { src: 'music/Avicii - The Nights (Lyrics) my father told me - Unique Sound.mp3', title: 'Avicii â€” The Nights' },
-    { src: 'music/Glass Animals - Heat Waves - LatinHype.mp3', title: 'Glass Animals â€” Heat Waves' },
-    { src: 'music/Imagine Dragons - On Top Of The World (Official Music Video) - ImagineDragonsVEVO.mp3', title: 'Imagine Dragons â€” On Top Of The World' },
-    { src: 'music/My Type - Saint Motel (Lyrics)  Pop Song - Astro.mp3', title: 'Saint Motel â€” My Type' },
-    { src: 'music/Travis Scott - goosebumps (Official Video) ft. Kendrick Lamar - TravisScottVEVO.mp3', title: 'Travis Scott â€” Goosebumps ft. Kendrick Lamar' },
-    { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons â€” Warriors' },
-    { src: 'music/Somos Carlos Kirk.mp3', title: 'Carlos Kirk â€” Somos' },
-    { src: 'music/Willyrex Canta Paradise-Coldplay (mp3cut.net).mp3', title: 'Willyrex â€” Paradise (Coldplay)' },
-    { src: 'music/Capital Cities - Safe And Sound - Hunter Seth.mp3', title: 'Capital Cities â€” Safe And Sound' },
-    { src: 'music/CHVRCHES - WE SINK - coconutðŸ¤.mp3', title: 'CHVRCHES â€” We Sink' },
-    { src: 'music/FIFA 14 - Amplify Dot - Get Down  Soundtrack - Silvo & Shani.mp3', title: 'Amplify Dot â€” Get Down' },
-    { src: 'music/Skrillex & Damian Jr. Gong Marley - Make It Bun Dem [OFFICIAL VIDEO] - Skrillex.mp3', title: 'Skrillex & Damian Marley â€” Make It Bun Dem' },
-    { src: 'music/Worship You - Vampire Weekend.mp3', title: 'Vampire Weekend â€” Worship You' },
-    { src: 'music/Wretch 32 - 24 Hours (Official Audio) - Wretch 32.mp3', title: 'Wretch 32 â€” 24 Hours' },
-    { src: 'music/Axwell __ Ingrosso, Axwell, Sebastian Ingrosso - More Than You Know - AxwellIngrossoVEVO.mp3', title: 'Axwell Î› Ingrosso â€” More Than You Know' }
+    { src: 'music/We Are One (Ole Ola) [The Official 2014 FIFA World Cup Song] (Olodum Mix).mp3', title: 'We Are One (Ole Ola) - Pitbull ft. J.Lo' },
+    { src: 'music/John Newman - Love Me Again - JohnNewmanVEVO.mp3', title: 'John Newman - Love Me Again' },
+    { src: 'music/Joy Crookes - Feet Don\'t Fail Me Now (Official Video) - JoyCrookesVEVO.mp3', title: 'Joy Crookes - Feet Don\'t Fail Me Now' },
+    { src: 'music/Avicii - Levels (Lyrics) - Creative Chaos.mp3', title: 'Avicii - Levels' },
+    { src: 'music/Avicii - The Nights (Lyrics) my father told me - Unique Sound.mp3', title: 'Avicii - The Nights' },
+    { src: 'music/Glass Animals - Heat Waves - LatinHype.mp3', title: 'Glass Animals - Heat Waves' },
+    { src: 'music/Imagine Dragons - On Top Of The World (Official Music Video) - ImagineDragonsVEVO.mp3', title: 'Imagine Dragons - On Top Of The World' },
+    { src: 'music/My Type - Saint Motel (Lyrics)  Pop Song - Astro.mp3', title: 'Saint Motel - My Type' },
+    { src: 'music/Travis Scott - goosebumps (Official Video) ft. Kendrick Lamar - TravisScottVEVO.mp3', title: 'Travis Scott - Goosebumps ft. Kendrick Lamar' },
+    { src: 'music/Warriors (ft. Imagine Dragons)  Worlds 2014 - League of Legends - League of Legends.mp3', title: 'Imagine Dragons - Warriors' },
+    { src: 'music/Somos Carlos Kirk.mp3', title: 'Carlos Kirk - Somos' },
+    { src: 'music/Willyrex Canta Paradise-Coldplay (mp3cut.net).mp3', title: 'Willyrex - Paradise (Coldplay)' },
+    { src: 'music/Capital Cities - Safe And Sound - Hunter Seth.mp3', title: 'Capital Cities - Safe And Sound' },
+    { src: 'music/CHVRCHES - WE SINK - coconutðŸ¤.mp3', title: 'CHVRCHES - We Sink' },
+    { src: 'music/FIFA 14 - Amplify Dot - Get Down  Soundtrack - Silvo & Shani.mp3', title: 'Amplify Dot - Get Down' },
+    { src: 'music/Skrillex & Damian Jr. Gong Marley - Make It Bun Dem [OFFICIAL VIDEO] - Skrillex.mp3', title: 'Skrillex & Damian Marley - Make It Bun Dem' },
+    { src: 'music/Worship You - Vampire Weekend.mp3', title: 'Vampire Weekend - Worship You' },
+    { src: 'music/Wretch 32 - 24 Hours (Official Audio) - Wretch 32.mp3', title: 'Wretch 32 - 24 Hours' },
+    { src: 'music/Axwell __ Ingrosso, Axwell, Sebastian Ingrosso - More Than You Know - AxwellIngrossoVEVO.mp3', title: 'Axwell - Ingrosso - More Than You Know' }
 ];
 let currentTrackIndex = -1;
 let shuffledQueue = [];
@@ -4253,7 +4127,7 @@ const RARITY_THRESHOLDS = [
 ];
 
 // Jugadores retirados / inactivos (iconos)
-const RETIRED_PLAYER_IDS = new Set([506, 507]); // Neymar, Luis Suarez â€” add more IDs as needed
+const RETIRED_PLAYER_IDS = new Set([506, 507]); // Neymar, Luis Suarez — add more IDs as needed
 
 function getPlayerRarity(p) {
     const ovr = calcPlayerOVR(p);
@@ -4450,6 +4324,7 @@ function buildCardHTML(card, index) {
                         ` : `
                         <div class="pack-stat-row"><span class="pack-stat-val">${p.def}</span><span class="pack-stat-lbl">DEF</span></div>
                         <div class="pack-stat-row"><span class="pack-stat-val">${p.phy}</span><span class="pack-stat-lbl">FÍS</span></div>
+                        <div class="pack-stat-row"><span class="pack-stat-val">${p.reg || Math.round((p.pac + p.pas) / 2)}</span><span class="pack-stat-lbl">REG</span></div>
                         `}
                     </div>
                 </div>
@@ -4460,7 +4335,7 @@ function buildCardHTML(card, index) {
 
 window.revealCard = function (el) {
     if (el.classList.contains('revealed')) {
-        // Already revealed â€” zoom in for close-up view
+        // Already revealed — zoom in for close-up view
         zoomCard(el);
         return;
     }
@@ -4583,7 +4458,7 @@ function renderCurrentSobre() {
     } else {
         title.textContent = packRevealState.isStarterPack ? 'Sobre Inicial del Club' : 'Abriendo Sobre';
     }
-    subtitle.textContent = `${sobre.length} cartas â€” Desliza hacia abajo para abrir`;
+    subtitle.textContent = `${sobre.length} cartas - Desliza hacia abajo para abrir`;
 
     // Pre-build card HTML but keep stage hidden
     stage.innerHTML = '';
@@ -4671,7 +4546,7 @@ function openEnvelopeNow() {
         envelope.classList.add('hidden');
         stage.classList.remove('hidden');
         stage.classList.add('cards-entering');
-        subtitle.textContent = `${packRevealState.allSobres[packRevealState.currentSobre].length} cartas â€” Toca cada carta para revelarla`;
+        subtitle.textContent = `${packRevealState.allSobres[packRevealState.currentSobre].length} cartas - Toca cada carta para revelarla`;
     }, 1000);
 }
 
@@ -4745,18 +4620,60 @@ function renderSobresTab() {
 window.searchFriends = async function () {
     if (!state || !auth.currentUser) return;
     const searchInput = document.getElementById('friend-search-input');
-    const searchName = searchInput.value.trim().toLowerCase();
-    const btn = document.getElementById('btn-search-friends');
     const resultsContainer = document.getElementById('friend-search-results');
-
-    if (!searchName) return showAlert("Introduce parte del nombre para buscar.");
+    const btn = document.getElementById('btn-search-friends');
     
-    // UI Loading state
+    if (!searchInput || !resultsContainer) return;
+    
+    const term = searchInput.value.trim().toUpperCase();
+    if (term.length !== 8) {
+        return showAlert("El código de amigo debe tener exactamente 8 caracteres.");
+    }
+    
+    if (term === auth.currentUser.uid.substring(0, 8).toUpperCase()) {
+        return showAlert("No puedes añadirte a ti mismo.");
+    }
+
     const originalText = btn.innerHTML;
     btn.innerHTML = '<span class="animate-pulse">BUSCANDO...</span>';
     btn.disabled = true;
-    resultsContainer.innerHTML = '';
+    resultsContainer.innerHTML = '<div class="text-[10px] text-slate-400 text-center italic py-2">Buscando mánager...</div>';
     resultsContainer.classList.remove('hidden');
+
+    try {
+        const snapshot = await db.collection('users').get();
+        let targetUser = null;
+        
+        snapshot.forEach(doc => {
+            if (doc.id.substring(0, 8).toUpperCase() === term) {
+                const data = doc.data();
+                if (data && data.auth && data.auth.user) {
+                    targetUser = { id: doc.id, username: escapeHTML(data.auth.user) };
+                }
+            }
+        });
+
+        if (!targetUser) {
+            resultsContainer.innerHTML = '<div class="text-[10px] text-red-400 p-2 text-center">Código no encontrado. Revisa si está bien escrito.</div>';
+        } else {
+            const isFriend = (state.friends || []).some(f => f.uid === targetUser.id);
+            if (isFriend) {
+                resultsContainer.innerHTML = `<div class="text-[10px] text-green-400 p-2 text-center">Ya eres amigo de ${targetUser.username}.</div>`;
+            } else {
+                await sendFriendRequest(targetUser.id, targetUser.username);
+                resultsContainer.innerHTML = `<div class="text-[10px] text-blue-400 p-2 text-center">¡Solicitud enviada a ${targetUser.username}!</div>`;
+                searchInput.value = '';
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
+const _searchFriends_OLD = async function () {
 
     try {
         // Obtenemos todos los usuarios (en apps enormes de producci�n esto ser�a una Cloud Function o Algolia, pero aqu� es suficiente)
@@ -4875,56 +4792,35 @@ window.removeFriend = async function(friendUid, friendUsername) {
 }
 
 window.acceptFriendRequest = async function (reqUid, reqUsername) {
-
     if (!state || !auth.currentUser) return;
-
     try {
-
+        state.friendRequests = state.friendRequests || [];
+        state.friends = state.friends || [];
+        
         state.friendRequests = state.friendRequests.filter(r => r.uid !== reqUid);
-
-        const myNewFriend = { uid: reqUid, username: reqUsername, addedAt: Date.now()  };
-
-        state.friends.push(myNewFriend);
-
-
+        const myNewFriend = { uid: reqUid, username: reqUsername, addedAt: Date.now() };
+        
+        // Evitar duplicados
+        if (!state.friends.some(f => f.uid === reqUid)) {
+            state.friends.push(myNewFriend);
+        }
 
         await db.collection('users').doc(auth.currentUser.uid).update({
-
             friendRequests: state.friendRequests,
-
             friends: state.friends
-
-        
         });
 
-
-
-        const theirNewFriend = { uid: auth.currentUser.uid, username: state.auth.user, addedAt: Date.now()  };
-
+        const theirNewFriend = { uid: auth.currentUser.uid, username: state.auth.user, addedAt: Date.now() };
         await db.collection('users').doc(reqUid).update({
-
             friends: firebase.firestore.FieldValue.arrayUnion(theirNewFriend)
-
-        
         });
-
-
 
         showAlert(`Has aceptado a ${reqUsername} como amigo.`);
-
         renderFriendsTab();
-
-    
     } catch (err) {
-
         console.error("Error aceptando:", err);
-
         showAlert("Error aceptando amigo.");
-
-    
     }
-
-
 }
 
 
@@ -4959,39 +4855,7 @@ window.rejectFriendRequest = async function (reqUid) {
 
 
 
-const originalShowSubpageFriends = window.showSubpage;
 
-window.showSubpage = async function (pageId) {
-
-    if (pageId === 'friends') {
-
-        if (auth.currentUser) {
-
-            const doc = await db.collection('users').doc(auth.currentUser.uid).get();
-
-            if (doc.exists) {
-
-                const data = doc.data();
-
-                if (data.friendRequests) state.friendRequests = data.friendRequests;
-
-                if (data.friends) state.friends = data.friends;
-
-                renderFriendsTab();
-
-            
-            }
-
-        
-        }
-
-    
-    }
-
-    if (originalShowSubpageFriends) originalShowSubpageFriends(pageId);
-
-
-}
 
 
 
@@ -5018,13 +4882,13 @@ function renderFriendsTab() {
                     <div class="flex items-center gap-3 overflow-hidden">
                         <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold uppercase text-xs border border-yellow-500/50">${req.username.substring(0,2)}</div>
                         <div class="flex flex-col truncate">
-                            <span class="text-xs font-bold text-white truncate">${req.username}</span>
-                            <span class="text-[9px] text-slate-400 truncate">Sol�cita tu amistad</span>
+                            <span class="text-xs font-bold text-white truncate">${escapeHTML(req.username)}</span>
+                            <span class="text-[9px] text-slate-400 truncate">Solicita tu amistad</span>
                         </div>
                     </div>
                     <div class="flex gap-2 shrink-0">
-                        <button onclick="acceptFriendRequest('${req.uid}', '${req.username}')" class="bg-green-600/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-600 px-3 py-1 rounded text-[10px] font-bold tracking-widest transition"></button>
-                        <button onclick="rejectFriendRequest('${req.uid}')" class="bg-red-600/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-600 px-3 py-1 rounded text-[10px] font-bold tracking-widest transition"></button>
+                        <button onclick="acceptFriendRequest('${req.uid}', '${escapeHTML(req.username)}')" class="bg-green-600/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-600 px-3 py-1 rounded text-[10px] font-bold tracking-widest transition" title="Aceptar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> </button>
+                        <button onclick="rejectFriendRequest('${req.uid}')" class="bg-red-600/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-600 px-3 py-1 rounded text-[10px] font-bold tracking-widest transition" title="Rechazar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     </div>
                 `;
                 reqList.appendChild(div);
@@ -5052,12 +4916,12 @@ function renderFriendsTab() {
                         </div>
                         <div class="flex flex-col truncate w-32 md:w-48">
                             <span class="text-sm font-bold text-white truncate">${f.username}</span>
-                            <span class="text-[10px] text-blue-400 font-medium tracking-widest truncate">A�ADIDO RECIENTEMENTE</span>
+                            <span class="text-[10px] text-blue-400 font-medium tracking-widest truncate">AÑADIDO RECIENTEMENTE</span>
                         </div>
                     </div>
                     <div class="flex gap-2 shrink-0">
                         <button onclick="removeFriend('${f.uid}', '${f.username}')" class="opacity-0 group-hover:opacity-100 btn-action py-1 px-3 text-[9px] bg-red-600 hover:bg-red-500 tracking-widest transition" title="Eliminar amigo">X</button>
-                        <button onclick="inviteFriend1v1('${f.uid}')" class="btn-action py-1 px-4 text-[10px] tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] flex items-center gap-2 border border-blue-500/50"><span>�</span> INVITAR</button>
+                        <button onclick="inviteFriend1v1('${f.uid}')" class="btn-action py-1 px-4 text-[10px] tracking-widest shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] flex items-center gap-2 border border-blue-500/50"><span>⚽</span> INVITAR</button>
                     </div>
                 `;
                 friendList.appendChild(div);
@@ -5136,284 +5000,9 @@ window.inviteFriend1v1 = function (targetUid) {
             pvpSocket.emit('respond_invite', { accepted: false, targetSocketId: pending1v1Invite.fromSocketId });
             pending1v1Invite = null;
         }
-        pvpSocket.on('match_ready', (data) => {
-function renderFriendsTab() {
-
-    const countsEl = document.getElementById('friend-requests-count');
-
-    const friendsCountEl = document.getElementById('friends-count');
-
-    if (countsEl) countsEl.textContent = state.friendRequests ? state.friendRequests.length : 0;
-
-    if (friendsCountEl) friendsCountEl.textContent = state.friends ? state.friends.length : 0;
-
-
-
-    const reqList = document.getElementById('friend-requests-list');
-
-    if (reqList) {
-
-        reqList.innerHTML = '';
-
-        if (!state.friendRequests || state.friendRequests.length === 0) {
-
-            reqList.innerHTML = '<div class="text-[10px] text-slate-500 italic text-center mt-4" id="empty-requests-msg">No hay solicitudes</div>';
-
-        
-        } else {
-
-            state.friendRequests.forEach(req => {
-
-                const div = document.createElement('div');
-
-                div.className = "flex justify-between items-center bg-[#272738] p-3 rounded border border-[#313145]";
-
-                div.innerHTML = `
-
-                    <div class="text-xs font-bold text-white uppercase tracking-widest">${req.username}</div>
-
-                    <div class="flex gap-2">
-
-                        <button onclick="acceptFriendRequest('${req.uid}', '${req.username}')" class="bg-green-600 hover:bg-green-500 text-white p-1 rounded transition text-xs"> </button>
-
-                        <button onclick="rejectFriendRequest('${req.uid}')" class="bg-red-600 hover:bg-red-500 text-white p-1 rounded transition text-xs"> </button>
-
-                    </div>
-
-                `;
-
-                reqList.appendChild(div);
-
-            
-            });
-
-        
-        }
-
-    
-    }
-
-
-
-    const friendList = document.getElementById('friends-list');
-
-    if (friendList) {
-
-        friendList.innerHTML = '';
-
-        if (!state.friends || state.friends.length === 0) {
-
-            friendList.innerHTML = '<div class="text-[11px] text-slate-500 italic text-center mt-10" id="empty-friends-msg">Agrega amigos para jugar partidos 1vs1 privados.</div>';
-
-        
-        } else {
-
-            state.friends.forEach(f => {
-
-                const div = document.createElement('div');
-
-                div.className = "flex justify-between items-center bg-[#272738] p-3 rounded-xl border border-[#313145]";
-
-                div.innerHTML = `
-
-                    <div class="flex items-center gap-3">
-
-                        <img loading="lazy" src="${getAvatar(f.username)}" class="w-8 h-8 rounded-full border border-[#313145]">
-
-                        <div class="text-xs font-bold text-white uppercase tracking-widest">${f.username}</div>
-
-                    </div>
-
-                    <button onclick="inviteFriend1v1('${f.uid}')" class="btn-action py-1 px-4 text-[10px] tracking-widest shadow-md flex items-center gap-2"><span>Ã¢a Ã¯Â¸Â</span> INVITAR</button>
-
-                `;
-
-                friendList.appendChild(div);
-
-            
-            });
-
-        
-        }
-
-    
-    }
-
-
-}
-
-
-
-// --- 1V1 INVITATION LOGIC (Socket) ---
-
-let pending1v1Invite = null;
-
-
-
-window.inviteFriend1v1 = function (targetUid) {
-
-    if (!window.socket || !window.socket.connected) return showAlert("No estÃ¡s conectado al servidor multiplayer.");
-
-    window.socket.emit('invite_friend', { targetUid: targetUid, senderName: state.auth.user, senderOvr: state.squadOvr || 50  });
-
-    showAlert("InvitaciÃ³n enviada. Esperando respuesta del jugador...");
-
-
-}
-
-
-
-function setupPrivateMatchSocketEvents(sock) {
-
-    sock.on('receive_invite', (data) => {
-
-        pending1v1Invite = data;
-
-        const modal = document.getElementById('modal-1v1-invite');
-
-        if (modal) {
-
-            document.getElementById('invite-sender-name').textContent = data.senderName;
-
-            modal.classList.remove('hidden');
-
-        
-        }
-
-    
-    });
-
-
-
-    sock.on('invite_response', (data) => {
-
-        if (!data.accepted) {
-
-            showAlert(data.message || "InvitaciÃ³n rechazada o fallida.");
-
-        
-        }
-
-    
-    });
-
-
-
-    sock.on('private_match_start', (data) => {
-
-        closeSubpage();
-
-        const mm = document.getElementById('match-modal');
-
-        if (mm) {
-
-            mm.classList.remove('hidden');
-
-            mm.style.display = 'flex';
-
-        
-        }
-
-        simIsRanked = false;
-
-        simIsMultiplayer = true;
-
-        simMultiplayerRoom = data.room;
-
-        simMatchInProgress = true;
-
-        simLatestNarrativeTime = 0;
-
-
-
-        const homeLabel = data.isPlayer1 ? state.team.name : data.opponentName;
-
-        const awayLabel = data.isPlayer1 ? data.opponentName : state.team.name;
-
-        document.getElementById('sim-home-name').textContent = homeLabel;
-
-        document.getElementById('sim-away-name').textContent = awayLabel;
-
-        document.getElementById('sim-home-score').textContent = "0";
-
-        document.getElementById('sim-away-score').textContent = "0";
-
-        document.getElementById('match-narrative').innerHTML = "";
-
-
-
-        setTimeout(() => {
-
-            if (typeof sendMultiplayerLineup === 'function') sendMultiplayerLineup();
-
-        
-        }, 500);
-
-    
-    });
-
-
-}
-
-
-
-const socketHookInterval = setInterval(() => {
-
-    if (window.socket && window.socket.hasListeners) {
-
-        if (!window.socket._privateEventsHooked) {
-
-            setupPrivateMatchSocketEvents(window.socket);
-
-            window.socket._privateEventsHooked = true;
-
-        
-        }
-
-        clearInterval(socketHookInterval);
-
-    
-    }
-
-
-}, 1000);
-
-
-
-window.accept1v1Invite = function () {
-
-    if (!pending1v1Invite || !window.socket) return;
-
-    document.getElementById('modal-1v1-invite').classList.add('hidden');
-
-    window.socket.emit('respond_invite', { accepted: true, targetSocketId: pending1v1Invite.fromSocketId, senderName: state.auth.user  });
-
-    pending1v1Invite = null;
-
-
-}
-
-
-
-window.reject1v1Invite = function () {
-
-    if (!pending1v1Invite || !window.socket) return;
-
-    document.getElementById('modal-1v1-invite').classList.add('hidden');
-
-    window.socket.emit('respond_invite', { accepted: false, targetSocketId: pending1v1Invite.fromSocketId  });
-
-    pending1v1Invite = null;
-
-
-}
-
-
 
 /* =========================================================================
-
    SISTEMA DE TORNEOS DE FIREBASE
-
    ========================================================================= */
 
 
@@ -6037,3 +5626,30 @@ window.renderCompLeaderboard = function () {
 
 }
 );
+
+if (!window._friendSubpageHooked) {
+    const originalShowSubpage = window.showSubpage;
+    window.showSubpage = async function (pageId) {
+        if (pageId === 'friends') {
+            if (auth.currentUser) {
+                try {
+                    const doc = await db.collection('users').doc(auth.currentUser.uid).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        state.friendRequests = data.friendRequests || [];
+                        state.friends = data.friends || [];
+                        renderFriendsTab();
+                    }
+                    
+                    const friendCode = auth.currentUser.uid.substring(0, 8).toUpperCase();
+                    const codeEl = document.getElementById('my-friend-code');
+                    if (codeEl) codeEl.innerText = friendCode;
+                } catch (e) {
+                    console.error("Error loading friends data:", e);
+                }
+            }
+        }
+        if (originalShowSubpage) originalShowSubpage(pageId);
+    };
+    window._friendSubpageHooked = true;
+}
