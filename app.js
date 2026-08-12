@@ -26,6 +26,21 @@ function escapeHTML(str) {
     return p.innerHTML;
 }
 
+function getAuthUsername(rawName) {
+    if (!rawName || typeof rawName !== 'string') return '';
+    return rawName.trim();
+}
+
+function getAuthEmail(rawName) {
+    if (!rawName || typeof rawName !== 'string') return '';
+    const normalized = rawName
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9._-]/g, '');
+    return normalized ? `${normalized}@inafuma.com` : '';
+}
+
 // PLAYERS_DB is now imported from players_db.js
 
 // === COMPETITIVE RANK CONSTANTS & LOGIC ===
@@ -421,9 +436,14 @@ window.toggleAuth = function (mode) {
 
 document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const user = document.getElementById('reg-user').value;
+    const rawUser = document.getElementById('reg-user').value;
+    const user = getAuthUsername(rawUser);
     const pass = document.getElementById('reg-pass').value;
-    const email = user + '@inafuma.com';
+    const email = getAuthEmail(rawUser);
+
+    if (!user || !email) {
+        return showAlert('Por favor ingresa un nombre de usuario válido sin espacios especiales.');
+    }
 
     auth.createUserWithEmailAndPassword(email, pass)
         .then((cred) => {
@@ -434,21 +454,26 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
             routeView();
         })
         .catch((err) => {
-            if (err.code === 'auth/email-already-in-use') showAlert("El usuario ya existe.");
-            else if (err.code === 'auth/weak-password') showAlert("La contraseña debe tener al menos 6 caracteres.");
-            else showAlert("Error al registrar: " + err.message);
+            if (err.code === 'auth/email-already-in-use') showAlert('El usuario ya existe.');
+            else if (err.code === 'auth/weak-password') showAlert('La contraseña debe tener al menos 6 caracteres.');
+            else showAlert('Error al registrar: ' + err.message);
         });
 });
 
 document.getElementById('login-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const u = document.getElementById('log-user').value;
+    const rawUser = document.getElementById('log-user').value;
+    const u = getAuthUsername(rawUser);
     const p = document.getElementById('log-pass').value;
-    const email = u + '@inafuma.com';
+    const email = getAuthEmail(rawUser);
+
+    if (!u || !email) {
+        return showAlert('Por favor ingresa tu nombre de usuario válido.');
+    }
 
     auth.signInWithEmailAndPassword(email, p)
         .then(async (cred) => {
-            // Login exitoso â€” intentar descargar estado desde Firestore
+            // Login exitoso — intentar descargar estado desde Firestore
             try {
                 const doc = await db.collection('users').doc(cred.user.uid).get();
                 if (doc.exists) {
@@ -467,10 +492,10 @@ document.getElementById('login-form').addEventListener('submit', (e) => {
             routeView();
         })
         .catch((err) => {
-            if (err.code === 'auth/user-not-found') showAlert("Usuario o contraseña incorrectos.");
-            else if (err.code === 'auth/wrong-password') showAlert("Usuario o contraseña incorrectos.");
-            else if (err.code === 'auth/invalid-credential') showAlert("Usuario o contraseña incorrectos.");
-            else showAlert("Error al iniciar sesión: " + err.message);
+            if (err.code === 'auth/user-not-found') showAlert('Usuario o contraseña incorrectos.');
+            else if (err.code === 'auth/wrong-password') showAlert('Usuario o contraseña incorrectos.');
+            else if (err.code === 'auth/invalid-credential') showAlert('Usuario o contraseña incorrectos.');
+            else showAlert('Error al iniciar sesión: ' + err.message);
         });
 });
 
@@ -572,26 +597,7 @@ window.logout = function () { auth.signOut().then(() => { state = null; location
 
 // Abrir Ajustes
 window.openSettings = function () {
-    const s = state.settings || { volMusic: 0.05, volSfx: 0.5 };
-    const musicSlider = document.getElementById('setting-music');
-    const sfxSlider = document.getElementById('setting-sfx');
-    if (musicSlider) musicSlider.value = s.volMusic;
-    if (sfxSlider) sfxSlider.value = s.volSfx;
-
-    // Show speed control only during active match (local or PVP)
-    const speedSection = document.getElementById('settings-sim-speed-section');
-    if (speedSection) {
-        const matchActive = !document.getElementById('match-modal').classList.contains('hidden')
-            || !document.getElementById('pvp-match-modal').classList.contains('hidden');
-        speedSection.classList.toggle('hidden', !matchActive);
-    }
-    // Sync slider value
-    const speedSlider = document.getElementById('setting-sim-speed');
-    if (speedSlider) speedSlider.value = simSpeedLevel;
-    const speedLabel = document.getElementById('sim-speed-label');
-    if (speedLabel) speedLabel.textContent = SIM_SPEED_LABELS[simSpeedLevel] || 'Normal';
-
-    document.getElementById('modal-settings').classList.remove('hidden');
+    showSubpage('settings');
 }
 
 // Update Volume
@@ -4038,6 +4044,8 @@ window.initBgMusic = function () {
     // When a song ends, pick a different random song and play it immediately
     audio.removeEventListener('ended', handleTrackEnded);
     audio.addEventListener('ended', handleTrackEnded);
+    audio.removeEventListener('error', handleBgMusicError);
+    audio.addEventListener('error', handleBgMusicError);
 
     updateNowPlaying();
     setNowPlayingVisibility();
@@ -4105,6 +4113,13 @@ function handleTrackEnded() {
     audio.play().catch(() => { });
     // Preload the next one right away
     preloadNextTrack();
+}
+
+function handleBgMusicError() {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    console.warn('Error de reproducción de música de fondo. Saltando a la siguiente pista. Código de error:', audio.error ? audio.error.code : 'desconocido');
+    skipToNextTrack();
 }
 
 /* =========================================================================
