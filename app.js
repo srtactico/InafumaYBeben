@@ -36,6 +36,8 @@ function getAuthEmail(rawName) {
     const normalized = rawName
         .trim()
         .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/\s+/g, '')
         .replace(/[^a-z0-9._-]/g, '');
     return normalized ? `${normalized}@inafuma.com` : '';
@@ -362,31 +364,35 @@ window.onload = () => {
     const cookiesModal = document.getElementById('modal-cookies');
     if (!localStorage.getItem('inafuma_cookies') && cookiesModal) cookiesModal.classList.remove('hidden');
 
-    // Auto-resume music if cookies already accepted
-    if (localStorage.getItem('inafuma_cookies')) {
+    if (typeof initBgMusic === 'function') {
         initBgMusic();
     }
 
     // Escuchar cambios de autenticación de Firebase
     auth.onAuthStateChanged(async (user) => {
         if (user) {
+            const fallbackUser = user.displayName || (user.email ? user.email.split('@')[0] : 'Manager');
             try {
                 const doc = await db.collection('users').doc(user.uid).get();
                 if (doc.exists) {
                     state = cleanState(doc.data());
-                    // Connect to PVP server immediately to support friend invites
-                    if (!pvpSocket || !pvpSocket.connected) {
-                        pvpSocket = io(PVP_SERVER_URL, { transports: ['websocket', 'polling'] });
-                        pvpSocket.on('connect', () => {
-                            pvpSocket.emit('register_user', { uid: user.uid, username: state.auth.user });
-                            if (typeof setupPrivateMatchSocketEvents === 'function') setupPrivateMatchSocketEvents(pvpSocket);
-                        });
-                    } else {
+                } else {
+                    state = cleanState({ auth: { user: fallbackUser }, team: null, economy: { coins: 50000000, premium: 0 } });
+                    db.collection('users').doc(user.uid).set(JSON.parse(JSON.stringify(state))).catch(() => { });
+                }
+                // Connect to PVP server immediately to support friend invites
+                if (!pvpSocket || !pvpSocket.connected) {
+                    pvpSocket = io(PVP_SERVER_URL, { transports: ['websocket', 'polling'] });
+                    pvpSocket.on('connect', () => {
                         pvpSocket.emit('register_user', { uid: user.uid, username: state.auth.user });
-                    }
+                        if (typeof setupPrivateMatchSocketEvents === 'function') setupPrivateMatchSocketEvents(pvpSocket);
+                    });
+                } else {
+                    pvpSocket.emit('register_user', { uid: user.uid, username: state.auth.user });
                 }
             } catch (err) {
                 console.error('Error al cargar estado desde Firestore:', err);
+                state = cleanState({ auth: { user: fallbackUser }, team: null, economy: { coins: 50000000, premium: 0 } });
             }
         }
         routeView();
