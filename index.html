@@ -152,8 +152,18 @@
                 <span class="now-playing-label">Reproduciendo</span>
                 <span id="now-playing-title" class="now-playing-title">—</span>
             </div>
-            <button id="now-playing-next" class="now-playing-next" onclick="skipToNextTrack()"
-                title="Siguiente canción">
+            <button id="now-playing-prev" class="now-playing-control" onclick="skipToPrevTrack()" title="Canción anterior">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11 12l8 6V6l-8 6z"></path>
+                    <rect x="4" y="6" width="2" height="12"></rect>
+                </svg>
+            </button>
+            <button id="now-playing-toggle" class="now-playing-control" onclick="toggleBgMusic()" title="Reproducir/Pausa">
+                <svg id="now-playing-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"></path>
+                </svg>
+            </button>
+            <button id="now-playing-next" class="now-playing-control" onclick="skipToNextTrack()" title="Siguiente canción">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M5 5v14l11-7z" />
                     <rect x="18" y="5" width="2" height="14" />
@@ -1728,20 +1738,6 @@
                                     oninput="updateSimSpeed(this.value)">
                                 <span class="text-[10px] text-slate-500">🐇</span>
                             </div>
-                        </div>
-                        <div class="text-center mt-6 border-t border-[#313145] pt-4">
-                            <span class="text-xs text-blue-400 font-bold uppercase tracking-widest block mb-4">Velocidad
-                                de Simulación (Local)</span>
-                            <div class="flex items-center justify-between pb-2">
-                                <label
-                                    class="text-xs text-slate-300 font-bold uppercase w-1/4 text-left">Velocidad</label>
-                                <input type="range" id="setting-sim-speed" class="w-3/4 cursor-pointer" min="100"
-                                    max="2500" step="100" value="800" oninput="updateSimSpeed(this.value)"
-                                    style="direction: rtl;">
-                            </div>
-                            <span id="sim-speed-label"
-                                class="text-[10px] text-yellow-400 font-bold uppercase tracking-widest mt-2 block">Normal
-                                (800ms)</span>
                         </div>
                     </div>
                 </div>

@@ -643,7 +643,10 @@ window.updateSimSpeed = function (val) {
 window.toggleProfileMenu = function () { document.getElementById('profile-dropdown').classList.toggle('hidden'); }
 
 window.showSubpage = function (id) {
-    document.getElementById('page-' + id).classList.remove('hidden');
+    closeSubpage();
+    const page = document.getElementById('page-' + id);
+    if (!page) return;
+    page.classList.remove('hidden');
     if (id === 'settings') {
         const s = (state && state.settings) ? state.settings : { volMusic: 0.05, volSfx: 0.5 };
         const musicSlider = document.getElementById('setting-music');
@@ -3993,10 +3996,27 @@ function pickRandomTrack(excludeIndex) {
 }
 
 // Audio control - start after cookie acceptance, persist across reloads
+function getSafeAudioSrc(path) {
+    try {
+        return encodeURI(path).replace(/#/g, '%23');
+    } catch (error) {
+        return path;
+    }
+}
+
 function updateNowPlaying() {
     const titleEl = document.getElementById('now-playing-title');
+    const toggleIcon = document.getElementById('now-playing-toggle-icon');
     if (titleEl && currentTrackIndex >= 0 && currentTrackIndex < MUSIC_PLAYLIST.length) {
         titleEl.textContent = MUSIC_PLAYLIST[currentTrackIndex].title;
+    }
+    const audio = document.getElementById('bg-music');
+    if (toggleIcon && audio) {
+        if (audio.paused) {
+            toggleIcon.innerHTML = '<path d="M8 5v14l11-7z"></path>';
+        } else {
+            toggleIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect>';
+        }
     }
 }
 
@@ -4014,12 +4034,37 @@ window.skipToNextTrack = function () {
     const audio = document.getElementById('bg-music');
     if (!audio) return;
     currentTrackIndex = pickRandomTrack(currentTrackIndex);
-    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    audio.src = getSafeAudioSrc(MUSIC_PLAYLIST[currentTrackIndex].src);
     localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
     localStorage.setItem('inafuma_music_time', '0');
     updateNowPlaying();
-    audio.play().catch(() => { });
+    audio.play().catch(() => { updateNowPlaying(); });
 }
+
+window.skipToPrevTrack = function () {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    currentTrackIndex = (currentTrackIndex - 1 + MUSIC_PLAYLIST.length) % MUSIC_PLAYLIST.length;
+    audio.src = getSafeAudioSrc(MUSIC_PLAYLIST[currentTrackIndex].src);
+    localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
+    localStorage.setItem('inafuma_music_time', '0');
+    updateNowPlaying();
+    audio.play().catch(() => { updateNowPlaying(); });
+}
+
+window.toggleBgMusic = function () {
+    const audio = document.getElementById('bg-music');
+    if (!audio) return;
+    if (audio.paused) {
+        audio.play().catch(() => {
+            updateNowPlaying();
+        });
+    } else {
+        audio.pause();
+        updateNowPlaying();
+    }
+}
+
 let bgMusicInterval = null;
 window.initBgMusic = function () {
     const audio = document.getElementById('bg-music');
@@ -4032,7 +4077,7 @@ window.initBgMusic = function () {
     } else {
         currentTrackIndex = pickRandomTrack(-1);
     }
-    audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+    audio.src = getSafeAudioSrc(MUSIC_PLAYLIST[currentTrackIndex].src);
     localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
 
     // Restore saved playback position
@@ -4046,6 +4091,10 @@ window.initBgMusic = function () {
     audio.addEventListener('ended', handleTrackEnded);
     audio.removeEventListener('error', handleBgMusicError);
     audio.addEventListener('error', handleBgMusicError);
+    audio.removeEventListener('play', updateNowPlaying);
+    audio.removeEventListener('pause', updateNowPlaying);
+    audio.addEventListener('play', updateNowPlaying);
+    audio.addEventListener('pause', updateNowPlaying);
 
     updateNowPlaying();
     setNowPlayingVisibility();
@@ -4063,10 +4112,18 @@ window.initBgMusic = function () {
     const tryPlay = () => {
         audio.play().catch(() => {
             // Autoplay blocked - will start on next user interaction
-            document.addEventListener('click', function startMusic() {
+            const startMusic = () => {
                 audio.play().catch(() => { });
+                updateNowPlaying();
                 document.removeEventListener('click', startMusic);
-            }, { once: true });
+                document.removeEventListener('keydown', startMusic);
+                document.removeEventListener('touchstart', startMusic);
+                document.removeEventListener('pointerdown', startMusic);
+            };
+            document.addEventListener('click', startMusic, { once: true });
+            document.addEventListener('keydown', startMusic, { once: true });
+            document.addEventListener('touchstart', startMusic, { once: true });
+            document.addEventListener('pointerdown', startMusic, { once: true });
         });
     };
 
@@ -4091,7 +4148,7 @@ let preloadedNextTrack = null;
 function preloadNextTrack() {
     const nextIdx = pickRandomTrack(currentTrackIndex);
     const preload = new Audio();
-    preload.src = MUSIC_PLAYLIST[nextIdx].src;
+    preload.src = getSafeAudioSrc(MUSIC_PLAYLIST[nextIdx].src);
     preload.preload = 'auto';
     preloadedNextTrack = { index: nextIdx, audio: preload };
 }
@@ -4101,11 +4158,11 @@ function handleTrackEnded() {
     if (!audio) return;
     if (preloadedNextTrack) {
         currentTrackIndex = preloadedNextTrack.index;
-        audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+        audio.src = getSafeAudioSrc(MUSIC_PLAYLIST[currentTrackIndex].src);
         preloadedNextTrack = null;
     } else {
         currentTrackIndex = pickRandomTrack(currentTrackIndex);
-        audio.src = MUSIC_PLAYLIST[currentTrackIndex].src;
+        audio.src = getSafeAudioSrc(MUSIC_PLAYLIST[currentTrackIndex].src);
     }
     localStorage.setItem('inafuma_music_track', String(currentTrackIndex));
     localStorage.setItem('inafuma_music_time', '0');
